@@ -1,3 +1,10 @@
 from django.shortcuts import render
 
-# Create your views here.
+from .models import *
+
+
+def index(request):
+    context = {
+        "somedata": "Hello, world!",
+    }
+    return render(request, "userportal/index.html", context)
