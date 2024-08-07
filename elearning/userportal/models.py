@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from dateutil.relativedelta import relativedelta
 from .validators import *
+from django.utils.translation import gettext as _
+from .constants import *
 
 
 class Program(models.Model):
@@ -15,14 +17,30 @@ class Program(models.Model):
 class PortalUserManager(UserManager):
     def create_user(self, username, email=None, password=None, **extra_fields):
         # email, first_name, last_name and user_type are required fields
+        errors = {}
         if not email:
-            raise ValueError("Email must be specified")
+            errors["email"] = ValidationError(
+                _("Email must be specified"), code=VALIDATION_ERR_REQUIRED
+            )
+
         if not extra_fields.get("first_name"):
-            raise ValueError("First name must be specified")
+            errors["first_name"] = ValidationError(
+                _("First name must be specified"), code=VALIDATION_ERR_REQUIRED
+            )
+
         if not extra_fields.get("last_name"):
-            raise ValueError("Last name must be specified")
+            errors["last_name"] = ValidationError(
+                _("Last name must be specified"), code=VALIDATION_ERR_REQUIRED
+            )
+
         if not extra_fields.get("user_type"):
-            raise ValueError("User type must be specified")
+            errors["user_type"] = ValidationError(
+                _("User type must be specified"), code=VALIDATION_ERR_REQUIRED
+            )
+
+        if errors:
+            raise ValidationError(errors)
+
         return super().create_user(username, email, password, **extra_fields)
 
 
