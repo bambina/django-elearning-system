@@ -89,6 +89,9 @@ class StudentProfile(models.Model):
         self.registration_expiry_date = self.registration_date + relativedelta(years=6)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return str(self.user)
+
 
 class TeacherProfile(models.Model):
     user = models.OneToOneField(PortalUser, on_delete=models.CASCADE)
@@ -98,3 +101,6 @@ class TeacherProfile(models.Model):
         null=True,
         help_text="A professional biography of the teacher",
     )
+
+    def __str__(self):
+        return str(self.user)
