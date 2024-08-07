@@ -1,12 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ValidationError
+from .validators import *
 
 
 class Program(models.Model):
     title = models.CharField(max_length=100)
-    description = models.TextField(max_length=300)
+    description = models.TextField(max_length=500)
 
     def __str__(self):
         return self.title
@@ -39,11 +39,9 @@ class PortalUser(AbstractUser):
         DR = "Dr."
         PROF = "Prof."
 
-    user_type = models.PositiveSmallIntegerField(
-        choices=UserType, blank=True, null=True
-    )
-    email = models.EmailField(unique=True, blank=True)
-    title = models.CharField(max_length=10, choices=Title, blank=True)
+    user_type = models.PositiveSmallIntegerField(choices=UserType, null=True)
+    email = models.EmailField(unique=True, null=True)
+    title = models.CharField(max_length=10, choices=Title, null=True, blank=True)
 
     objects = PortalUserManager()
     EMAIL_FIELD = "email"
@@ -66,7 +64,7 @@ class StudentProfile(models.Model):
     program = models.ForeignKey(
         "Program", on_delete=models.CASCADE, related_name="students"
     )
-    registration_date = models.DateField()
+    registration_date = models.DateField(validators=[registration_date_validator])
     registration_expiry_date = models.DateField(editable=False)
 
     def save(self, *args, **kwargs):
@@ -77,5 +75,8 @@ class StudentProfile(models.Model):
 class TeacherProfile(models.Model):
     user = models.OneToOneField(PortalUser, on_delete=models.CASCADE)
     biography = models.TextField(
-        blank=True, null=True, help_text="A professional biography of the teacher"
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="A professional biography of the teacher",
     )
