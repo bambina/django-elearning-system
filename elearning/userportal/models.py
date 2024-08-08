@@ -1,9 +1,12 @@
+from dateutil.relativedelta import relativedelta
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from dateutil.relativedelta import relativedelta
-from .validators import *
 from django.utils.translation import gettext as _
+from django.core.exceptions import ValidationError
+
 from .constants import *
+from .validators import *
 
 
 class Program(models.Model):
@@ -50,15 +53,17 @@ class PortalUser(AbstractUser):
         STUDENT = 2
 
     class Title(models.TextChoices):
-        NONE = ""
+        PREFER_NOT_TO_SAY = ""
         MR = "Mr."
         MS = "Ms."
         MRS = "Mrs."
         DR = "Dr."
         PROF = "Prof."
 
-    user_type = models.PositiveSmallIntegerField(choices=UserType, null=True)
-    email = models.EmailField(unique=True, null=True)
+    email = models.EmailField(unique=True, null=True, blank=True)
+    user_type = models.PositiveSmallIntegerField(
+        choices=UserType, null=True, blank=True
+    )
     title = models.CharField(max_length=10, choices=Title, null=True, blank=True)
 
     objects = PortalUserManager()
@@ -69,11 +74,6 @@ class PortalUser(AbstractUser):
 
     def is_student(self):
         return self.user_type == self.UserType.STUDENT
-
-    def __str__(self):
-        if self.user_type:
-            return f"{self.title} {super().get_full_name()}".strip()
-        return super().__str__()
 
 
 class StudentProfile(models.Model):

@@ -1,10 +1,9 @@
-
-
 {% extends "./base.html" %}
 {% block content %}
     <div class="container">
-        <h1>INDEX! login is not required</h1>
-        <p>This is the index page. Add your content here.</p>
+        <h1>HOME!</h1>
+        {{ user }}
+        <p>This is the home page.</p>
         {{ somedata }}
     </div>
 {% endblock %}
