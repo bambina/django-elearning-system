@@ -1,6 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-from userportal.models import PortalUser
+from userportal.models import PortalUser, Program
 
 from userportal.constants import *
 
@@ -129,3 +129,43 @@ class PasswordChangeViewTestCase(BaseTestCase):
             html=True,
         )
         self.assertTrue(response.wsgi_request.user.check_password("testpassword"))
+
+
+class SignUpViewTestCase(BaseTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.url = reverse("signup")
+        cls.program = Program.objects.create(title="Program 1")
+        cls.new_student_data = {
+            "username": "new-student",
+            "email": "stu@example.com",
+            "password1": "crispy123student",
+            "password2": "crispy123student",
+            "first_name": "New",
+            "last_name": "Student",
+            "program": cls.program.id,
+            "registration_date": "2024-01-01",
+        }
+
+    def test_signup_view_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Register", html=True)
+
+    def test_signup_view_post(self):
+        response = self.client.post(self.url, self.new_student_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("home"))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        self.assertTrue(response.wsgi_request.user.is_student())
+        self.assertEqual(
+            response.wsgi_request.user.studentprofile.program, self.program
+        )
+
+    def test_signup_view_post_invalid(self):
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required.", html=True)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertFalse(PortalUser.objects.filter(username="new-student").exists())

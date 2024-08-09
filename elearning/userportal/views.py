@@ -1,6 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from .models import *
@@ -21,8 +21,7 @@ def home(request):
     return render(request, "userportal/home.html", context)
 
 
-@login_required(login_url="login")
-def register(request):
+def signup(request):
     if request.method == "POST":
         student_form = StudentForm(request.POST)
         student_profile_form = StudentProfileForm(request.POST)
@@ -34,6 +33,8 @@ def register(request):
             student_profile.user = student
             student_profile.save()
             messages.success(request, CREATE_STUDENT_ACCOUNT_SUCCESS_MSG)
+            login(request, student)
+            return redirect("home")
     else:
         student_form = StudentForm()
         student_profile_form = StudentProfileForm()
@@ -42,7 +43,7 @@ def register(request):
         "student_form": student_form,
         "student_profile_form": student_profile_form,
     }
-    return render(request, "registration/register.html", context)
+    return render(request, "registration/signup.html", context)
 
 
 @login_required(login_url="login")
