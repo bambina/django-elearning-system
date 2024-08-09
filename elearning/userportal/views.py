@@ -64,7 +64,7 @@ def password_change(request):
 # @login_required(login_url="login")
 class UserListView(ListView):
     model = PortalUser
-    paginate_by = 3
+    paginate_by = 2
     template_name = 'userportal/user_list.html'
     context_object_name = 'users'
 
