@@ -51,7 +51,7 @@ users = [
         first_name="Emily",
         last_name="Johnson",
         email="t2@example.com",
-        title=PortalUser.Title.PROF,
+        title=PortalUser.Title.DR,
         user_type=PortalUser.UserType.TEACHER,
     ),
     PortalUser(
@@ -59,7 +59,7 @@ users = [
         first_name="Michael",
         last_name="Brown",
         email="s1@example.com",
-        title=PortalUser.Title.MR,
+        title=PortalUser.Title.PREFER_NOT_TO_SAY,
         user_type=PortalUser.UserType.STUDENT,
     ),
     PortalUser(
@@ -68,6 +68,22 @@ users = [
         last_name="Davis",
         email="s2@example.com",
         title=PortalUser.Title.MS,
+        user_type=PortalUser.UserType.STUDENT,
+    ),
+    PortalUser(
+        username="student3",
+        first_name="Anna",
+        last_name="Johnson",
+        email="s3@example.com",
+        title=PortalUser.Title.MRS,
+        user_type=PortalUser.UserType.STUDENT,
+    ),
+    PortalUser(
+        username="student4",
+        first_name="James",
+        last_name="Smith",
+        email="s4@example.com",
+        title=PortalUser.Title.MR,
         user_type=PortalUser.UserType.STUDENT,
     ),
 ]

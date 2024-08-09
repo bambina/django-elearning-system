@@ -41,3 +41,12 @@ class StudentProfileForm(forms.ModelForm):
             "program",
             "registration_date",
         )
+
+class UserSearchForm(forms.Form):
+    keywords = forms.CharField(required=False, label='Keywords', widget=forms.TextInput(attrs={'placeholder': 'Enter username, etc.'}))
+    user_type = forms.MultipleChoiceField(
+        choices=PortalUser.UserType.choices,
+        required=False,
+        label='User Type',
+        widget=forms.CheckboxSelectMultiple
+    )

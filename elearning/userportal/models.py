@@ -75,6 +75,12 @@ class PortalUser(AbstractUser):
     def is_student(self):
         return self.user_type == self.UserType.STUDENT
 
+    def get_full_name(self) -> str:
+        if self.user_type:
+            title = self.title if self.title else ""
+            return f"{title} {self.first_name} {self.last_name}".strip()
+        else:
+            return super().__str__()
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(PortalUser, on_delete=models.CASCADE)
