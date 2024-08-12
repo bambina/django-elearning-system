@@ -10,3 +10,5 @@ CREATE_STUDENT_ACCOUNT_SUCCESS_MSG = _(
     "You have successfully created a student account."
 )
 PASSWORD_CHANGE_SUCCESS_MSG = _("Your password has been successfully changed.")
+
+UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")

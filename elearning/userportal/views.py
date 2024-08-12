@@ -9,18 +9,12 @@ from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
+
 def index(request):
     context = {
         "somedata": "Hello, world!",
     }
     return render(request, "userportal/index.html", context)
-
-
-@login_required(login_url="login")
-def home(request):
-    next_url = request.POST.get("next") or request.GET.get("next", "/")
-    context = {"somedata": "Hello, world!", "next": next_url}
-    return render(request, "userportal/home.html", context)
 
 
 def signup(request):
@@ -61,22 +55,29 @@ def password_change(request):
     return render(request, "registration/password_change.html", {"form": form})
 
 
-# @login_required(login_url="login")
 class UserListView(ListView):
     model = PortalUser
     paginate_by = 2
-    template_name = 'userportal/user_list.html'
-    context_object_name = 'users'
+    template_name = "userportal/user_list.html"
+    context_object_name = "users"
+    login_url = "login"
 
     def get_queryset(self):
-        queryset = PortalUser.objects.filter(is_staff=False, is_superuser=False).only('id', 'username', 'user_type')
-        keywords = self.request.GET.get('keywords')
-        user_types = self.request.GET.getlist('user_type')
+        queryset = PortalUser.objects.filter(is_staff=False, is_superuser=False).only(
+            "id", "username", "user_type"
+        )
+        keywords = self.request.GET.get("keywords")
+        user_types = self.request.GET.getlist("user_type")
         if keywords:
             query_words = keywords.split()
             q_objects = Q()
             for word in query_words:
-                q_objects |= Q(username__icontains=word) | Q(first_name__icontains=word) | Q(last_name__icontains=word) | Q(title__icontains=word)
+                q_objects |= (
+                    Q(username__icontains=word)
+                    | Q(first_name__icontains=word)
+                    | Q(last_name__icontains=word)
+                    | Q(title__icontains=word)
+                )
             queryset = queryset.filter(q_objects)
         if user_types:
             queryset = queryset.filter(user_type__in=user_types)
@@ -84,15 +85,35 @@ class UserListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_form'] = UserSearchForm(self.request.GET or None)
+        context["search_form"] = UserSearchForm(self.request.GET or None)
         return context
+
+
+@login_required(login_url="login")
+def home(request):
+    next_url = request.POST.get("next") or request.GET.get("next", "/")
+    if request.method == "POST":
+        status_form = StatusForm(request.POST)
+        if status_form.is_valid():
+            pass
+            student_profile = request.user.student_profile
+            student_profile.status = status_form.cleaned_data["status"]
+            student_profile.save()
+            messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+    else:
+        initial = {"status": request.user.student_profile.status}
+        status_form = StatusForm(initial=initial)
+    context = {"next": next_url, "status_form": status_form}
+    return render(request, "userportal/home.html", context)
+
 
 class UserDetailView(DetailView):
     models = PortalUser
-    template_name = 'userportal/user_detail.html'
-    slug_field = 'username'
-    slug_url_kwarg = 'username'
+    template_name = "userportal/user_detail.html"
+    slug_field = "username"
+    slug_url_kwarg = "username"
+    login_url = "login"
 
     def get_object(self):
-        username = self.kwargs.get('username')
+        username = self.kwargs.get("username")
         return get_object_or_404(PortalUser, username=username)

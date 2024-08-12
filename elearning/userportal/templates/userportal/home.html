@@ -1,9 +1,44 @@
 {% extends "./base.html" %}
 {% block content %}
-    <div class="container">
-        <h1>HOME!</h1>
-        {{ user }}
-        <p>This is the home page.</p>
-        {{ somedata }}
+    <div class="container py-3">
+        <h1>HOME</h1>
+        <div class="py-3">
+            {% if user.is_student %}
+                <strong class="d-inline-block mb-2 text-success-emphasis">Student</strong>
+            {% elif user.is_teacher %}
+                <strong class="d-inline-block mb-2 text-primary-emphasis">Teacher</strong>
+            {% endif %}
+            <h1>{{ user.get_full_name }}</h1>
+
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>{{ user.username }}</li>
+              <li>{{ user.email }}</li>
+            </ul>
+
+            {% if user.is_student %}
+                <form method="post" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <label class="visually-hidden">Status</label>
+                        {{ status_form.status }}
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Update status</button>
+                    </div>
+                </form>
+                <p>Program: {{ user.student_profile.program }}</p>
+                <p>Registration Date: {{ user.student_profile.registration_date }}</p>
+                <p>Registration Expiry Date: {{ user.student_profile.registration_expiry_date }}</p>
+            {% else %}
+                <p>Biography: {{ user.teacher_profile.biography }}</p>
+            {% endif %}
+
+        </div>
+        <div class="py-3">
+            <h2>Current Courses</h2>
+        </div>
+        <div class="py-3">
+            <h2>Past Courses</h2>
+        </div>
     </div>
 {% endblock %}

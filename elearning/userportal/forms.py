@@ -42,11 +42,26 @@ class StudentProfileForm(forms.ModelForm):
             "registration_date",
         )
 
+
 class UserSearchForm(forms.Form):
-    keywords = forms.CharField(required=False, label='Keywords', widget=forms.TextInput(attrs={'placeholder': 'Enter username, etc.'}))
+    keywords = forms.CharField(
+        required=False,
+        label="Keywords",
+        widget=forms.TextInput(attrs={"placeholder": "Enter username, etc."}),
+    )
     user_type = forms.MultipleChoiceField(
         choices=PortalUser.UserType.choices,
         required=False,
-        label='User Type',
-        widget=forms.CheckboxSelectMultiple
+        label="User Type",
+        widget=forms.CheckboxSelectMultiple,
+    )
+
+
+class StatusForm(forms.Form):
+    status = forms.CharField(
+        required=False,
+        max_length=100,
+        widget=forms.TextInput(
+            attrs={"placeholder": "What's your status?", "class": "form-control"}
+        ),
     )

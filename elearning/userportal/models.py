@@ -82,8 +82,11 @@ class PortalUser(AbstractUser):
         else:
             return super().__str__()
 
+
 class StudentProfile(models.Model):
-    user = models.OneToOneField(PortalUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        PortalUser, on_delete=models.CASCADE, related_name="student_profile"
+    )
     status = models.CharField(max_length=100, blank=True)
     program = models.ForeignKey(
         "Program", on_delete=models.CASCADE, related_name="students"
@@ -100,7 +103,9 @@ class StudentProfile(models.Model):
 
 
 class TeacherProfile(models.Model):
-    user = models.OneToOneField(PortalUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        PortalUser, on_delete=models.CASCADE, related_name="teacher_profile"
+    )
     biography = models.TextField(
         max_length=500,
         blank=True,
