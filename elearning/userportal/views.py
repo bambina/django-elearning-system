@@ -101,7 +101,10 @@ def home(request):
             student_profile.save()
             messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
     else:
-        initial = {"status": request.user.student_profile.status}
+        status = (
+            request.user.student_profile.status if request.user.is_student() else ""
+        )
+        initial = {"status": status}
         status_form = StatusForm(initial=initial)
     context = {"next": next_url, "status_form": status_form}
     return render(request, "userportal/home.html", context)

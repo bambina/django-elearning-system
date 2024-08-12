@@ -1,9 +1,43 @@
-
-
 {% extends "./base.html" %}
 {% block content %}
-    <div class="container">
-        <h1>{{ object.username }}</h1>
-        <p>This is the user detail page.</p>
+    <h1>User Profile</h1>
+    <div class="py-3">
+        {% if object.is_student %}
+            <strong class="d-inline-block mb-2 text-success-emphasis">Student</strong>
+        {% elif object.is_teacher %}
+            <strong class="d-inline-block mb-2 text-primary-emphasis">Teacher</strong>
+        {% endif %}
+        <h1>{{ object.get_full_name }}</h1>
+
+        <ul class="list-unstyled mt-3 mb-4">
+            <li>{{ object.username }}</li>
+            {% if object.is_student %}
+                <li>{{ object.student_profile.status }}</li>
+            {% endif %}
+        </ul>
+
+        {% if object.is_student %}
+            <p>Program: {{ object.student_profile.program }}</p>
+            {% if user.is_teacher %}
+            <p>Email: {{ object.email }}</p>
+            <p>Registration Date: {{ object.student_profile.registration_date }}</p>
+            <p>Registration Expiry Date: {{ object.student_profile.registration_expiry_date }}</p>
+            {% endif %}
+        {% else %}
+            <p>Biography: {{ object.teacher_profile.biography }}</p>
+        {% endif %}
     </div>
+    {% if user.is_teacher and object.is_student %}
+    <div class="py-3">
+        <h2>Current Courses</h2>
+    </div>
+    <div class="py-3">
+        <h2>Past Courses</h2>
+    </div>
+    {% endif %}
+    {% if object.is_teacher %}
+    <div class="py-3">
+        <h2>Courses</h2>
+    </div>
+    {% endif %}
 {% endblock %}

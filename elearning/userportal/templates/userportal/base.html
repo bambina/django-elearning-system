@@ -12,7 +12,9 @@
             {% endfor %}
         </div>
     {% endif %}
-    {% block content %}{% endblock %}
+    <div class="container py-3">
+        {% block content %}{% endblock %}
+    </div>
     {% include "./footer.html" %}
 </body>
 </html>
