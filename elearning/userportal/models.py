@@ -115,3 +115,58 @@ class TeacherProfile(models.Model):
 
     def __str__(self):
         return str(self.user)
+
+
+class AcademicTerm(models.Model):
+    class SemesterType(models.IntegerChoices):
+        FALL = 1
+        SPRING = 2
+
+    semester = models.PositiveSmallIntegerField(choices=SemesterType)
+    year = models.PositiveSmallIntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+
+    def is_active(self):
+        return self.start_date <= date.today() <= self.end
+
+    def clean(self):
+        if self.start_date > self.end_date:
+            raise ValidationError(
+                {
+                    "start_date": ValidationError(
+                        f"{INVALID_VALUE_MSG} {INVALID_START_DATE_MSG}",
+                        code=VALIDATION_ERR_INVALID,
+                        params={"value": self.start_date},
+                    )
+                }
+            )
+
+    def __str__(self):
+        return f"{self.get_semester_type_display()} {self.year}"
+
+
+class Course(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(max_length=500)
+    program = models.ForeignKey(
+        "Program", on_delete=models.CASCADE, related_name="courses"
+    )
+    teacher = models.ForeignKey(
+        "TeacherProfile", on_delete=models.CASCADE, related_name="courses"
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class CourseOffering(models.Model):
+    course = models.ForeignKey(
+        "Course", on_delete=models.CASCADE, related_name="offerings"
+    )
+    term = models.ForeignKey(
+        "AcademicTerm", on_delete=models.CASCADE, related_name="offerings"
+    )
+
+    def __str__(self):
+        return f"{self.course} ({self.term})"

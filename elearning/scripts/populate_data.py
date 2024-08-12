@@ -17,6 +17,8 @@ total_records = 0
 # Clean up the database
 Program.objects.all().delete()
 PortalUser.objects.all().delete()
+AcademicTerm.objects.all().delete()
+Course.objects.all().delete()
 
 COMMON_PASSWORD = "abc123"
 
@@ -126,5 +128,94 @@ teacher_profiles = [
 ]
 TeacherProfile.objects.bulk_create(teacher_profiles)
 total_records += len(teacher_profiles)
+
+academic_terms = [
+    AcademicTerm(
+        semester=AcademicTerm.SemesterType.SPRING,
+        year=2023,
+        start_date="2023-04-01",
+        end_date="2023-09-30",
+    ),
+    AcademicTerm(
+        semester=AcademicTerm.SemesterType.FALL,
+        year=2023,
+        start_date="2023-10-01",
+        end_date="2024-03-31",
+    ),
+    AcademicTerm(
+        semester=AcademicTerm.SemesterType.SPRING,
+        year=2024,
+        start_date="2024-04-01",
+        end_date="2024-09-30",
+    ),
+    AcademicTerm(
+        semester=AcademicTerm.SemesterType.FALL,
+        year=2024,
+        start_date="2024-10-01",
+        end_date="2025-03-31",
+    ),
+]
+
+AcademicTerm.objects.bulk_create(academic_terms)
+total_records += len(academic_terms)
+
+courses = [
+    Course(
+        title="Introduction to Computer Science",
+        description="An introductory course covering the essentials of computer science, from basic programming to algorithm understanding.",
+        program=program,
+        teacher=TeacherProfile.objects.get(user__username="teacher1"),
+    ),
+    Course(
+        title="Data Structures and Algorithms",
+        description="Study key data structures and algorithms to enhance problem-solving and software development skills.",
+        program=program,
+        teacher=TeacherProfile.objects.get(user__username="teacher1"),
+    ),
+    Course(
+        title="Database Management Systems",
+        description="Learn the fundamentals of database design, SQL, and managing relational database systems.",
+        program=program,
+        teacher=TeacherProfile.objects.get(user__username="teacher1"),
+    ),
+    Course(
+        title="Software Engineering",
+        description="Gain insights into software development processes, from design to testing and maintenance.",
+        program=program,
+        teacher=TeacherProfile.objects.get(user__username="teacher1"),
+    ),
+]
+
+Course.objects.bulk_create(courses)
+total_records += len(courses)
+
+course_offerings = [
+    CourseOffering(
+        course=Course.objects.get(title="Introduction to Computer Science"),
+        term=AcademicTerm.objects.get(
+            year=2023, semester=AcademicTerm.SemesterType.SPRING
+        ),
+    ),
+    CourseOffering(
+        course=Course.objects.get(title="Data Structures and Algorithms"),
+        term=AcademicTerm.objects.get(
+            year=2023, semester=AcademicTerm.SemesterType.FALL
+        ),
+    ),
+    CourseOffering(
+        course=Course.objects.get(title="Database Management Systems"),
+        term=AcademicTerm.objects.get(
+            year=2024, semester=AcademicTerm.SemesterType.SPRING
+        ),
+    ),
+    CourseOffering(
+        course=Course.objects.get(title="Software Engineering"),
+        term=AcademicTerm.objects.get(
+            year=2024, semester=AcademicTerm.SemesterType.FALL
+        ),
+    ),
+]
+CourseOffering.objects.bulk_create(course_offerings)
+total_records += len(course_offerings)
 
 print(f"Total records created: {total_records}")
