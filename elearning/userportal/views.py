@@ -120,3 +120,34 @@ class UserDetailView(DetailView):
     def get_object(self):
         username = self.kwargs.get("username")
         return get_object_or_404(PortalUser, username=username)
+
+
+class CourseListView(ListView):
+    model = Course
+    paginate_by = 2
+    template_name = "userportal/course_list.html"
+    context_object_name = "courses"
+    login_url = "login"
+
+    def get_queryset(self):
+        queryset = Course.objects.all().only("id", "title", "description")
+        keywords = self.request.GET.get("keywords")
+        if keywords:
+            query_words = keywords.split()
+            q_objects = Q()
+            for word in query_words:
+                q_objects |= Q(title__icontains=word) | Q(description__icontains=word)
+            queryset = queryset.filter(q_objects)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_form"] = CourseSearchForm(self.request.GET or None)
+        return context
+
+
+class CourseDetailView(DetailView):
+    model = Course
+    template_name = "userportal/course_detail.html"
+    context_object_name = "course"
+    login_url = "login"

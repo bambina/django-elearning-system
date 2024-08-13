@@ -57,6 +57,14 @@ class UserSearchForm(forms.Form):
     )
 
 
+class CourseSearchForm(forms.Form):
+    keywords = forms.CharField(
+        required=False,
+        label="Keywords",
+        widget=forms.TextInput(attrs={"placeholder": "Enter course title, etc."}),
+    )
+
+
 class StatusForm(forms.Form):
     status = forms.CharField(
         required=False,

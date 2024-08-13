@@ -1,0 +1,60 @@
+{% extends "./base.html" %}
+{% block content %}
+    <h1>Course List</h1>
+    <div class="py-3">
+        <form method="get" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
+            <div class="col-12">
+                <label class="visually-hidden">Keywords</label>
+                {{ search_form.keywords }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+    <div class="py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">
+                <div class="row">
+                    <div class="col">Title</div>
+                    <div class="col">Description</div>
+                    <div class="col">Teacher</div>
+                    <div class="col">Actions</div>
+                </div>
+            </li>
+            {% for course in courses %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col">{{ course.title }}</div>
+                        <div class="col text-truncate">{{ course.description }}</div>
+                        <div class="col">
+                            {{ course.teacher.user.get_full_name }}
+                        </div>
+                        <div class="col">
+                            <a href="{% url 'course_detail' course.id %}" class="btn btn-primary btn-sm">View</a>
+                        </div>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No courses yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="py-3">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous%}
+                    <li class="page-item">
+                        <a class="page-link {% if page_obj.number == 1 %}disables{% endif %}" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link {% if page_obj.number == page_obj.paginator.num_pages %}disables{% endif %}" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+{% endblock %}
