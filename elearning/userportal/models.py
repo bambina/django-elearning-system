@@ -124,20 +124,20 @@ class AcademicTerm(models.Model):
 
     semester = models.PositiveSmallIntegerField(choices=SemesterType)
     year = models.PositiveSmallIntegerField()
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_datetime = models.DateTimeField()
+    end_datetime = models.DateTimeField()
 
     def is_active(self):
-        return self.start_date <= date.today() <= self.end
+        return self.start_datetime <= date.today() <= self.end
 
     def clean(self):
-        if self.start_date > self.end_date:
+        if self.start_datetime > self.end_datetime:
             raise ValidationError(
                 {
-                    "start_date": ValidationError(
-                        f"{INVALID_VALUE_MSG} {INVALID_START_DATE_MSG}",
+                    "start_datetime": ValidationError(
+                        f"{INVALID_VALUE_MSG} {INVALID_START_DATETIME_MSG}",
                         code=VALIDATION_ERR_INVALID,
-                        params={"value": self.start_date},
+                        params={"value": self.start_datetime},
                     )
                 }
             )

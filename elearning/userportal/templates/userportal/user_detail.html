@@ -15,17 +15,26 @@
                 <li>{{ object.student_profile.status }}</li>
             {% endif %}
         </ul>
-
+        <dl class="row">
         {% if object.is_student %}
-            <p>Program: {{ object.student_profile.program }}</p>
+            <dt class="col-sm-3">Program</dt>
+            <dd class="col-sm-9">{{ object.student_profile.program }}</dd>
+
             {% if user.is_teacher %}
-            <p>Email: {{ object.email }}</p>
-            <p>Registration Date: {{ object.student_profile.registration_date }}</p>
-            <p>Registration Expiry Date: {{ object.student_profile.registration_expiry_date }}</p>
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">{{ object.email }}</dd>
+
+                <dt class="col-sm-3">Registration Date</dt>
+                <dd class="col-sm-9">{{ object.student_profile.registration_date }}</dd>
+
+                <dt class="col-sm-3">Registration Expiry Date</dt>
+                <dd class="col-sm-9">{{ object.student_profile.registration_expiry_date }}</dd>
             {% endif %}
         {% else %}
-            <p>Biography: {{ object.teacher_profile.biography }}</p>
+            <dt class="col-sm-3">Biography</dt>
+            <dd class="col-sm-9">{{ object.teacher_profile.biography }}</dd>
         {% endif %}
+        </dl>
     </div>
     {% if user.is_teacher and object.is_student %}
     <div class="py-3">

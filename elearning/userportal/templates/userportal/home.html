@@ -25,11 +25,21 @@
                     <button type="submit" class="btn btn-primary">Update status</button>
                 </div>
             </form>
-            <p>Program: {{ user.student_profile.program }}</p>
-            <p>Registration Date: {{ user.student_profile.registration_date }}</p>
-            <p>Registration Expiry Date: {{ user.student_profile.registration_expiry_date }}</p>
+            <dl class="row">
+                <dt class="col-sm-3">Program</dt>
+                <dd class="col-sm-9">{{ user.student_profile.program }}</dd>
+
+                <dt class="col-sm-3">Registration Date</dt>
+                <dd class="col-sm-9">{{ user.student_profile.registration_date }}</dd>
+
+                <dt class="col-sm-3">Registration Expiry Date</dt>
+                <dd class="col-sm-9">{{ user.student_profile.registration_expiry_date }}</dd>
+            </dl>
         {% else %}
-            <p>Biography: {{ user.teacher_profile.biography }}</p>
+            <dl class="row">
+                <dt class="col-sm-3">Biography</dt>
+                <dd class="col-sm-9">{{ user.teacher_profile.biography }}</dd>
+            </dl>
         {% endif %}
 
     </div>

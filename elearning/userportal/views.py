@@ -8,6 +8,7 @@ from .forms import *
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from django.utils.timezone import now
 
 
 def index(request):
@@ -149,5 +150,29 @@ class CourseListView(ListView):
 class CourseDetailView(DetailView):
     model = Course
     template_name = "userportal/course_detail.html"
-    context_object_name = "course"
     login_url = "login"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        coming_term = (
+            AcademicTerm.objects.filter(start_datetime__gte=now())
+            .order_by("start_datetime")
+            .first()
+        )
+        recent_offerings = self.object.offerings.filter(term=coming_term)
+        if recent_offerings.exists():
+            context["recent_offering"] = recent_offerings.first()
+        else:
+            context["recent_offering"] = None
+        return context
+
+
+@login_required(login_url="login")
+def enroll_course(request, course_id):
+    pass
+    # if request.method == 'POST':
+    #     course = get_object_or_404(Course, id=course_id)
+    #     Enrollment.objects.get_or_create(user=request.user, course=course)
+    #     # ここで追加の処理（例：確認メールの送信）を行うことができます
+    #     return redirect('course_detail', course_id=course_id)
+    # return redirect('course_list')  # GETリクエストの場合はコース一覧にリダイレクト

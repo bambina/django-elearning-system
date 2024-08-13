@@ -1,5 +1,8 @@
 import os, sys
 import django
+import itertools
+from django.utils import timezone
+from datetime import datetime
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -131,28 +134,28 @@ total_records += len(teacher_profiles)
 
 academic_terms = [
     AcademicTerm(
-        semester=AcademicTerm.SemesterType.SPRING,
-        year=2023,
-        start_date="2023-04-01",
-        end_date="2023-09-30",
-    ),
-    AcademicTerm(
         semester=AcademicTerm.SemesterType.FALL,
         year=2023,
-        start_date="2023-10-01",
-        end_date="2024-03-31",
+        start_datetime=timezone.make_aware(datetime(2023, 10, 1, 0, 0)),
+        end_datetime=timezone.make_aware(datetime(2024, 3, 31, 23, 59))
     ),
     AcademicTerm(
         semester=AcademicTerm.SemesterType.SPRING,
         year=2024,
-        start_date="2024-04-01",
-        end_date="2024-09-30",
+        start_datetime=timezone.make_aware(datetime(2024, 4, 1, 0, 0)),
+        end_datetime=timezone.make_aware(datetime(2024, 9, 30, 23, 59))
     ),
     AcademicTerm(
         semester=AcademicTerm.SemesterType.FALL,
         year=2024,
-        start_date="2024-10-01",
-        end_date="2025-03-31",
+        start_datetime=timezone.make_aware(datetime(2024, 10, 1, 0, 0)),
+        end_datetime=timezone.make_aware(datetime(2025, 3, 31, 23, 59))
+    ),
+    AcademicTerm(
+        semester=AcademicTerm.SemesterType.SPRING,
+        year=2025,
+        start_datetime=timezone.make_aware(datetime(2025, 4, 1, 0, 0)),
+        end_datetime=timezone.make_aware(datetime(2025, 9, 30, 23, 59))
     ),
 ]
 
@@ -189,32 +192,13 @@ courses = [
 Course.objects.bulk_create(courses)
 total_records += len(courses)
 
-course_offerings = [
-    CourseOffering(
-        course=Course.objects.get(title="Introduction to Computer Science"),
-        term=AcademicTerm.objects.get(
-            year=2023, semester=AcademicTerm.SemesterType.SPRING
-        ),
-    ),
-    CourseOffering(
-        course=Course.objects.get(title="Data Structures and Algorithms"),
-        term=AcademicTerm.objects.get(
-            year=2023, semester=AcademicTerm.SemesterType.FALL
-        ),
-    ),
-    CourseOffering(
-        course=Course.objects.get(title="Database Management Systems"),
-        term=AcademicTerm.objects.get(
-            year=2024, semester=AcademicTerm.SemesterType.SPRING
-        ),
-    ),
-    CourseOffering(
-        course=Course.objects.get(title="Software Engineering"),
-        term=AcademicTerm.objects.get(
-            year=2024, semester=AcademicTerm.SemesterType.FALL
-        ),
-    ),
-]
+first_three_courses = Course.objects.all()[:3]
+all_terms = AcademicTerm.objects.all()
+course_offerings = []
+
+for course, term in itertools.product(first_three_courses, all_terms):
+    course_offerings.append(CourseOffering(course=course, term=term))
+
 CourseOffering.objects.bulk_create(course_offerings)
 total_records += len(course_offerings)
 
