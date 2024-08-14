@@ -12,11 +12,13 @@ urlpatterns = [
         login_required(login_url="login")(auth_views.LogoutView.as_view()),
         name="logout",
     ),
-    path("password_change/", views.password_change, name="password_change"),
+    path("password-change/", views.password_change, name="password_change"),
     path("home/", views.home, name="home"),
     path("users/", views.UserListView.as_view(), name="user-list"),
     path("users/<str:username>/", views.UserDetailView.as_view(), name="user_detail"),
     path("courses/", views.CourseListView.as_view(), name="course-list"),
     path("courses/<int:pk>/", views.CourseDetailView.as_view(), name="course_detail"),
-    path("courses/<int:pk>/enroll/", views.enroll_course, name="enroll_course"),
+    path(
+        "course-offerings/<int:pk>/enroll/", views.enroll_course, name="enroll_course"
+    ),
 ]

@@ -9,6 +9,7 @@ from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.utils.timezone import now
+from django.views.decorators.http import require_POST
 
 
 def index(request):
@@ -154,25 +155,52 @@ class CourseDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        coming_term = (
-            AcademicTerm.objects.filter(start_datetime__gte=now())
-            .order_by("start_datetime")
-            .first()
+        course = self.object
+        user = self.request.user
+        if user.is_student():
+            current_term = AcademicTerm.current()
+            if current_term:
+                context["is_taking"] = CourseOffering.objects.filter(
+                    course=course,
+                    term=current_term,
+                    students__student=user.student_profile,
+                ).exists()
+
+            next_term = AcademicTerm.next()
+            if next_term:
+                upcoming_session = CourseOffering.objects.filter(
+                    course=course, term=next_term
+                ).first()
+                if upcoming_session:
+                    context["upcoming_session"] = upcoming_session
+                    context["is_enrolled"] = StudentCourse.objects.filter(
+                        student=user.student_profile, offering=upcoming_session
+                    ).exists()
+
+        context["is_instructor"] = (
+            user.is_teacher() and user.teacher_profile == course.teacher
         )
-        recent_offerings = self.object.offerings.filter(term=coming_term)
-        if recent_offerings.exists():
-            context["recent_offering"] = recent_offerings.first()
-        else:
-            context["recent_offering"] = None
+
         return context
 
 
 @login_required(login_url="login")
-def enroll_course(request, course_id):
-    pass
-    # if request.method == 'POST':
-    #     course = get_object_or_404(Course, id=course_id)
-    #     Enrollment.objects.get_or_create(user=request.user, course=course)
-    #     # ここで追加の処理（例：確認メールの送信）を行うことができます
-    #     return redirect('course_detail', course_id=course_id)
-    # return redirect('course_list')  # GETリクエストの場合はコース一覧にリダイレクト
+@require_POST
+def enroll_course(request, pk):
+    if not request.user.is_student():
+        messages.error(request, "Only students can enroll in courses.")
+        return redirect("course-list")
+
+    try:
+        offering = CourseOffering.objects.get(id=pk)
+        _, created = StudentCourse.objects.get_or_create(
+            student=request.user.student_profile, offering=offering
+        )
+        if created:
+            messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
+        else:
+            messages.warning(request, ENROLL_COURSE_ALREADY_MSG)
+        return redirect("course_detail", pk=offering.course.id)
+    except Course.DoesNotExist:
+        messages.error(request, "The requested course does not exist.")
+        return redirect("course-list")

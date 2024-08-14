@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils.translation import gettext as _
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 
 from .constants import *
 from .validators import *
@@ -127,6 +128,20 @@ class AcademicTerm(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
 
+    @classmethod
+    def current(cls):
+        return cls.objects.filter(
+            start_datetime__lte=now(), end_datetime__gte=now()
+        ).first()
+
+    @classmethod
+    def next(cls):
+        return (
+            cls.objects.filter(start_datetime__gt=now())
+            .order_by("start_datetime")
+            .first()
+        )
+
     def is_active(self):
         return self.start_datetime <= date.today() <= self.end
 
@@ -170,3 +185,65 @@ class CourseOffering(models.Model):
 
     def __str__(self):
         return f"{self.course} ({self.term})"
+
+
+class StudentCourse(models.Model):
+    class Grade(models.IntegerChoices):
+        NOT_GRADED = 1, _("Not Graded")
+        PASS = 2, _("Pass")
+        FAIL = 3, _("Fail")
+
+    student = models.ForeignKey(
+        "StudentProfile", on_delete=models.CASCADE, related_name="courses"
+    )
+    offering = models.ForeignKey(
+        "CourseOffering", on_delete=models.CASCADE, related_name="students"
+    )
+    grade = models.PositiveSmallIntegerField(
+        choices=Grade.choices, default=Grade.NOT_GRADED
+    )
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ["student", "offering"]
+        indexes = [
+            models.Index(fields=["student", "offering"]),
+        ]
+
+    @property
+    def status(self):
+        current_time = now()
+        if current_time > self.offering.term.end_datetime:
+            return "Ended"
+        elif current_time < self.offering.term.start_datetime:
+            return "Registered"
+        else:
+            return "In Progress"
+
+    def clean(self):
+        current_time = now()
+        if current_time > self.offering.term.start_datetime:
+            raise ValidationError(
+                {
+                    "offering": ValidationError(
+                        f"{INVALID_VALUE_MSG} {COURSE_ALREADY_STARTED_MSG}",
+                        code=VALIDATION_ERR_INVALID,
+                        params={"value": self.offering},
+                    )
+                }
+            )
+        if StudentCourse.objects.filter(
+            student=self.student, offering=self.offering
+        ).exists():
+            raise ValidationError(
+                {
+                    "offering": ValidationError(
+                        f"{INVALID_VALUE_MSG} {ALREADY_ENROLLED_MSG}",
+                        code=VALIDATION_ERR_INVALID,
+                        params={"value": self.offering},
+                    )
+                }
+            )
+
+    def __str__(self):
+        return f"{self.student} ({self.offering})"

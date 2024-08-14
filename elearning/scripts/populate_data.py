@@ -122,11 +122,11 @@ total_records += len(student_profiles)
 teacher_profiles = [
     TeacherProfile(
         user=PortalUser.objects.get(username="teacher1"),
-        biography="I am a professor of Computer Science.",
+        biography="Prof. John Smith is a Professor of Computer Science at the University of California. He obtained his Ph.D. in Computer Science and Engineering from the Visual Computing Lab at the University of California, Berkeley in 1995. With over two decades of experience, he has dedicated his career to advancing the fields of artificial intelligence and machine learning.",
     ),
     TeacherProfile(
         user=PortalUser.objects.get(username="teacher2"),
-        biography="I am a professor of Computer Science.",
+        biography="Dr. Emily Johnson is an Associate Professor of Mechanical Engineering at the Massachusetts Institute of Technology. She earned her Ph.D. in Mechanical Engineering with a focus on biomechanics from Stanford University in 2010. Dr. Johnson specializes in the development of robotic systems for healthcare applications, blending her expertise in engineering with medical technology.",
     ),
 ]
 TeacherProfile.objects.bulk_create(teacher_profiles)
@@ -201,5 +201,23 @@ for course, term in itertools.product(first_three_courses, all_terms):
 
 CourseOffering.objects.bulk_create(course_offerings)
 total_records += len(course_offerings)
+
+student_1 = StudentProfile.objects.get(user__username="student1")
+course_1 = Course.objects.get(title="Introduction to Computer Science")
+course_2 = Course.objects.get(title="Data Structures and Algorithms")
+current_term = AcademicTerm.current()
+course_offering_1 = CourseOffering.objects.filter(
+    course=course_1, term=current_term
+).first()
+course_offering_2 = CourseOffering.objects.filter(
+    course=course_2, term=current_term
+).first()
+enrollments = [
+    StudentCourse(student=student_1, offering=course_offering_1),
+    StudentCourse(student=student_1, offering=course_offering_2),
+]
+
+StudentCourse.objects.bulk_create(enrollments)
+total_records += len(enrollments)
 
 print(f"Total records created: {total_records}")
