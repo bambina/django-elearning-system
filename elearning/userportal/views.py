@@ -8,8 +8,8 @@ from .forms import *
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from django.utils.timezone import now
 from django.views.decorators.http import require_POST
+from django.conf import settings
 
 
 def index(request):
@@ -59,7 +59,7 @@ def password_change(request):
 
 class UserListView(ListView):
     model = PortalUser
-    paginate_by = 2
+    paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/user_list.html"
     context_object_name = "users"
     login_url = "login"
@@ -126,7 +126,7 @@ class UserDetailView(DetailView):
 
 class CourseListView(ListView):
     model = Course
-    paginate_by = 2
+    paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/course_list.html"
     context_object_name = "courses"
     login_url = "login"
@@ -173,7 +173,7 @@ class CourseDetailView(DetailView):
                 ).first()
                 if upcoming_session:
                     context["upcoming_session"] = upcoming_session
-                    context["is_enrolled"] = StudentCourse.objects.filter(
+                    context["is_enrolled"] = StudentCourseOffering.objects.filter(
                         student=user.student_profile, offering=upcoming_session
                     ).exists()
 
@@ -188,19 +188,19 @@ class CourseDetailView(DetailView):
 @require_POST
 def enroll_course(request, pk):
     if not request.user.is_student():
-        messages.error(request, "Only students can enroll in courses.")
+        messages.error(request, ERR_ONLY_STUDENTS_CAN_ENROLL)
         return redirect("course-list")
 
     try:
         offering = CourseOffering.objects.get(id=pk)
-        _, created = StudentCourse.objects.get_or_create(
+        _, created = StudentCourseOffering.objects.get_or_create(
             student=request.user.student_profile, offering=offering
         )
         if created:
             messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
         else:
-            messages.warning(request, ENROLL_COURSE_ALREADY_MSG)
-        return redirect("course_detail", pk=offering.course.id)
+            messages.warning(request, ALREADY_ENROLLED_MSG)
+        return redirect("course-detail", pk=offering.course.id)
     except Course.DoesNotExist:
-        messages.error(request, "The requested course does not exist.")
+        messages.error(request, ERR_COURSE_DOES_NOT_EXIST)
         return redirect("course-list")

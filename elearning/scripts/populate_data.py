@@ -213,11 +213,11 @@ course_offering_2 = CourseOffering.objects.filter(
     course=course_2, term=current_term
 ).first()
 enrollments = [
-    StudentCourse(student=student_1, offering=course_offering_1),
-    StudentCourse(student=student_1, offering=course_offering_2),
+    StudentCourseOffering(student=student_1, offering=course_offering_1),
+    StudentCourseOffering(student=student_1, offering=course_offering_2),
 ]
 
-StudentCourse.objects.bulk_create(enrollments)
+StudentCourseOffering.objects.bulk_create(enrollments)
 total_records += len(enrollments)
 
 print(f"Total records created: {total_records}")

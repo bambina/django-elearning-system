@@ -187,7 +187,7 @@ class CourseOffering(models.Model):
         return f"{self.course} ({self.term})"
 
 
-class StudentCourse(models.Model):
+class StudentCourseOffering(models.Model):
     class Grade(models.IntegerChoices):
         NOT_GRADED = 1, _("Not Graded")
         PASS = 2, _("Pass")
@@ -226,13 +226,13 @@ class StudentCourse(models.Model):
             raise ValidationError(
                 {
                     "offering": ValidationError(
-                        f"{INVALID_VALUE_MSG} {COURSE_ALREADY_STARTED_MSG}",
+                        f"{INVALID_VALUE_MSG} {INVALID_COURSE_ALREADY_STARTED_MSG}",
                         code=VALIDATION_ERR_INVALID,
                         params={"value": self.offering},
                     )
                 }
             )
-        if StudentCourse.objects.filter(
+        if StudentCourseOffering.objects.filter(
             student=self.student, offering=self.offering
         ).exists():
             raise ValidationError(
