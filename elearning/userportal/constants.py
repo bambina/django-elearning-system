@@ -13,7 +13,8 @@ INVALID_COURSE_ALREADY_STARTED_MSG = _(
 
 # Error messages
 ERR_ONLY_STUDENTS_CAN_ENROLL = _("Only students can enroll in courses.")
-ERR_COURSE_DOES_NOT_EXIST = _("The requested course does not exist.")
+ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")
+ERR_DOES_NOT_EXIST = _("The requested {value} does not exist.")
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")

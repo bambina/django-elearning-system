@@ -73,3 +73,14 @@ class StatusForm(forms.Form):
             attrs={"placeholder": "What's your status?", "class": "form-control"}
         ),
     )
+
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ["title", "description", "program"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control"}),
+            "program": forms.Select(attrs={"class": "form-control"}),
+        }

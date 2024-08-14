@@ -202,5 +202,29 @@ def enroll_course(request, pk):
             messages.warning(request, ALREADY_ENROLLED_MSG)
         return redirect("course-detail", pk=offering.course.id)
     except Course.DoesNotExist:
-        messages.error(request, ERR_COURSE_DOES_NOT_EXIST)
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
         return redirect("course-list")
+
+
+@login_required(login_url="login")
+def create_course(request):
+    if not request.user.is_teacher():
+        messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSES)
+        return redirect("course-list")
+
+    try:
+        teacher_profile = TeacherProfile.objects.get(user=request.user)
+    except TeacherProfile.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="TeacherProfile"))
+        return redirect("course-list")
+
+    if request.method == "POST":
+        form = CourseForm(request.POST)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.teacher = teacher_profile
+            course.save()
+            return redirect("course-detail", pk=course.pk)
+    else:
+        form = CourseForm()
+    return render(request, "userportal/create_course.html", {"form": form})
