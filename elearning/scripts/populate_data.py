@@ -205,16 +205,39 @@ total_records += len(course_offerings)
 student_1 = StudentProfile.objects.get(user__username="student1")
 course_1 = Course.objects.get(title="Introduction to Computer Science")
 course_2 = Course.objects.get(title="Data Structures and Algorithms")
+
+next_term = AcademicTerm.next()
 current_term = AcademicTerm.current()
-course_offering_1 = CourseOffering.objects.filter(
+previous_term = AcademicTerm.previous()
+
+next_offering_1 = CourseOffering.objects.filter(
+    course=course_1, term=next_term
+).first()
+next_offering_2 = CourseOffering.objects.filter(
+    course=course_2, term=next_term
+).first()
+
+current_offering_1 = CourseOffering.objects.filter(
     course=course_1, term=current_term
 ).first()
-course_offering_2 = CourseOffering.objects.filter(
+current_offering_2 = CourseOffering.objects.filter(
     course=course_2, term=current_term
 ).first()
+
+previous_offering_1 = CourseOffering.objects.filter(
+    course=course_1, term=previous_term
+).first()
+previous_offering_2 = CourseOffering.objects.filter(
+    course=course_2, term=previous_term
+).first()
+
 enrollments = [
-    StudentCourseOffering(student=student_1, offering=course_offering_1),
-    StudentCourseOffering(student=student_1, offering=course_offering_2),
+    StudentCourseOffering(student=student_1, offering=next_offering_1),
+    StudentCourseOffering(student=student_1, offering=next_offering_2),
+    StudentCourseOffering(student=student_1, offering=current_offering_1),
+    StudentCourseOffering(student=student_1, offering=current_offering_2),
+    StudentCourseOffering(student=student_1, offering=previous_offering_1),
+    StudentCourseOffering(student=student_1, offering=previous_offering_2),
 ]
 
 StudentCourseOffering.objects.bulk_create(enrollments)

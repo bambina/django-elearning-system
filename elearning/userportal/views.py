@@ -93,7 +93,6 @@ class UserListView(ListView):
 
 @login_required(login_url="login")
 def home(request):
-    next_url = request.POST.get("next") or request.GET.get("next", "/")
     if request.method == "POST":
         status_form = StatusForm(request.POST)
         if status_form.is_valid():
@@ -108,7 +107,30 @@ def home(request):
         )
         initial = {"status": status}
         status_form = StatusForm(initial=initial)
+
+    # Prepare the context
+    next_url = request.POST.get("next") or request.GET.get("next", "/")
     context = {"next": next_url, "status_form": status_form}
+
+    # Get student's courses
+    if request.user.is_student():
+        student = request.user.student_profile
+        student_offerings = StudentCourseOffering.objects.filter(
+            student=student
+        ).select_related('offering', 'offering__course', 'offering__term')
+
+        context["upcoming_offerings"] = []
+        context["current_offerings"] = []
+        context["past_offerings"] = []
+
+        for so in student_offerings:
+            if so.offering.term.status == AcademicTerm.TermStatus.NOT_STARTED:
+                context["upcoming_offerings"].append(so.offering)
+            elif so.offering.term.status == AcademicTerm.TermStatus.IN_PROGRESS:
+                context["current_offerings"].append(so.offering)
+            else:
+                context["past_offerings"].append(so.offering)
+
     return render(request, "userportal/home.html", context)
 
 

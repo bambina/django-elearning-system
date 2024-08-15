@@ -120,8 +120,13 @@ class TeacherProfile(models.Model):
 
 class AcademicTerm(models.Model):
     class SemesterType(models.IntegerChoices):
-        FALL = 1
-        SPRING = 2
+        FALL = 1, _('FALL')
+        SPRING = 2, _('SPRING')
+
+    class TermStatus(models.IntegerChoices):
+        NOT_STARTED = 1, _('Not Started')
+        IN_PROGRESS = 2, _('In Progress')
+        ENDED = 3, _('Ended')
 
     semester = models.PositiveSmallIntegerField(choices=SemesterType)
     year = models.PositiveSmallIntegerField()
@@ -144,6 +149,24 @@ class AcademicTerm(models.Model):
             .order_by("start_datetime")
             .first()
         )
+
+    @classmethod
+    def previous(cls):
+        return (
+            cls.objects.filter(end_datetime__lt=now())
+            .order_by("-end_datetime")
+            .first()
+        )
+    
+    @property
+    def status(self):
+        current_time = now()
+        if current_time > self.end_datetime:
+            return self.TermStatus.ENDED
+        elif current_time < self.start_datetime:
+            return self.TermStatus.NOT_STARTED
+        else:
+            return self.TermStatus.IN_PROGRESS
 
     def clean(self):
         if self.start_datetime > self.end_datetime:
@@ -187,16 +210,6 @@ class CourseOffering(models.Model):
 
     class Meta:
         unique_together = ["course", "term"]
-
-    @property
-    def status(self):
-        current_time = now()
-        if current_time > self.term.end_datetime:
-            return "Ended"
-        elif current_time < self.term.start_datetime:
-            return "Not Started"
-        else:
-            return "In Progress"
 
     def __str__(self):
         return f"{self.course} ({self.term})"
@@ -262,3 +275,20 @@ class StudentCourseOffering(models.Model):
 
     def __str__(self):
         return f"{self.student} ({self.offering})"
+
+
+class Feedback(models.Model):
+    student = models.ForeignKey(
+        "StudentProfile", on_delete=models.CASCADE, related_name="feedbacks"
+    )
+    course = models.ForeignKey(
+        "Course", on_delete=models.CASCADE, related_name="feedbacks"
+    )
+    comments = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "course")
+
+    def __str__(self):
+        return f"{self.student} ({self.course})"
