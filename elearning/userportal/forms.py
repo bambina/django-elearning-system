@@ -109,3 +109,14 @@ class CourseOfferingForm(forms.ModelForm):
                 )
 
         return cleaned_data
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ["comments"]
+        widgets = {
+            "comments": forms.Textarea(attrs={"class": "form-control",
+                                              "placeholder": "How well did the course content meet your learning expectations?",
+                                              "rows": 5}),
+        }

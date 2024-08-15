@@ -13,6 +13,7 @@ INVALID_COURSE_ALREADY_STARTED_MSG = _(
 
 # Error messages
 ERR_ONLY_STUDENTS_CAN_ENROLL = _("Only students can enroll in courses.")
+ERR_ONLY_STUDENTS_CAN_CREATE_FEEDBACK = _("Only students can create feedback.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS = _(
     "Only teachers can create course offerings."
@@ -29,3 +30,4 @@ CREATE_STUDENT_ACCOUNT_SUCCESS_MSG = _(
 PASSWORD_CHANGE_SUCCESS_MSG = _("Your password has been successfully changed.")
 UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")
 ENROLL_COURSE_SUCCESS_MSG = _("You have successfully enrolled in the course.")
+SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")

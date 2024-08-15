@@ -34,4 +34,5 @@ urlpatterns = [
         views.enroll_course,
         name="enroll-course",
     ),
+    path("courses/<int:course_id>/feedback/create", views.create_feedback, name="feedback-create"),
 ]

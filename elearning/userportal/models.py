@@ -285,6 +285,7 @@ class Feedback(models.Model):
         "Course", on_delete=models.CASCADE, related_name="feedbacks"
     )
     comments = models.TextField(max_length=500)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
