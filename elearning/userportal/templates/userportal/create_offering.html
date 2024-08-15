@@ -1,0 +1,31 @@
+{% extends "./base.html" %}
+{% block content %}
+    <h1>Create Course Offering</h1>
+    <p>Create offering for "{{ course.title }}"</p>
+    <div class="py-3">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <small class="form-text text-muted text-danger-emphasis">
+                            {{ error }}
+                        </small>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+{% endblock %}

@@ -128,6 +128,9 @@ class AcademicTerm(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
 
+    class Meta:
+        ordering = ["-start_datetime"]
+
     @classmethod
     def current(cls):
         return cls.objects.filter(
@@ -142,9 +145,6 @@ class AcademicTerm(models.Model):
             .first()
         )
 
-    def is_active(self):
-        return self.start_datetime <= date.today() <= self.end
-
     def clean(self):
         if self.start_datetime > self.end_datetime:
             raise ValidationError(
@@ -158,7 +158,9 @@ class AcademicTerm(models.Model):
             )
 
     def __str__(self):
-        return f"{self.get_semester_type_display()} {self.year}"
+        start_date = self.start_datetime.strftime("%b %d %Y")
+        end_date = self.end_datetime.strftime("%b %d %Y")
+        return f"{self.get_semester_display()} {self.year} ({start_date} - {end_date})"
 
 
 class Course(models.Model):
@@ -182,6 +184,9 @@ class CourseOffering(models.Model):
     term = models.ForeignKey(
         "AcademicTerm", on_delete=models.CASCADE, related_name="offerings"
     )
+
+    class Meta:
+        unique_together = ["course", "term"]
 
     @property
     def status(self):

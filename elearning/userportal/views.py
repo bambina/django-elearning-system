@@ -249,3 +249,29 @@ class CourseOfferingListView(ListView):
         course = get_object_or_404(Course, pk=course_id)
         context["course"] = course
         return context
+
+
+@login_required(login_url="login")
+def create_course_offering(request, course_id):
+    if not request.user.is_teacher():
+        messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS)
+        return redirect("course-list")
+
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
+        return redirect("course-list")
+
+    if request.method == "POST":
+        form = CourseOfferingForm(request.POST, course=course)
+        if form.is_valid():
+            offering = form.save(commit=False)
+            offering.course = course
+            offering.save()
+            return redirect("offering-list", course_id=course_id)
+    else:
+        form = CourseOfferingForm(course=course)
+    return render(
+        request, "userportal/create_offering.html", {"form": form, "course": course}
+    )

@@ -25,6 +25,11 @@ urlpatterns = [
         name="offering-list",
     ),
     path(
+        "courses/<int:course_id>/offerings/create/",
+        views.create_course_offering,
+        name="offering-create",
+    ),
+    path(
         "courses/<int:course_id>/offerings/<int:offering_id>/enroll/",
         views.enroll_course,
         name="enroll-course",

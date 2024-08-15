@@ -22,6 +22,8 @@
 
     {% if is_instructor %}
     <a href="{% url 'offering-list' object.id %}">View All Course Offerings</a>
+    or
+    <a href="{% url 'offering-create' object.id %}">Add New Offering for This Course</a>
     {% endif %}
 
     {% if is_taking or is_instructor %}

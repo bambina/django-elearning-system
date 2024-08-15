@@ -5,6 +5,7 @@
         <p>{{ course.title }}</p>
         <p>by <a href="{% url 'user-detail' course.teacher.user.username %}">{{ course.teacher.user.get_full_name }}</a></p>
     </div>
+    <a href="{% url 'offering-create' course.id %}">Add New Offering for This Course</a>
     <div class="py-3">
         <ul class="list-group list-group-flush">
             <li class="list-group-item list-group-item-primary">

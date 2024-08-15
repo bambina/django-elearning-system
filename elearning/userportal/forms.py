@@ -84,3 +84,28 @@ class CourseForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control"}),
             "program": forms.Select(attrs={"class": "form-control"}),
         }
+
+
+class CourseOfferingForm(forms.ModelForm):
+    class Meta:
+        model = CourseOffering
+        fields = ["term"]
+        widgets = {
+            "term": forms.Select(attrs={"class": "form-control"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.course = kwargs.pop("course", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        term = cleaned_data.get("term")
+        if self.course and term:
+            # Check if the course offering already exists for the selected term
+            if CourseOffering.objects.filter(course=self.course, term=term).exists():
+                raise ValidationError(
+                    "This course offering already exists for the selected term."
+                )
+
+        return cleaned_data
