@@ -183,6 +183,16 @@ class CourseOffering(models.Model):
         "AcademicTerm", on_delete=models.CASCADE, related_name="offerings"
     )
 
+    @property
+    def status(self):
+        current_time = now()
+        if current_time > self.term.end_datetime:
+            return "Ended"
+        elif current_time < self.term.start_datetime:
+            return "Not Started"
+        else:
+            return "In Progress"
+
     def __str__(self):
         return f"{self.course} ({self.term})"
 

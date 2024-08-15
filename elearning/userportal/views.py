@@ -168,13 +168,13 @@ class CourseDetailView(DetailView):
 
             next_term = AcademicTerm.next()
             if next_term:
-                upcoming_session = CourseOffering.objects.filter(
+                next_offering = CourseOffering.objects.filter(
                     course=course, term=next_term
                 ).first()
-                if upcoming_session:
-                    context["upcoming_session"] = upcoming_session
+                if next_offering:
+                    context["next_offering"] = next_offering
                     context["is_enrolled"] = StudentCourseOffering.objects.filter(
-                        student=user.student_profile, offering=upcoming_session
+                        student=user.student_profile, offering=next_offering
                     ).exists()
 
         context["is_instructor"] = (
@@ -186,13 +186,13 @@ class CourseDetailView(DetailView):
 
 @login_required(login_url="login")
 @require_POST
-def enroll_course(request, pk):
+def enroll_course(request, course_id, offering_id):
     if not request.user.is_student():
         messages.error(request, ERR_ONLY_STUDENTS_CAN_ENROLL)
         return redirect("course-list")
 
     try:
-        offering = CourseOffering.objects.get(id=pk)
+        offering = CourseOffering.objects.get(id=offering_id)
         _, created = StudentCourseOffering.objects.get_or_create(
             student=request.user.student_profile, offering=offering
         )
@@ -200,7 +200,7 @@ def enroll_course(request, pk):
             messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
         else:
             messages.warning(request, ALREADY_ENROLLED_MSG)
-        return redirect("course-detail", pk=offering.course.id)
+        return redirect("course-detail", pk=course_id)
     except Course.DoesNotExist:
         messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
         return redirect("course-list")
@@ -228,3 +228,24 @@ def create_course(request):
     else:
         form = CourseForm()
     return render(request, "userportal/create_course.html", {"form": form})
+
+
+class CourseOfferingListView(ListView):
+    model = CourseOffering
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    template_name = "userportal/offering_list.html"
+    context_object_name = "offerings"
+    login_url = "login"
+
+    def get_queryset(self):
+        course_id = self.kwargs.get("course_id")
+        return CourseOffering.objects.filter(course_id=course_id).order_by(
+            "-term__start_datetime"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course_id = self.kwargs.get("course_id")
+        course = get_object_or_404(Course, pk=course_id)
+        context["course"] = course
+        return context

@@ -20,6 +20,13 @@ urlpatterns = [
     path("courses/<int:pk>/", views.CourseDetailView.as_view(), name="course-detail"),
     path("courses/create/", views.create_course, name="course-create"),
     path(
-        "course-offerings/<int:pk>/enroll/", views.enroll_course, name="enroll-course"
+        "courses/<int:course_id>/offerings/",
+        views.CourseOfferingListView.as_view(),
+        name="offering-list",
+    ),
+    path(
+        "courses/<int:course_id>/offerings/<int:offering_id>/enroll/",
+        views.enroll_course,
+        name="enroll-course",
     ),
 ]

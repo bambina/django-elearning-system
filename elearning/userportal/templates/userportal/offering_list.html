@@ -1,42 +1,33 @@
 {% extends "./base.html" %}
 {% block content %}
-    <h1>Courses</h1>
+    <h1>Course Offerings</h1>
     <div class="py-3">
-        <form method="get" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
-            <div class="col-12">
-                <label class="visually-hidden">Keywords</label>
-                {{ search_form.keywords }}
-            </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </form>
+        <p>{{ course.title }}</p>
+        <p>by <a href="{% url 'user-detail' course.teacher.user.username %}">{{ course.teacher.user.get_full_name }}</a></p>
     </div>
     <div class="py-3">
         <ul class="list-group list-group-flush">
             <li class="list-group-item list-group-item-primary">
                 <div class="row">
-                    <div class="col">Title</div>
-                    <div class="col">Description</div>
-                    <div class="col">Teacher</div>
+                    <div class="col">Status</div>
+                    <div class="col">Academic Term</div>
+                    <div class="col">Term Dates</div>
                     <div class="col">Actions</div>
                 </div>
             </li>
-            {% for course in courses %}
+            {% for offering in offerings %}
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col">{{ course.title }}</div>
-                        <div class="col text-truncate">{{ course.description }}</div>
+                        <div class="col">{{ offering.status }}</div>
+                        <div class="col">{{ offering.term.get_semester_display }} {{ offering.term.year }}</div>
+                        <div class="col">{{ offering.term.start_datetime|date:"M j, Y" }} - {{ offering.term.end_datetime|date:"M j, Y" }}</div>
                         <div class="col">
-                            {{ course.teacher.user.get_full_name }}
-                        </div>
-                        <div class="col">
-                            <a href="{% url 'course-detail' course.id %}" class="btn btn-primary btn-sm">View</a>
+                            <a href="#" class="btn btn-primary btn-sm">View Details</a>
                         </div>
                     </div>
                 </li>
             {% empty %}
-                <li class="list-group-item">No courses yet.</li>
+                <li class="list-group-item">No course offerings yet.</li>
             {% endfor %}
         </ul>
     </div>
