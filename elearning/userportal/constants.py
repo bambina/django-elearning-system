@@ -19,6 +19,7 @@ ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS = _(
     "Only teachers can create course offerings."
 )
 ERR_DOES_NOT_EXIST = _("The requested {value} does not exist.")
+ERR_NO_CURRENT_OFFERING = _("There is no current offering for this course.")
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")

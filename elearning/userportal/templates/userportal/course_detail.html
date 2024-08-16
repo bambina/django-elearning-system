@@ -34,7 +34,10 @@
 
     {% if is_instructor %}
     <div class="py-3">
-        <a href="{% url 'feedback-list' object.id %}">View Feedbacks</a>
+        <a href="{% url 'student-list' object.id %}">View Currently Enrolled Students</a>
+    </div>
+    <div class="py-3">
+        <a href="{% url 'feedback-list' object.id %}">View Feedback</a>
     </div>
     {% endif %}
 

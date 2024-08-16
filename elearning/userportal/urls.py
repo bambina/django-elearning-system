@@ -34,6 +34,7 @@ urlpatterns = [
         views.enroll_course,
         name="enroll-course",
     ),
-    path("courses/<int:course_id>/feedbacks/create", views.create_feedback, name="feedback-create"),
-    path("courses/<int:course_id>/feedbacks/", views.FeedbackListView.as_view(), name="feedback-list"),
+    path("courses/<int:course_id>/feedback/create", views.create_feedback, name="feedback-create"),
+    path("courses/<int:course_id>/feedback/", views.FeedbackListView.as_view(), name="feedback-list"),
+    path("courses/<int:course_id>/students/", views.EnrolledStudentsListView.as_view(), name="student-list"),
 ]

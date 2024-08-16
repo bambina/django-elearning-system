@@ -364,3 +364,52 @@ class FeedbackListView(ListView):
         course = get_object_or_404(Course, pk=course_id)
         context["course"] = course
         return context
+
+@login_required(login_url="login")
+def view_currently_enrolled_students(request, course_id):
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
+        return redirect("course-list")
+    
+    current_offering = CourseOffering.objects.filter(
+        course=course, term__start_datetime__lte=now(), term__end_datetime__gte=now()
+    ).first()
+
+    if not current_offering:
+        messages.error(request, ERR_NO_CURRENT_OFFERING)
+        return redirect("course-detail", pk=course_id)
+    
+    student_offerings = StudentCourseOffering.objects.filter(
+        offering=current_offering
+    ).select_related('student')
+
+    return render(
+        request, "userportal/student_list.html", {"course": course, "student_offerings": student_offerings}
+    )
+
+class EnrolledStudentsListView(ListView):
+    model = StudentCourseOffering
+    template_name = "userportal/student_list.html"
+    context_object_name = "student_offerings"
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    login_url = "login"
+
+    def get_queryset(self):
+        course_id = self.kwargs.get('course_id')
+
+        current_offering = CourseOffering.objects.filter(
+            course_id=course_id, term__start_datetime__lte=now(), term__end_datetime__gte=now()
+        ).first()
+        
+        return StudentCourseOffering.objects.filter(
+            offering=current_offering
+            ).select_related('student')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course_id = self.kwargs.get('course_id')
+        course = Course.objects.get(pk=course_id)
+        context['course'] = course
+        return context

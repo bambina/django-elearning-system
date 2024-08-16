@@ -1,0 +1,33 @@
+{% extends "./base.html" %}
+{% block content %}
+    <h1>Enrolled Students</h1>
+    <div class="py-3">
+        <p>for {{ course.title }}</p>
+    </div>
+    <div class="py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">
+                <div class="row">
+                    <div class="col">Username</div>
+                    <div class="col">Full Name</div>
+                    <div class="col">Actions</div>
+                </div>
+            </li>
+            {% for so in student_offerings %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col">{{ so.student.user.username }}</div>
+                        <div class="col">{{ so.student.user.get_full_name }}</div>
+                        <div class="col">
+                            <a href="{% url 'user-detail' so.student.user.username %}" class="btn btn-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No students yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% include "./pagination.html" %}
+
+{% endblock %}
