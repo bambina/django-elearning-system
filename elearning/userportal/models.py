@@ -120,13 +120,13 @@ class TeacherProfile(models.Model):
 
 class AcademicTerm(models.Model):
     class SemesterType(models.IntegerChoices):
-        FALL = 1, _('FALL')
-        SPRING = 2, _('SPRING')
+        FALL = 1, _("FALL")
+        SPRING = 2, _("SPRING")
 
     class TermStatus(models.IntegerChoices):
-        NOT_STARTED = 1, _('Not Started')
-        IN_PROGRESS = 2, _('In Progress')
-        ENDED = 3, _('Ended')
+        NOT_STARTED = 1, _("Not Started")
+        IN_PROGRESS = 2, _("In Progress")
+        ENDED = 3, _("Ended")
 
     semester = models.PositiveSmallIntegerField(choices=SemesterType)
     year = models.PositiveSmallIntegerField()
@@ -153,11 +153,9 @@ class AcademicTerm(models.Model):
     @classmethod
     def previous(cls):
         return (
-            cls.objects.filter(end_datetime__lt=now())
-            .order_by("-end_datetime")
-            .first()
+            cls.objects.filter(end_datetime__lt=now()).order_by("-end_datetime").first()
         )
-    
+
     @property
     def status(self):
         current_time = now()
