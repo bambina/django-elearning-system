@@ -57,7 +57,7 @@ class CourseDetailView(DetailView):
                 ).first()
                 if next_offering:
                     context["next_offering"] = next_offering
-                    context["is_enrolled"] = StudentCourseOffering.objects.filter(
+                    context["is_enrolled"] = Enrollment.objects.filter(
                         student=user.student_profile, offering=next_offering
                     ).exists()
 

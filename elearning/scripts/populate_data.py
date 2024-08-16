@@ -240,23 +240,23 @@ previous_offering_2 = CourseOffering.objects.filter(
 ).first()
 
 enrollments = [
-    StudentCourseOffering(student=student_1, offering=next_offering_1),
-    StudentCourseOffering(student=student_1, offering=next_offering_2),
-    StudentCourseOffering(student=student_1, offering=current_offering_1),
-    StudentCourseOffering(student=student_1, offering=current_offering_2),
-    StudentCourseOffering(student=student_2, offering=current_offering_1),
-    StudentCourseOffering(student=student_2, offering=current_offering_2),
-    StudentCourseOffering(student=student_3, offering=current_offering_1),
-    StudentCourseOffering(student=student_3, offering=current_offering_2),
-    StudentCourseOffering(student=student_1, offering=previous_offering_1, grade=StudentCourseOffering.Grade.FAIL),
-    StudentCourseOffering(student=student_1, offering=previous_offering_2, grade=StudentCourseOffering.Grade.FAIL),
-    StudentCourseOffering(student=student_2, offering=previous_offering_1, grade=StudentCourseOffering.Grade.PASS),
-    StudentCourseOffering(student=student_2, offering=previous_offering_2, grade=StudentCourseOffering.Grade.PASS),
-    StudentCourseOffering(student=student_3, offering=previous_offering_1, grade=StudentCourseOffering.Grade.PASS),
-    StudentCourseOffering(student=student_3, offering=previous_offering_2, grade=StudentCourseOffering.Grade.PASS),
+    Enrollment(student=student_1, offering=next_offering_1),
+    Enrollment(student=student_1, offering=next_offering_2),
+    Enrollment(student=student_1, offering=current_offering_1),
+    Enrollment(student=student_1, offering=current_offering_2),
+    Enrollment(student=student_2, offering=current_offering_1),
+    Enrollment(student=student_2, offering=current_offering_2),
+    Enrollment(student=student_3, offering=current_offering_1),
+    Enrollment(student=student_3, offering=current_offering_2),
+    Enrollment(student=student_1, offering=previous_offering_1, grade=Enrollment.Grade.FAIL),
+    Enrollment(student=student_1, offering=previous_offering_2, grade=Enrollment.Grade.FAIL),
+    Enrollment(student=student_2, offering=previous_offering_1, grade=Enrollment.Grade.PASS),
+    Enrollment(student=student_2, offering=previous_offering_2, grade=Enrollment.Grade.PASS),
+    Enrollment(student=student_3, offering=previous_offering_1, grade=Enrollment.Grade.PASS),
+    Enrollment(student=student_3, offering=previous_offering_2, grade=Enrollment.Grade.PASS),
 ]
 
-StudentCourseOffering.objects.bulk_create(enrollments)
+Enrollment.objects.bulk_create(enrollments)
 total_records += len(enrollments)
 
 feedbacks = [

@@ -55,7 +55,7 @@ class FeedbackListView(ListView):
         course_id = self.kwargs.get("course_id")
 
         latest_grade = (
-            StudentCourseOffering.objects.filter(
+            Enrollment.objects.filter(
                 student=OuterRef("student"),
                 offering__course_id=course_id,
                 offering__term__end_datetime__lt=now(),
@@ -69,8 +69,8 @@ class FeedbackListView(ListView):
             .annotate(
                 grade=Subquery(latest_grade),
                 grade_display=Case(
-                    When(grade=StudentCourseOffering.Grade.PASS, then=Value("Pass")),
-                    When(grade=StudentCourseOffering.Grade.FAIL, then=Value("Fail")),
+                    When(grade=Enrollment.Grade.PASS, then=Value("Pass")),
+                    When(grade=Enrollment.Grade.FAIL, then=Value("Fail")),
                     default=Value("Not Graded"),
                 ),
             )

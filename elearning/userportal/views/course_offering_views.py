@@ -18,7 +18,7 @@ def enroll_course(request, course_id, offering_id):
 
     try:
         offering = CourseOffering.objects.get(id=offering_id)
-        _, created = StudentCourseOffering.objects.get_or_create(
+        _, created = Enrollment.objects.get_or_create(
             student=request.user.student_profile, offering=offering
         )
         if created:

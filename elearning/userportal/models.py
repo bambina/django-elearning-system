@@ -83,6 +83,9 @@ class PortalUser(AbstractUser):
         else:
             return super().__str__()
 
+    class Meta:
+        ordering = ["username"]
+
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(
@@ -194,6 +197,9 @@ class Course(models.Model):
         "TeacherProfile", on_delete=models.CASCADE, related_name="courses"
     )
 
+    class Meta:
+        ordering = ["title"]
+
     def __str__(self):
         return self.title
 
@@ -213,7 +219,7 @@ class CourseOffering(models.Model):
         return f"{self.course} ({self.term})"
 
 
-class StudentCourseOffering(models.Model):
+class Enrollment(models.Model):
     class Grade(models.IntegerChoices):
         NOT_GRADED = 1, _("Not Graded")
         PASS = 2, _("Pass")
@@ -258,7 +264,7 @@ class StudentCourseOffering(models.Model):
                     )
                 }
             )
-        if StudentCourseOffering.objects.filter(
+        if Enrollment.objects.filter(
             student=self.student, offering=self.offering
         ).exists():
             raise ValidationError(

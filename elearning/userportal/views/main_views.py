@@ -4,6 +4,7 @@ from django.contrib import messages
 from ..models import *
 from ..forms import *
 
+
 def index(request):
     context = {
         "somedata": "Hello, world!",
@@ -35,9 +36,9 @@ def home(request):
     # Get student's courses
     if request.user.is_student():
         student = request.user.student_profile
-        student_offerings = StudentCourseOffering.objects.filter(
-            student=student
-        ).select_related("offering", "offering__course", "offering__term")
+        student_offerings = Enrollment.objects.filter(student=student).select_related(
+            "offering", "offering__course", "offering__term"
+        )
 
         context["upcoming_offerings"] = []
         context["current_offerings"] = []

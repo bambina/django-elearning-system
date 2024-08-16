@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 class EnrolledStudentsListView(ListView):
-    model = StudentCourseOffering
+    model = Enrollment
     template_name = "userportal/student_list.html"
     context_object_name = "student_offerings"
     paginate_by = settings.PAGINATION_PAGE_SIZE
@@ -20,9 +20,9 @@ class EnrolledStudentsListView(ListView):
             term__end_datetime__gte=now(),
         ).first()
 
-        return StudentCourseOffering.objects.filter(
-            offering=current_offering
-        ).select_related("student")
+        return Enrollment.objects.filter(offering=current_offering).select_related(
+            "student"
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
