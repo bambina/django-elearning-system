@@ -23,7 +23,7 @@ PortalUser.objects.all().delete()
 AcademicTerm.objects.all().delete()
 Course.objects.all().delete()
 
-COMMON_PASSWORD = "abc123"
+COMMON_PASSWORD = "abc"
 
 # Create a superuser
 PortalUser.objects.create_superuser(
@@ -114,6 +114,12 @@ student_profiles = [
         registration_date="2024-01-01",
         registration_expiry_date="2030-01-01",
     ),
+    StudentProfile(
+        user=PortalUser.objects.get(username="student3"),
+        program=program,
+        registration_date="2022-01-01",
+        registration_expiry_date="2028-01-01",
+    ),
 ]
 
 StudentProfile.objects.bulk_create(student_profiles)
@@ -203,6 +209,8 @@ CourseOffering.objects.bulk_create(course_offerings)
 total_records += len(course_offerings)
 
 student_1 = StudentProfile.objects.get(user__username="student1")
+student_2 = StudentProfile.objects.get(user__username="student2")
+student_3 = StudentProfile.objects.get(user__username="student3")
 course_1 = Course.objects.get(title="Introduction to Computer Science")
 course_2 = Course.objects.get(title="Data Structures and Algorithms")
 
@@ -236,11 +244,45 @@ enrollments = [
     StudentCourseOffering(student=student_1, offering=next_offering_2),
     StudentCourseOffering(student=student_1, offering=current_offering_1),
     StudentCourseOffering(student=student_1, offering=current_offering_2),
-    StudentCourseOffering(student=student_1, offering=previous_offering_1),
-    StudentCourseOffering(student=student_1, offering=previous_offering_2),
+    StudentCourseOffering(student=student_1, offering=previous_offering_1, grade=StudentCourseOffering.Grade.FAIL),
+    StudentCourseOffering(student=student_1, offering=previous_offering_2, grade=StudentCourseOffering.Grade.FAIL),
+    StudentCourseOffering(student=student_2, offering=previous_offering_1, grade=StudentCourseOffering.Grade.PASS),
+    StudentCourseOffering(student=student_2, offering=previous_offering_2, grade=StudentCourseOffering.Grade.PASS),
+    StudentCourseOffering(student=student_3, offering=previous_offering_1, grade=StudentCourseOffering.Grade.PASS),
+    StudentCourseOffering(student=student_3, offering=previous_offering_2, grade=StudentCourseOffering.Grade.PASS),
 ]
 
 StudentCourseOffering.objects.bulk_create(enrollments)
 total_records += len(enrollments)
+
+feedbacks = [
+    Feedback(
+        student=student_1,
+        course=course_1,
+        comments="I directly applied the concepts and skills I learned from my courses to an exciting new project at work.",
+    ),
+    Feedback(
+        student=student_1,
+        course=course_2,
+        comments="I directly applied the concepts and skills I learned from my courses to an exciting new project at work.",
+    ),
+    Feedback(
+        student=student_2,
+        course=course_1,
+        comments="To be able to take courses at my own pace and rhythm has been an amazing experience. I can learn whenever it fits my schedule and mood.",
+    ),
+    Feedback(
+        student=student_2,
+        course=course_2,
+        comments="To be able to take courses at my own pace and rhythm has been an amazing experience. I can learn whenever it fits my schedule and mood.",
+    ),
+    Feedback(
+        student=student_3,
+        course=course_1,
+        comments="Taking this course was an important step in my career. I could readily see the practical application of some of what we studied and strengthen my theoretical understanding of algorithms and frameworks used at work. Interacting with professors and course mates was inspiring and generated new intuitions and ideas.",
+    )
+]
+Feedback.objects.bulk_create(feedbacks)
+total_records += len(feedbacks)
 
 print(f"Total records created: {total_records}")

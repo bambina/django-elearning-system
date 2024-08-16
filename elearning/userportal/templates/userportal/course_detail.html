@@ -34,7 +34,7 @@
 
     {% if is_instructor %}
     <div class="py-3">
-        Link to feedback
+        <a href="{% url 'feedback-list' object.id %}">View Feedbacks</a>
     </div>
     {% endif %}
 

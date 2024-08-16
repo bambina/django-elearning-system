@@ -7,7 +7,7 @@ from .models import *
 from .forms import *
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef, Case, When, Value
 from django.views.decorators.http import require_POST
 from django.conf import settings
 
@@ -331,3 +331,36 @@ def create_feedback(request, course_id):
     return render(
         request, "userportal/create_feedback.html", {"form": form, "course": course}
     )
+
+
+class FeedbackListView(ListView):
+    model = Feedback
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    template_name = "userportal/feedback_list.html"
+    context_object_name = "feedbacks"
+    login_url = "login"
+
+    def get_queryset(self):
+        course_id = self.kwargs.get("course_id")
+
+        latest_grade = StudentCourseOffering.objects.filter(
+            student=OuterRef("student"),
+            offering__course_id=course_id,
+            offering__term__end_datetime__lt=now(),
+        ).order_by("-offering__term__end_datetime").values("grade")[:1]
+
+        return Feedback.objects.filter(course_id=course_id).annotate(
+            grade=Subquery(latest_grade),
+            grade_display=Case(
+                When(grade=StudentCourseOffering.Grade.PASS, then=Value('Pass')),
+                When(grade=StudentCourseOffering.Grade.FAIL, then=Value('Fail')),
+                default=Value("Not Graded"),
+            )
+        ).select_related("student").order_by("-updated_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course_id = self.kwargs.get("course_id")
+        course = get_object_or_404(Course, pk=course_id)
+        context["course"] = course
+        return context
