@@ -1,81 +1,64 @@
-{% extends "./base.html" %}
+{% extends "./common/base.html" %}
 {% block content %}
-    <div class="container py-3">
-        <h1>Users</h1>
-        <div class="py-3">
-            <form method="get">
-                {% for field in search_form %}
-                <div class="row mb-3">
-                    <div class="col-md-2">
-                        {{ field.label_tag }}
-                    </div>
-                    <div class="col-md-10">
-                        {% if field.name == "user_type" %}
-                            {% for choice in field %}
-                                <div class="form-check form-check-inline">
-                                    {{ choice.tag }}
-                                    {{ choice.choice_label }}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            {{ field }}
-                        {% endif %}
-                    </div>
+    <h1>Users</h1>
+    <div class="py-3">
+        <form method="get">
+            {% for field in search_form %}
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    {{ field.label_tag }}
                 </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
-        <div class="py-3">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item list-group-item-primary">
+                <div class="col-md-10">
+                    {% if field.name == "user_type" %}
+                        {% for choice in field %}
+                            <div class="form-check form-check-inline">
+                                {{ choice.tag }}
+                                {{ choice.choice_label }}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <div class="py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">
+                <div class="row">
+                    <div class="col">Username</div>
+                    <div class="col">Fullname</div>
+                    <div class="col">User Type</div>
+                    <div class="col">Actions</div>
+                </div>
+            </li>
+            {% for user_item in users %}
+                <li class="list-group-item">
                     <div class="row">
-                        <div class="col">Username</div>
-                        <div class="col">Fullname</div>
-                        <div class="col">User Type</div>
-                        <div class="col">Actions</div>
+                        <div class="col">{{ user_item.username }}</div>
+                        <div class="col">{{ user_item.get_full_name }}</div>
+                        <div class="col">
+                            {% if user_item.is_student %}
+                                Student
+                            {% else %}
+                                Teacher
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <a href="{% url 'user-detail' user_item.username %}" class="btn btn-primary btn-sm">View</a>
+                            {% if user_item.is_student %}
+                                <button class="btn btn-danger btn-sm">Deactivate</button>
+                            {% endif %}
+                        </div>
                     </div>
                 </li>
-                {% for user_item in users %}
-                    <li class="list-group-item">
-                        <div class="row">
-                            <div class="col">{{ user_item.username }}</div>
-                            <div class="col">{{ user_item.get_full_name }}</div>
-                            <div class="col">
-                                {% if user_item.is_student %}
-                                    Student
-                                {% else %}
-                                    Teacher
-                                {% endif %}
-                            </div>
-                            <div class="col">
-                                <a href="{% url 'user-detail' user_item.username %}" class="btn btn-primary btn-sm">View</a>
-                                {% if user_item.is_student %}
-                                    <button class="btn btn-danger btn-sm">Deactivate</button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </li>
-                {% empty %}
-                    <li class="list-group-item">No users yet.</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="py-3">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous%}
-                        <li class="page-item">
-                            <a class="page-link {% if page_obj.number == 1 %}disables{% endif %}" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                        </li>
-                    {% endif %}
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link {% if page_obj.number == page_obj.paginator.num_pages %}disables{% endif %}" href="?page={{ page_obj.next_page_number }}">Next</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
+            {% empty %}
+                <li class="list-group-item">No users yet.</li>
+            {% endfor %}
+        </ul>
     </div>
+    {% include "./common/pagination.html" %}
 {% endblock %}

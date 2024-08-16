@@ -1,14 +1,14 @@
+{% extends "../userportal/common/base.html" %}
 
-{% extends "../userportal/base.html" %}
 {% block content %}
-    <div class="container">
-        <h2>Register as a Student</h2>
-        <p>Please fill out the forms below to create a new student account.</p>
-        <form method="post">
-            {% csrf_token %}
-            {{ student_form.as_p }}
-            {{ student_profile_form.as_p }}
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
-    </div>
+
+<h2>Register as a Student</h2>
+<p>Please fill out the forms below to create a new student account.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ student_form.as_p }}
+    {{ student_profile_form.as_p }}
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
 {% endblock %}

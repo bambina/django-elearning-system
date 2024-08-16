@@ -1,4 +1,4 @@
-{% extends "../userportal/base.html" %}
+{% extends "../userportal/common/base.html" %}
 
 {% block content %}
 
@@ -11,12 +11,11 @@
     {% endif %}
 {% endif %}
 
-<div class="container">
-  <h2>Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
-</div>
+<h2>Login</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
 {% endblock %}
