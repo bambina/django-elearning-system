@@ -249,7 +249,7 @@ def create_course(request):
             return redirect("course-detail", pk=course.pk)
     else:
         form = CourseForm()
-    return render(request, "userportal/create_course.html", {"form": form})
+    return render(request, "userportal/course_create.html", {"form": form})
 
 
 class CourseOfferingListView(ListView):
@@ -295,7 +295,7 @@ def create_course_offering(request, course_id):
     else:
         form = CourseOfferingForm(course=course)
     return render(
-        request, "userportal/create_offering.html", {"form": form, "course": course}
+        request, "userportal/offering_create.html", {"form": form, "course": course}
     )
 
 @login_required(login_url="login")
@@ -329,7 +329,7 @@ def create_feedback(request, course_id):
     else:
         form = FeedbackForm(instance=feedback)
     return render(
-        request, "userportal/create_feedback.html", {"form": form, "course": course}
+        request, "userportal/feedback_create.html", {"form": form, "course": course}
     )
 
 
