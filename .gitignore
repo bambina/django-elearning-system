@@ -1,5 +1,6 @@
 bin/
 include/
+media/
 image_store/images/
 image_store/celery.pid
 *.prof

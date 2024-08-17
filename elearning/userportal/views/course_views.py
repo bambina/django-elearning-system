@@ -6,6 +6,7 @@ from ..forms import *
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from django.conf import settings
+from django.http import FileResponse
 
 
 class CourseListView(ListView):
@@ -90,3 +91,70 @@ def create_course(request):
     else:
         form = CourseForm()
     return render(request, "userportal/course_create.html", {"form": form})
+
+
+@login_required(login_url="login")
+def create_material(request, course_id):
+    if not request.user.is_teacher():
+        messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_MATERIALS)
+        return redirect("course-list")
+
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
+        return redirect("course-list")
+
+    if request.method == "POST":
+        form = MaterialForm(request.POST, request.FILES)
+        if form.is_valid():
+            material = form.save(commit=False)
+            material.course = course
+            material.save()
+            return redirect("course-detail", pk=course_id)
+    else:
+        form = MaterialForm()
+    return render(
+        request, "userportal/material_create.html", {"course": course, "form": form}
+    )
+
+
+class MaterialListView(ListView):
+    model = Material
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    template_name = "userportal/material_list.html"
+    context_object_name = "materials"
+    login_url = "login"
+
+    def get_queryset(self):
+        course_id = self.kwargs.get("course_id")
+        return Material.objects.filter(course_id=course_id).only("id", "title", "file")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["course"] = Course.objects.get(pk=self.kwargs.get("course_id"))
+        return context
+
+
+def download_material(request, course_id, material_id):
+    try:
+        course = Course.objects.get(pk=course_id)
+    except Course.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
+        return redirect("course-list")
+
+    try:
+        material = Material.objects.get(pk=material_id)
+    except Material.DoesNotExist:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Material"))
+        return redirect("material-list", course_id=course_id)
+
+    if not material.file:
+        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Material file"))
+        return redirect("material-list", course_id=course_id)
+
+    response = FileResponse(material.file, as_attachment=True)
+    response["Content-Disposition"] = (
+        f'attachment; filename="{material.original_filename}"'
+    )
+    return response

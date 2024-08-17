@@ -124,3 +124,20 @@ class FeedbackForm(forms.ModelForm):
                 }
             ),
         }
+
+
+class MaterialForm(forms.ModelForm):
+    class Meta:
+        model = Material
+        fields = ["title", "description", "file"]
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter a brief description of the file.",
+                    "rows": 5,
+                }
+            ),
+            "file": forms.FileInput(attrs={"class": "form-control"}),
+        }

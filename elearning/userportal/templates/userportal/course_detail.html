@@ -28,7 +28,7 @@
 
     {% if is_taking or is_instructor %}
     <div class="py-3">
-        Link to materials
+        <a href="{% url 'material-list' object.id %}">View Materials</a>
     </div>
     {% endif %}
 

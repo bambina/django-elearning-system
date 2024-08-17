@@ -65,4 +65,19 @@ urlpatterns = [
         enrollment_views.EnrolledStudentsListView.as_view(),
         name="student-list",
     ),
+    path(
+        "courses/<int:course_id>/materials/",
+        course_views.MaterialListView.as_view(),
+        name="material-list",
+    ),
+    path(
+        "courses/<int:course_id>/materials/create/",
+        course_views.create_material,
+        name="material-create",
+    ),
+    path(
+        "courses/<int:course_id>/materials/<int:material_id>/download/",
+        course_views.download_material,
+        name="material-download",
+    ),
 ]

@@ -12,7 +12,7 @@ class Command(BaseCommand):
     FEEDBACK_COMMENTS = [
         "I directly applied the concepts and skills I learned from my courses to an exciting new project at work.",
         "To be able to take courses at my own pace and rhythm has been an amazing experience. I can learn whenever it fits my schedule and mood.",
-        "Taking this course was an important step in my career. I could readily see the practical application of some of what we studied and strengthen my theoretical understanding of algorithms and frameworks used at work. Interacting with professors and course mates was inspiring and generated new intuitions and ideas."
+        "Taking this course was an important step in my career. I could readily see the practical application of some of what we studied and strengthen my theoretical understanding of algorithms and frameworks used at work. Interacting with professors and course mates was inspiring and generated new intuitions and ideas.",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -288,7 +288,7 @@ class Command(BaseCommand):
         feedbacks = []
         ended_enrollments = Enrollment.objects.filter(
             offering__term__end_datetime__lt=timezone.now()
-        ).select_related('student', 'offering__course')
+        ).select_related("student", "offering__course")
 
         for i, enrollment in enumerate(ended_enrollments):
             comment_no = i % len(self.FEEDBACK_COMMENTS)

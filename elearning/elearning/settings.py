@@ -140,3 +140,7 @@ MESSAGE_TAGS = {
 }
 
 PAGINATION_PAGE_SIZE = 2
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR / "media"

@@ -5,9 +5,11 @@ from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils.translation import gettext as _
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
+from django.core.validators import FileExtensionValidator
 
 from .constants import *
 from .validators import *
+from .utils import path_and_rename
 
 
 class Program(models.Model):
@@ -297,3 +299,31 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"{self.student} ({self.course})"
+
+
+class Material(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    original_filename = models.CharField(max_length=255, blank=True)
+    file = models.FileField(
+        upload_to=path_and_rename,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["pdf", "jpg", "png", "jpeg"]),
+            file_size_validator,
+        ],
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    course = models.ForeignKey(
+        "Course", on_delete=models.CASCADE, related_name="materials"
+    )
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.original_filename = self.file.name
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title

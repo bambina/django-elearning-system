@@ -18,6 +18,7 @@ ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS = _(
     "Only teachers can create course offerings."
 )
+ERR_ONLY_TEACHERS_CAN_CREATE_MATERIALS = _("Only teachers can create materials.")
 ERR_DOES_NOT_EXIST = _("The requested {value} does not exist.")
 ERR_NO_CURRENT_OFFERING = _("There is no current offering for this course.")
 

@@ -1,0 +1,38 @@
+{% extends "./common/base.html" %}
+{% block content %}
+    <h1>Materials</h1>
+    <div class="py-3">
+        <p>{{ course.title }} - Lectures by <a href="{% url 'user-detail' course.teacher.user.username %}">{{ course.teacher.user.get_full_name }}</a></p>
+    </div>
+
+    <a href="{% url 'material-create' course.id %}">Upload New Material</a>
+
+    <div class="py-3">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item list-group-item-primary">
+                <div class="row">
+                    <div class="col">Title</div>
+                    <div class="col">Description</div>
+                    <div class="col">Date Added</div>
+                    <div class="col">Actions</div>
+                </div>
+            </li>
+            {% for material in materials %}
+                <li class="list-group-item">
+                    <div class="row">
+                        <div class="col">{{ material.title }}</div>
+                        <div class="col">{{ material.description }}</div>
+                        <div class="col">{{ material.uploaded_at|date:"M j, Y" }}</div>
+                        <div class="col">
+                            <a href="{% url 'material-download' course.id material.id %}" class="btn btn-primary btn-sm">Download</a>
+                        </div>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No materials yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% include "./common/pagination.html" %}
+
+{% endblock %}
