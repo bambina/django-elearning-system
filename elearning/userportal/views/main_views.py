@@ -4,6 +4,9 @@ from django.contrib import messages
 from ..models import *
 from ..forms import *
 
+from django.views.generic import ListView
+from django.conf import settings
+
 
 def index(request):
     context = {
@@ -53,3 +56,28 @@ def home(request):
                 context["past_offerings"].append(so.offering)
 
     return render(request, "userportal/home.html", context)
+
+
+class NotificationListView(ListView):
+    model = Notification
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    template_name = "userportal/notification_list.html"
+    context_object_name = "notifications"
+    login_url = "login"
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by(
+            "-created_at"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        page_obj = context.get("page_obj")
+        if page_obj:
+            # TODO:
+            # Asynchronously mark notifications as read
+            for notification in page_obj.object_list:
+                if not notification.is_read:
+                    notification.is_read = True
+                    notification.save()
+        return context

@@ -327,3 +327,20 @@ class Material(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Notification(models.Model):
+    user = models.ForeignKey(
+        "PortalUser", on_delete=models.CASCADE, related_name="notifications"
+    )
+    message = models.TextField(max_length=500)
+    link_path = models.CharField(max_length=100, blank=True, null=True)
+    link_text = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} ({self.message[:20]}...)"

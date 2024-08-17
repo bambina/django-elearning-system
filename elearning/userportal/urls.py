@@ -14,6 +14,11 @@ from django.contrib.auth.decorators import login_required
 urlpatterns = [
     path("", main_views.index, name="index"),
     path("home/", main_views.home, name="home"),
+    path(
+        "notifications/",
+        main_views.NotificationListView.as_view(),
+        name="notification-list",
+    ),
     path("signup/", registration_views.signup, name="signup"),
     path("login/", auth_views.LoginView.as_view(), name="login"),
     path(
