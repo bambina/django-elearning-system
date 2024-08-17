@@ -7,6 +7,8 @@ from ..forms import *
 from django.views.generic import ListView
 from django.conf import settings
 
+from ..tasks import mark_notification_as_read
+
 
 def index(request):
     context = {
@@ -74,10 +76,8 @@ class NotificationListView(ListView):
         context = super().get_context_data(**kwargs)
         page_obj = context.get("page_obj")
         if page_obj:
-            # TODO:
-            # Asynchronously mark notifications as read
             for notification in page_obj.object_list:
                 if not notification.is_read:
-                    notification.is_read = True
-                    notification.save()
+                    # Asynchronously mark notifications as read
+                    mark_notification_as_read.delay(notification.id)
         return context

@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.http import FileResponse
 from django.urls import reverse
+from ..tasks import create_notifications_for_enrolled_students
 
 
 class CourseListView(ListView):
@@ -113,19 +114,13 @@ def create_material(request, course_id):
             material.course = course
             material.save()
 
-            # Notify students enrolled in the course
-            # TODO:
-            # Asynchronously send notifications to students
-            students = StudentProfile.objects.filter(
-                courses__offering__course=course,
-                courses__offering__term=AcademicTerm.current(),
-            ).only("user")
-            users = [student.user for student in students]
-            link_path = reverse("material-list", kwargs={"course_id": course_id})
-            link_text = "View Materials"
-            message = f"A new material '{material.title}' has been added to the course '{course.title}'."
-            send_notification(users, message, link_path, link_text)
-
+            # Asynchronously send notifications to students enrolled in the course
+            create_notifications_for_enrolled_students.delay(
+                course_id,
+                f"A new material '{material.title}' has been added to the course '{course.title}'.",
+                reverse("material-list", kwargs={"course_id": course_id}),
+                "View Materials",
+            )
             messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
             return redirect("course-detail", pk=course_id)
     else:
@@ -133,13 +128,6 @@ def create_material(request, course_id):
     return render(
         request, "userportal/material_create.html", {"course": course, "form": form}
     )
-
-
-def send_notification(users, message, link_path, link_text):
-    for user in users:
-        Notification.objects.create(
-            user=user, message=message, link_path=link_path, link_text=link_text
-        )
 
 
 class MaterialListView(ListView):
