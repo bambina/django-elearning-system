@@ -115,11 +115,15 @@ def create_material(request, course_id):
             material.save()
 
             # Asynchronously send notifications to students enrolled in the course
+            message = MATERIAL_CREATED_NOTIFICATION_MSG % {
+                "material_title": material.title,
+                "course_title": course.title
+            }
             create_notifications_for_enrolled_students.delay(
                 course_id,
-                f"A new material '{material.title}' has been added to the course '{course.title}'.",
+                message,
                 reverse("material-list", kwargs={"course_id": course_id}),
-                "View Materials",
+                MATERIAL_CREATED_NOTIFICATION_LINK_TEXT,
             )
             messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
             return redirect("course-detail", pk=course_id)

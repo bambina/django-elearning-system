@@ -37,3 +37,9 @@ UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")
 ENROLL_COURSE_SUCCESS_MSG = _("You have successfully enrolled in the course.")
 SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")
 MATERIAL_CREATED_SUCCESS_MSG = _("The material has been created successfully.")
+
+# Notification messages
+MATERIAL_CREATED_NOTIFICATION_MSG = _(
+    "A new material '%(material_title)s' has been added to the course %(course_title)s."
+)
+MATERIAL_CREATED_NOTIFICATION_LINK_TEXT = _("View material")
