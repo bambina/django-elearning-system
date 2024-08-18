@@ -339,6 +339,20 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
+    def clean(self):
+        # Ensure that both link_path and link_text are provided together
+        if (self.link_path or self.link_text) and not (
+            self.link_path and self.link_text
+        ):
+            raise ValidationError(
+                {
+                    "link_path": ValidationError(
+                        f"{INVALID_VALUE_MSG} {ERR_MISSING_NOTIFICATION_LINK}",
+                        code=VALIDATION_ERR_INVALID,
+                    )
+                }
+            )
+
     class Meta:
         ordering = ["-created_at"]
 
