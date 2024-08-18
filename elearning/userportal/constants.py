@@ -28,6 +28,10 @@ ERR_MISSING_NOTIFICATION_LINK = _(
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
 
+# Info messages
+USER_ALREADY_DEACTIVATED_MSG = _("User {username} is already deactivated.")
+USER_ALREADY_ACTIVATED_MSG = _("User {username} is already activated.")
+
 # Success messages
 CREATE_STUDENT_ACCOUNT_SUCCESS_MSG = _(
     "You have successfully created a student account."
@@ -37,6 +41,8 @@ UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")
 ENROLL_COURSE_SUCCESS_MSG = _("You have successfully enrolled in the course.")
 SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")
 MATERIAL_CREATED_SUCCESS_MSG = _("The material has been created successfully.")
+DEACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully deactivated.")
+ACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully activated.")
 
 # Notification messages
 MATERIAL_CREATED_NOTIFICATION_MSG = _(

@@ -4,10 +4,14 @@ from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.conf import settings
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 
 
 class UserDetailView(DetailView):
-    models = PortalUser
+    models = get_user_model()
     template_name = "userportal/user_detail.html"
     slug_field = "username"
     slug_url_kwarg = "username"
@@ -15,19 +19,21 @@ class UserDetailView(DetailView):
 
     def get_object(self):
         username = self.kwargs.get("username")
-        return get_object_or_404(PortalUser, username=username)
+        return get_object_or_404(get_user_model(), username=username)
 
 
 class UserListView(ListView):
-    model = PortalUser
+    model = get_user_model()
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/user_list.html"
     context_object_name = "users"
     login_url = "login"
 
     def get_queryset(self):
-        queryset = PortalUser.objects.filter(is_staff=False, is_superuser=False).only(
-            "id", "username", "user_type"
+        queryset = (
+            get_user_model()
+            .objects.filter(is_staff=False, is_superuser=False)
+            .only("id", "username", "user_type")
         )
         keywords = self.request.GET.get("keywords")
         user_types = self.request.GET.getlist("user_type")
@@ -50,3 +56,29 @@ class UserListView(ListView):
         context = super().get_context_data(**kwargs)
         context["search_form"] = UserSearchForm(self.request.GET or None)
         return context
+
+
+@login_required(login_url="login")
+# @permission_required('auth.change_user', raise_exception=True)
+def deactivate_user(request, username):
+    user = get_object_or_404(get_user_model(), username=username)
+    if user.is_active:
+        user.is_active = False
+        user.save()
+        messages.success(request, DEACTIVATE_USER_SUCCESS_MSG.format(username=username))
+    else:
+        messages.info(request, USER_ALREADY_DEACTIVATED_MSG.format(username=username))
+    return redirect("user-list")
+
+
+@login_required(login_url="login")
+# @permission_required('auth.change_user', raise_exception=True)
+def activate_user(request, username):
+    user = get_object_or_404(get_user_model(), username=username)
+    if user.is_active:
+        messages.info(request, USER_ALREADY_ACTIVATED_MSG.format(username=username))
+    else:
+        user.is_active = True
+        user.save()
+        messages.success(request, ACTIVATE_USER_SUCCESS_MSG.format(username=username))
+    return redirect("user-list")

@@ -33,6 +33,14 @@ urlpatterns = [
     path(
         "users/<str:username>/", user_views.UserDetailView.as_view(), name="user-detail"
     ),
+    path(
+        "users/<str:username>/deactivate/",
+        user_views.deactivate_user,
+        name="user-deactivate",
+    ),
+    path(
+        "users/<str:username>/activate/", user_views.activate_user, name="user-activate"
+    ),
     path("courses/", course_views.CourseListView.as_view(), name="course-list"),
     path(
         "courses/<int:pk>/",

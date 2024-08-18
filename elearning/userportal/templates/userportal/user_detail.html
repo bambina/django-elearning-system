@@ -1,6 +1,11 @@
 {% extends "./common/base.html" %}
 {% block content %}
     <h1>User Profile</h1>
+    {% if user.is_teacher and not object.is_active %}
+        <div class="alert alert-danger" role="alert">
+            This user is deactivated.
+        </div>
+    {% endif %}
     <div class="py-3">
         {% if object.is_student %}
             <strong class="d-inline-block mb-2 text-success-emphasis">Student</strong>

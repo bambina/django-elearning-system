@@ -117,7 +117,7 @@ def create_material(request, course_id):
             # Asynchronously send notifications to students enrolled in the course
             message = MATERIAL_CREATED_NOTIFICATION_MSG % {
                 "material_title": material.title,
-                "course_title": course.title
+                "course_title": course.title,
             }
             create_notifications_for_enrolled_students.delay(
                 course_id,
