@@ -13,7 +13,7 @@
 
     {% if next_offering and not is_enrolled %}
     <div class="py-3">
-        <form method="post" action="{% url 'enroll-course' course_id=object.id offering_id=next_offering.id %}">
+        <form method="post" action="{% url 'course-enroll' course_id=object.id offering_id=next_offering.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary"><span class="h4 font-weight-bold">Enroll Now</span><br>Starts {{ next_offering.term.start_datetime|date:"M j" }}</button>
         </form>
