@@ -21,7 +21,7 @@ def send_notifications(
     users: list[PortalUser], message: str, link_path: str = None, link_text: str = None
 ):
     """
-    Sends notifications to a list of users
+    Sends notifications to users
     """
     notifications = [
         Notification(
@@ -33,10 +33,8 @@ def send_notifications(
 
 
 @shared_task
-def mark_notification_as_read(notification_id):
+def mark_notifications_as_read(notification_ids):
     """
     A task to mark a notification as read.
     """
-    notification = Notification.objects.get(id=notification_id)
-    notification.is_read = True
-    notification.save()
+    Notification.objects.filter(id__in=notification_ids).update(is_read=True)
