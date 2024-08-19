@@ -6,7 +6,6 @@ from .views import (
     course_views,
     course_offering_views,
     feedback_views,
-    enrollment_views,
 )
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required

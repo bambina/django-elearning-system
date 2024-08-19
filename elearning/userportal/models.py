@@ -52,8 +52,8 @@ class PortalUserManager(UserManager):
 
 class PortalUser(AbstractUser):
     class UserType(models.IntegerChoices):
-        TEACHER = 1
-        STUDENT = 2
+        TEACHER = 1, _("Teacher")
+        STUDENT = 2, _("Student")
 
     class Title(models.TextChoices):
         PREFER_NOT_TO_SAY = ""

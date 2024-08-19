@@ -16,7 +16,6 @@ class CourseListView(ListView):
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/course_list.html"
     context_object_name = "courses"
-    login_url = "login"
 
     def get_queryset(self):
         queryset = Course.objects.all().only("id", "title", "description")
@@ -38,12 +37,15 @@ class CourseListView(ListView):
 class CourseDetailView(DetailView):
     model = Course
     template_name = "userportal/course_detail.html"
-    login_url = "login"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        course = self.object
         user = self.request.user
+
+        if user.is_anonymous:
+            return context
+
+        course = self.object
         if user.is_student():
             current_term = AcademicTerm.current()
             if current_term:
@@ -173,6 +175,7 @@ def download_material(request, course_id, material_id):
         f'attachment; filename="{material.original_filename}"'
     )
     return response
+
 
 class EnrolledStudentListView(ListView):
     model = Enrollment

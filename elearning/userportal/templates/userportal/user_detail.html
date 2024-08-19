@@ -2,43 +2,33 @@
 {% block content %}
     <h1>User Profile</h1>
     {% if user.is_teacher and not object.is_active %}
-        <div class="alert alert-danger" role="alert">
-            This user is deactivated.
-        </div>
+    <div class="alert alert-danger" role="alert">
+        This user is deactivated.
+    </div>
     {% endif %}
     <div class="py-3">
-        {% if object.is_student %}
-            <strong class="d-inline-block mb-2 text-success-emphasis">Student</strong>
-        {% elif object.is_teacher %}
-            <strong class="d-inline-block mb-2 text-primary-emphasis">Teacher</strong>
-        {% endif %}
-        <h1>{{ object.get_full_name }}</h1>
-
-        <ul class="list-unstyled mt-3 mb-4">
-            <li>{{ object.username }}</li>
-            {% if object.is_student %}
-                <li>{{ object.student_profile.status }}</li>
-            {% endif %}
-        </ul>
+        <strong class="d-inline-block mb-3 text-primary-emphasis">{{ object.get_user_type_display }}</strong>
+        <h1 class="mb-3">{{ object.get_full_name }}</h1>
         <dl class="row">
-        {% if object.is_student %}
+            <dt class="col-sm-3">Username</dt>
+            <dd class="col-sm-9">{{ object.username }}</dd>
+            {% if object.is_student %}
+            <dt class="col-sm-3">Status</dt>
+            <dd class="col-sm-9">{{ object.student_profile.status }}</dd>
             <dt class="col-sm-3">Program</dt>
             <dd class="col-sm-9">{{ object.student_profile.program }}</dd>
-
             {% if user.is_teacher %}
-                <dt class="col-sm-3">Email</dt>
-                <dd class="col-sm-9">{{ object.email }}</dd>
-
-                <dt class="col-sm-3">Registration Date</dt>
-                <dd class="col-sm-9">{{ object.student_profile.registration_date }}</dd>
-
-                <dt class="col-sm-3">Registration Expiry Date</dt>
-                <dd class="col-sm-9">{{ object.student_profile.registration_expiry_date }}</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ object.email }}</dd>
+            <dt class="col-sm-3">Registration Date</dt>
+            <dd class="col-sm-9">{{ object.student_profile.registration_date }}</dd>
+            <dt class="col-sm-3">Registration Expiry Date</dt>
+            <dd class="col-sm-9">{{ object.student_profile.registration_expiry_date }}</dd>
             {% endif %}
-        {% else %}
+            {% else %}
             <dt class="col-sm-3">Biography</dt>
             <dd class="col-sm-9">{{ object.teacher_profile.biography }}</dd>
-        {% endif %}
+            {% endif %}
         </dl>
     </div>
     {% if user.is_teacher and object.is_student %}
@@ -49,9 +39,22 @@
         <h2>Past Courses</h2>
     </div>
     {% endif %}
+
     {% if object.is_teacher %}
     <div class="py-3">
-        <h2>Courses</h2>
+        <h2>Offered Courses</h2>
+        <ul class="list-group list-group-flush">
+            {% for course in offered_courses %}
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col">{{ course.title }}</div>
+                    <div class="col">
+                        <a href="{% url 'course-detail' course.id%}" class="btn btn-primary btn-sm">See Course Details</a>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
     {% endif %}
 {% endblock %}

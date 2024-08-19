@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.http import Http404
 
 
 class UserDetailView(DetailView):
@@ -15,11 +16,24 @@ class UserDetailView(DetailView):
     template_name = "userportal/user_detail.html"
     slug_field = "username"
     slug_url_kwarg = "username"
-    login_url = "login"
 
     def get_object(self):
         username = self.kwargs.get("username")
-        return get_object_or_404(get_user_model(), username=username)
+        user = get_object_or_404(get_user_model(), username=username)
+        # Anyone can view teacher profiles
+        if user.is_teacher():
+            return user
+        # Only authenticated users can view profiles
+        if self.request.user.is_authenticated:
+            return user
+        # Raise a 404 error if the user is not authenticated and trying to access a non-teacher profile.
+        raise Http404(ERR_USER_NOT_FOUND)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.object.is_teacher():
+            context["offered_courses"] = self.object.teacher_profile.courses.all()
+        return context
 
 
 class UserListView(ListView):
