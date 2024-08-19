@@ -28,7 +28,7 @@ class UserDetailView(DetailView):
         if self.request.user.is_authenticated:
             return user
         # Raise a 404 error if the user is not authenticated and trying to access a non-teacher profile.
-        raise Http404(ERR_USER_NOT_FOUND)
+        raise Http404
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,7 +57,7 @@ class UserListView(ListView):
         queryset = (
             get_user_model()
             .objects.filter(is_staff=False, is_superuser=False)
-            .only("id", "username", "user_type")
+            .only("id", "username", "user_type", "is_active")
         )
         keywords = self.request.GET.get("keywords")
         user_types = self.request.GET.getlist("user_type")

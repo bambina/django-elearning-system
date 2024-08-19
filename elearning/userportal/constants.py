@@ -19,12 +19,11 @@ ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS = _(
     "Only teachers can create course offerings."
 )
 ERR_ONLY_TEACHERS_CAN_CREATE_MATERIALS = _("Only teachers can create materials.")
-ERR_DOES_NOT_EXIST = _("The requested {value} does not exist.")
+ERR_DOES_NOT_EXIST = _("The requested {entity} does not exist.")
 ERR_NO_CURRENT_OFFERING = _("There is no current offering for this course.")
 ERR_MISSING_NOTIFICATION_LINK = _(
     "Both link_path and link_text must be provided together."
 )
-ERR_USER_NOT_FOUND = _("The requested user does not exist.")
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")

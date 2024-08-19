@@ -9,6 +9,7 @@ from django.conf import settings
 from django.http import FileResponse
 from django.urls import reverse
 from ..tasks import create_notifications_for_enrolled_students
+from django.shortcuts import get_object_or_404
 
 
 class CourseListView(ListView):
@@ -18,7 +19,14 @@ class CourseListView(ListView):
     context_object_name = "courses"
 
     def get_queryset(self):
-        queryset = Course.objects.all().only("id", "title", "description")
+        queryset = Course.objects.select_related("teacher__user").only(
+            "id",
+            "title",
+            "description",
+            "teacher__user__title",
+            "teacher__user__first_name",
+            "teacher__user__last_name",
+        )
         keywords = self.request.GET.get("keywords")
         if keywords:
             query_words = keywords.split()
@@ -84,11 +92,7 @@ def create_course(request):
         messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSES)
         return redirect("course-list")
 
-    try:
-        teacher_profile = TeacherProfile.objects.get(user=request.user)
-    except TeacherProfile.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="TeacherProfile"))
-        return redirect("course-list")
+    teacher_profile = get_object_or_404(TeacherProfile, user=request.user)
 
     if request.method == "POST":
         form = CourseForm(request.POST)
@@ -108,11 +112,7 @@ def create_material(request, course_id):
         messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_MATERIALS)
         return redirect("course-list")
 
-    try:
-        course = Course.objects.get(pk=course_id)
-    except Course.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
-        return redirect("course-list")
+    course = get_object_or_404(Course, pk=course_id)
 
     if request.method == "POST":
         form = MaterialForm(request.POST, request.FILES)
@@ -122,6 +122,7 @@ def create_material(request, course_id):
             material.save()
 
             # Asynchronously send notifications to students enrolled in the course
+            # TODO: Compose message in async task
             message = MATERIAL_CREATED_NOTIFICATION_MSG % {
                 "material_title": material.title,
                 "course_title": course.title,
@@ -150,30 +151,23 @@ class MaterialListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return Material.objects.filter(course_id=course_id).only("id", "title", "file")
+        return Material.objects.filter(course_id=course_id).only(
+            "id", "title", "description", "uploaded_at", "file"
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["course"] = Course.objects.get(pk=self.kwargs.get("course_id"))
+        context["course"] = get_object_or_404(Course, pk=self.kwargs.get("course_id"))
         return context
 
 
 def download_material(request, course_id, material_id):
-    try:
-        course = Course.objects.get(pk=course_id)
-    except Course.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
-        return redirect("course-list")
-
-    try:
-        material = Material.objects.get(pk=material_id)
-    except Material.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Material"))
-        return redirect("material-list", course_id=course_id)
+    course = get_object_or_404(Course, pk=course_id)
+    material = get_object_or_404(Material, pk=material_id)
 
     if not material.file:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Material file"))
-        return redirect("material-list", course_id=course_id)
+        messages.error(request, ERR_DOES_NOT_EXIST.format(entity="file"))
+        return redirect("material-list", course_id=course.id)
 
     response = FileResponse(material.file, as_attachment=True)
     response["Content-Disposition"] = (

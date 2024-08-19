@@ -23,7 +23,6 @@ def home(request):
     if request.method == "POST":
         status_form = StatusForm(request.POST)
         if status_form.is_valid():
-            pass
             student_profile = request.user.student_profile
             student_profile.status = status_form.cleaned_data["status"]
             student_profile.save()

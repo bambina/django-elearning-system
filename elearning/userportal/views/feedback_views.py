@@ -16,12 +16,7 @@ def create_feedback(request, course_id):
         return redirect("course-list")
     pass
 
-    try:
-        course = Course.objects.get(pk=course_id)
-    except Course.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
-        return redirect("course-list")
-
+    course = get_object_or_404(Course, pk=course_id)
     student = request.user.student_profile
     try:
         feedback = Feedback.objects.get(student=student, course=course)
@@ -81,6 +76,5 @@ class FeedbackListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, pk=course_id)
-        context["course"] = course
+        context["course"] = get_object_or_404(Course, pk=course_id)
         return context

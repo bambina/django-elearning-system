@@ -95,7 +95,7 @@ class StudentProfile(models.Model):
     )
     status = models.CharField(max_length=100, blank=True)
     program = models.ForeignKey(
-        "Program", on_delete=models.CASCADE, related_name="students"
+        Program, on_delete=models.CASCADE, related_name="students"
     )
     registration_date = models.DateField(validators=[registration_date_validator])
     registration_expiry_date = models.DateField(editable=False)
@@ -193,10 +193,10 @@ class Course(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
     program = models.ForeignKey(
-        "Program", on_delete=models.CASCADE, related_name="courses"
+        Program, on_delete=models.CASCADE, related_name="courses"
     )
     teacher = models.ForeignKey(
-        "TeacherProfile", on_delete=models.CASCADE, related_name="courses"
+        TeacherProfile, on_delete=models.CASCADE, related_name="courses"
     )
 
     class Meta:
@@ -208,10 +208,10 @@ class Course(models.Model):
 
 class CourseOffering(models.Model):
     course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="offerings"
+        Course, on_delete=models.CASCADE, related_name="offerings"
     )
     term = models.ForeignKey(
-        "AcademicTerm", on_delete=models.CASCADE, related_name="offerings"
+        AcademicTerm, on_delete=models.CASCADE, related_name="offerings"
     )
 
     class Meta:
@@ -228,10 +228,10 @@ class Enrollment(models.Model):
         FAIL = 3, _("Fail")
 
     student = models.ForeignKey(
-        "StudentProfile", on_delete=models.CASCADE, related_name="courses"
+        StudentProfile, on_delete=models.CASCADE, related_name="courses"
     )
     offering = models.ForeignKey(
-        "CourseOffering", on_delete=models.CASCADE, related_name="students"
+        CourseOffering, on_delete=models.CASCADE, related_name="students"
     )
     grade = models.PositiveSmallIntegerField(
         choices=Grade.choices, default=Grade.NOT_GRADED
@@ -285,10 +285,10 @@ class Enrollment(models.Model):
 
 class Feedback(models.Model):
     student = models.ForeignKey(
-        "StudentProfile", on_delete=models.CASCADE, related_name="feedbacks"
+        StudentProfile, on_delete=models.CASCADE, related_name="feedbacks"
     )
     course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="feedbacks"
+        Course, on_delete=models.CASCADE, related_name="feedbacks"
     )
     comments = models.TextField(max_length=500)
     updated_at = models.DateTimeField(auto_now=True)
@@ -314,7 +314,7 @@ class Material(models.Model):
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
     course = models.ForeignKey(
-        "Course", on_delete=models.CASCADE, related_name="materials"
+        Course, on_delete=models.CASCADE, related_name="materials"
     )
 
     class Meta:
@@ -331,7 +331,7 @@ class Material(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(
-        "PortalUser", on_delete=models.CASCADE, related_name="notifications"
+        PortalUser, on_delete=models.CASCADE, related_name="notifications"
     )
     message = models.TextField(max_length=500)
     link_path = models.CharField(max_length=100, blank=True, null=True)

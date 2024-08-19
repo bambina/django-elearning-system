@@ -18,23 +18,21 @@ def enroll_course(request, course_id, offering_id):
         messages.error(request, ERR_ONLY_STUDENTS_CAN_ENROLL)
         return redirect("course-list")
 
-    try:
-        offering = CourseOffering.objects.get(id=offering_id)
-        _, created = Enrollment.objects.get_or_create(
-            student=request.user.student_profile, offering=offering
+    course = get_object_or_404(Course, pk=course_id)
+    offering = get_object_or_404(CourseOffering, pk=offering_id)
+
+    _, created = Enrollment.objects.get_or_create(
+        student=request.user.student_profile, offering=offering
+    )
+    if created:
+        messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
+        # Send a notification to the course teacher
+        notify_teacher_of_new_enrollment.delay(
+            course.id, offering.id, request.user.username
         )
-        if created:
-            messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
-            # Send a notification to the course teacher
-            notify_teacher_of_new_enrollment.delay(
-                course_id, offering_id, request.user.username
-            )
-        else:
-            messages.warning(request, ALREADY_ENROLLED_MSG)
-        return redirect("course-detail", pk=course_id)
-    except Course.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
-        return redirect("course-list")
+    else:
+        messages.warning(request, ALREADY_ENROLLED_MSG)
+    return redirect("course-detail", pk=course.id)
 
 
 class CourseOfferingListView(ListView):
@@ -46,15 +44,16 @@ class CourseOfferingListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return CourseOffering.objects.filter(course_id=course_id).order_by(
-            "-term__start_datetime"
+        return (
+            CourseOffering.objects.filter(course_id=course_id)
+            .select_related("term")
+            .order_by("-term__start_datetime")
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         course_id = self.kwargs.get("course_id")
-        course = get_object_or_404(Course, pk=course_id)
-        context["course"] = course
+        context["course"] = get_object_or_404(Course, pk=course_id)
         return context
 
 
@@ -64,11 +63,7 @@ def create_course_offering(request, course_id):
         messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS)
         return redirect("course-list")
 
-    try:
-        course = Course.objects.get(pk=course_id)
-    except Course.DoesNotExist:
-        messages.error(request, ERR_DOES_NOT_EXIST.format(value="Course"))
-        return redirect("course-list")
+    course = get_object_or_404(Course, pk=course_id)
 
     if request.method == "POST":
         form = CourseOfferingForm(request.POST, course=course)
@@ -102,6 +97,6 @@ class EnrolledStudentListView(ListView):
         context = super().get_context_data(**kwargs)
         course_id = self.kwargs.get("course_id")
         offering_id = self.kwargs.get("offering_id")
-        context["course"] = Course.objects.get(pk=course_id)
-        context["offering"] = CourseOffering.objects.get(pk=offering_id)
+        context["course"] = get_object_or_404(Course, pk=course_id)
+        context["offering"] = get_object_or_404(CourseOffering, pk=offering_id)
         return context
