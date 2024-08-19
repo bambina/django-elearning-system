@@ -57,6 +57,12 @@ def home(request):
             else:
                 context["past_offerings"].append(so.offering)
 
+    # Get teacher's courses
+    if request.user.is_teacher():
+        teacher = request.user.teacher_profile
+        context["offered_courses"] = teacher.courses.all()
+        context["is_instructor"] = True
+
     return render(request, "userportal/home.html", context)
 
 

@@ -1,0 +1,25 @@
+<div class="py-3">
+    <h2>Offered Courses</h2>
+    <ul class="list-group list-group-flush">
+        {% for course in offered_courses %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">{{ course.title }}</div>
+                <div class="col">
+                    <a href="{% url 'course-detail' course.id%}" class="btn btn-primary btn-sm">See Course Details</a>
+                    {% if is_instructor %}
+                    <a href="{% url 'enrolled-student-list' course.id%}" class="btn btn-secondary btn-sm">See Enrolled Students</a>
+                    {% endif %}
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+        {% if not offered_courses %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">No courses are available yet. Please check back later.</div>
+            </div>
+        </li>
+        {% endif %}
+    </ul>
+</div>

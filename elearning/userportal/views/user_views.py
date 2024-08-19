@@ -33,6 +33,7 @@ class UserDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         if self.object.is_teacher():
             context["offered_courses"] = self.object.teacher_profile.courses.all()
+            context["is_instructor"] = self.object == self.request.user
         return context
 
 

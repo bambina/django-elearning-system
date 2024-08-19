@@ -2,46 +2,38 @@
 {% block content %}
     <h1>HOME</h1>
     <div class="py-3">
-        {% if user.is_student %}
-            <strong class="d-inline-block mb-2 text-success-emphasis">Student</strong>
-        {% elif user.is_teacher %}
-            <strong class="d-inline-block mb-2 text-primary-emphasis">Teacher</strong>
-        {% endif %}
+        <strong class="d-inline-block mb-3 text-primary-emphasis">{{ user.get_user_type_display }}</strong>
         <h1>{{ user.get_full_name }}</h1>
 
-        <ul class="list-unstyled mt-3 mb-4">
-            <li>{{ user.username }}</li>
-            <li>{{ user.email }}</li>
-        </ul>
-
         {% if user.is_student %}
-            <form method="post" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
-                {% csrf_token %}
-                <div class="col-12">
-                    <label class="visually-hidden">Status</label>
-                    {{ status_form.status }}
-                </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Update status</button>
-                </div>
-            </form>
-            <dl class="row">
-                <dt class="col-sm-3">Program</dt>
-                <dd class="col-sm-9">{{ user.student_profile.program }}</dd>
-
-                <dt class="col-sm-3">Registration Date</dt>
-                <dd class="col-sm-9">{{ user.student_profile.registration_date }}</dd>
-
-                <dt class="col-sm-3">Registration Expiry Date</dt>
-                <dd class="col-sm-9">{{ user.student_profile.registration_expiry_date }}</dd>
-            </dl>
-        {% else %}
-            <dl class="row">
-                <dt class="col-sm-3">Biography</dt>
-                <dd class="col-sm-9">{{ user.teacher_profile.biography }}</dd>
-            </dl>
+        <form method="post" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
+            {% csrf_token %}
+            <div class="col-12">
+                <label class="visually-hidden">Status</label>
+                {{ status_form.status }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Update status</button>
+            </div>
+        </form>
         {% endif %}
-
+        <dl class="row">
+            <dt class="col-sm-3">Username</dt>
+            <dd class="col-sm-9">{{ user.username }}</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ user.email }}</dd>
+            {% if user.is_student %}
+            <dt class="col-sm-3">Program</dt>
+            <dd class="col-sm-9">{{ user.student_profile.program }}</dd>
+            <dt class="col-sm-3">Registration Date</dt>
+            <dd class="col-sm-9">{{ user.student_profile.registration_date }}</dd>
+            <dt class="col-sm-3">Registration Expiry Date</dt>
+            <dd class="col-sm-9">{{ user.student_profile.registration_expiry_date }}</dd>
+            {% else %}
+            <dt class="col-sm-3">Biography</dt>
+            <dd class="col-sm-9">{{ user.teacher_profile.biography }}</dd>
+            {% endif %}
+        </dl>
     </div>
 
     {% if user.is_student %}
@@ -103,8 +95,6 @@
         </div>
         {% endif %}
     {% else %}
-    <div class="py-3">
-        <h2>Courses</h2>
-    </div>
+    {% include "./common/offered_course_list.html" %}
     {% endif %}
 {% endblock %}
