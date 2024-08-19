@@ -328,8 +328,8 @@ class Command(BaseCommand):
                 offering=next_course_1,
             ),
             Enrollment(
-                student=self.student_1,
-                offering=next_course_2,
+                student=self.student_2,
+                offering=next_course_1,
             ),
             Enrollment(
                 student=self.student_1,

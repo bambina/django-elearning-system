@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from userportal.repositories.enrollment_repository import *
 
 
 class UserDetailView(DetailView):
@@ -31,6 +32,15 @@ class UserDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        if self.object.is_student():
+            enrollments = fetch_enrollments_for_student(self.object)
+            (
+                context["upcoming_enrollments"],
+                context["current_enrollments"],
+                context["past_enrollments"],
+            ) = enrollments
+
         if self.object.is_teacher():
             context["offered_courses"] = self.object.teacher_profile.courses.all()
         return context

@@ -1,0 +1,63 @@
+{% if current_enrollments %}
+<div class="py-3">
+    <h2>Current Course</h2>
+    <ul class="list-group list-group-flush">
+        {% for enrollment in current_enrollments %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">{{ enrollment.offering.course.title }}</div>
+                <div class="col">Ends on {{ enrollment.offering.term.end_datetime|date:"M j Y" }}</div>
+                <div class="col">{{ enrollment.get_grade_display }}</div>
+                <div class="col">
+                    <a href="{% url 'course-detail' enrollment.offering.course.id %}" class="btn btn-primary btn-sm">See Course Details</a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if upcoming_enrollments %}
+<div class="py-3">
+    <h2>Upcoming Course</h2>
+    <ul class="list-group list-group-flush">
+        {% for enrollment in upcoming_enrollments %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">{{ enrollment.offering.course.title }}</div>
+                <div class="col">Starting {{ enrollment.offering.term.start_datetime|date:"M j Y" }}</div>
+                <div class="col">{{ enrollment.get_grade_display }}</div>
+                <div class="col">
+                    <a href="{% url 'course-detail' enrollment.offering.course.id %}" class="btn btn-primary btn-sm">See Course Details</a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if past_enrollments %}
+<div class="py-3">
+    <h2>Past Course</h2>
+    <ul class="list-group list-group-flush">
+        {% for enrollment in past_enrollments %}
+        <li class="list-group-item">
+            <div class="row">
+                <div class="col">{{ enrollment.offering.course.title }}</div>
+                <div class="col">Ended on {{ enrollment.offering.term.end_datetime|date:"M j Y" }}</div>
+                <div class="col">{{ enrollment.get_grade_display }}</div>
+                <div class="col">
+                    <a href="{% url 'course-detail' enrollment.offering.course.id %}" class="btn btn-primary btn-sm">See Course Details</a>
+                    {% url 'home' as home_url %}
+                    {% if request.path == home_url %}
+                    <a href="{% url 'feedback-create' enrollment.offering.course.id %}" class="btn btn-secondary btn-sm">Leave Feedback</a>
+                    {% endif %}
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

@@ -10,11 +10,11 @@
         <strong class="d-inline-block mb-3 text-primary-emphasis">{{ object.get_user_type_display }}</strong>
         <h1 class="mb-3">{{ object.get_full_name }}</h1>
         <dl class="row">
-            <dt class="col-sm-3">Username</dt>
-            <dd class="col-sm-9">{{ object.username }}</dd>
             {% if object.is_student %}
+            {% if object.student_profile.status %}
             <dt class="col-sm-3">Status</dt>
             <dd class="col-sm-9">{{ object.student_profile.status }}</dd>
+            {% endif %}
             <dt class="col-sm-3">Program</dt>
             <dd class="col-sm-9">{{ object.student_profile.program }}</dd>
             {% if user.is_teacher %}
@@ -32,12 +32,7 @@
         </dl>
     </div>
     {% if user.is_teacher and object.is_student %}
-    <div class="py-3">
-        <h2>Current Courses</h2>
-    </div>
-    <div class="py-3">
-        <h2>Past Courses</h2>
-    </div>
+    {% include "./common/student_enrollment_list.html" %}
     {% endif %}
 
     {% if object.is_teacher %}
