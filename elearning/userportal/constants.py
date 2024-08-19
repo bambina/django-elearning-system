@@ -50,3 +50,7 @@ MATERIAL_CREATED_NOTIFICATION_MSG = _(
     "A new material '%(material_title)s' has been added to the course %(course_title)s."
 )
 MATERIAL_CREATED_NOTIFICATION_LINK_TEXT = _("View material")
+STUDENT_ENROLLED_NOTIFICATION_MSG = _(
+    "Student {username} has enrolled in your upcoming course {course_title}"
+)
+STUDENT_ENROLLED_NOTIFICATION_LINK_TEXT = _("View enrolled students")

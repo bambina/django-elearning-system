@@ -46,22 +46,27 @@ class CourseDetailView(DetailView):
             return context
 
         course = self.object
-        if user.is_student():
-            current_term = AcademicTerm.current()
-            if current_term:
-                context["is_taking"] = CourseOffering.objects.filter(
-                    course=course,
-                    term=current_term,
-                    students__student=user.student_profile,
-                ).exists()
 
-            next_term = AcademicTerm.next()
-            if next_term:
-                next_offering = CourseOffering.objects.filter(
-                    course=course, term=next_term
-                ).first()
-                if next_offering:
-                    context["next_offering"] = next_offering
+        current_term = AcademicTerm.current()
+        if current_term:
+            current_offering = CourseOffering.objects.filter(
+                course=course, term=current_term
+            ).first()
+            if current_offering:
+                context["current_offering"] = current_offering
+                if user.is_student():
+                    context["is_taking"] = Enrollment.objects.filter(
+                        student=user.student_profile, offering=current_offering
+                    ).exists()
+
+        next_term = AcademicTerm.next()
+        if next_term:
+            next_offering = CourseOffering.objects.filter(
+                course=course, term=next_term
+            ).first()
+            if next_offering:
+                context["next_offering"] = next_offering
+                if user.is_student():
                     context["is_enrolled"] = Enrollment.objects.filter(
                         student=user.student_profile, offering=next_offering
                     ).exists()
@@ -175,31 +180,3 @@ def download_material(request, course_id, material_id):
         f'attachment; filename="{material.original_filename}"'
     )
     return response
-
-
-class EnrolledStudentListView(ListView):
-    model = Enrollment
-    template_name = "userportal/student_list.html"
-    context_object_name = "student_offerings"
-    paginate_by = settings.PAGINATION_PAGE_SIZE
-    login_url = "login"
-
-    def get_queryset(self):
-        course_id = self.kwargs.get("course_id")
-
-        current_offering = CourseOffering.objects.filter(
-            course_id=course_id,
-            term__start_datetime__lte=now(),
-            term__end_datetime__gte=now(),
-        ).first()
-
-        return Enrollment.objects.filter(offering=current_offering).select_related(
-            "student"
-        )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        course_id = self.kwargs.get("course_id")
-        course = Course.objects.get(pk=course_id)
-        context["course"] = course
-        return context

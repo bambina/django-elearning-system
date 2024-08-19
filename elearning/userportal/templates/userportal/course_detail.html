@@ -11,11 +11,11 @@
         by <a href="{% url 'user-detail' object.teacher.user.username %}">{{ object.teacher.user.get_full_name }}</a>
     </div>
 
-    {% if next_offering and not is_enrolled %}
+    {% if next_offering and not is_enrolled and user.is_student %}
     <div class="py-3">
         <form method="post" action="{% url 'course-enroll' course_id=object.id offering_id=next_offering.id %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-primary"><span class="h4 font-weight-bold">Enroll Now</span><br>Starts {{ next_offering.term.start_datetime|date:"M j" }}</button>
+            <button type="submit" class="btn btn-primary"><span class="h4 font-weight-bold">Enroll Now</span><br>Starts {{ next_offering.term.start_datetime|date:"M j Y" }}</button>
         </form>
     </div>
     {% endif %}
@@ -33,9 +33,11 @@
     {% endif %}
 
     {% if is_instructor %}
+    {% if current_offering %}
     <div class="py-3">
-        <a href="{% url 'enrolled-student-list' object.id %}">View Currently Enrolled Students</a>
+        <a href="{% url 'enrolled-student-list' object.id current_offering.id %}">View Currently Enrolled Students</a>
     </div>
+    {% endif %}
     <div class="py-3">
         <a href="{% url 'feedback-list' object.id %}">View Feedback</a>
     </div>

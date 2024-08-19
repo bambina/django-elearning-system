@@ -2,8 +2,7 @@
 {% block content %}
     <h1>Course Offerings</h1>
     <div class="py-3">
-        <p>{{ course.title }}</p>
-        <p>by <a href="{% url 'user-detail' course.teacher.user.username %}">{{ course.teacher.user.get_full_name }}</a></p>
+        <p>{{ course.title }} by <a href="{% url 'user-detail' course.teacher.user.username %}">{{ course.teacher.user.get_full_name }}</a></p>
     </div>
     <a href="{% url 'offering-create' course.id %}">Add New Offering for This Course</a>
     <div class="py-3">
@@ -23,7 +22,7 @@
                         <div class="col">{{ offering.term.get_semester_display }} {{ offering.term.year }}</div>
                         <div class="col">{{ offering.term.start_datetime|date:"M j Y" }} - {{ offering.term.end_datetime|date:"M j Y" }}</div>
                         <div class="col">
-                            <a href="#" class="btn btn-primary btn-sm">View Details</a>
+                            <a href="{% url 'enrolled-student-list' course.id offering.id %}" class="btn btn-primary btn-sm">View Enrolled Students</a>
                         </div>
                     </div>
                 </li>

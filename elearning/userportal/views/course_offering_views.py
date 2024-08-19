@@ -7,6 +7,8 @@ from django.views.generic import ListView
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.urls import reverse
+from ..tasks import notify_teacher_of_new_enrollment
 
 
 @login_required(login_url="login")
@@ -23,6 +25,10 @@ def enroll_course(request, course_id, offering_id):
         )
         if created:
             messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
+            # Send a notification to the course teacher
+            notify_teacher_of_new_enrollment.delay(
+                course_id, offering_id, request.user.username
+            )
         else:
             messages.warning(request, ALREADY_ENROLLED_MSG)
         return redirect("course-detail", pk=course_id)
@@ -76,3 +82,26 @@ def create_course_offering(request, course_id):
     return render(
         request, "userportal/offering_create.html", {"form": form, "course": course}
     )
+
+
+class EnrolledStudentListView(ListView):
+    model = Enrollment
+    template_name = "userportal/student_list.html"
+    context_object_name = "enrollments"
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+
+    def get_queryset(self):
+        offering_id = self.kwargs.get("offering_id")
+        return (
+            Enrollment.objects.filter(offering_id=offering_id)
+            .select_related("student")
+            .order_by("-enrolled_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course_id = self.kwargs.get("course_id")
+        offering_id = self.kwargs.get("offering_id")
+        context["course"] = Course.objects.get(pk=course_id)
+        context["offering"] = CourseOffering.objects.get(pk=offering_id)
+        return context

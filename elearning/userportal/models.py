@@ -184,9 +184,9 @@ class AcademicTerm(models.Model):
             )
 
     def __str__(self):
-        start_date = self.start_datetime.strftime("%b %d %Y")
-        end_date = self.end_datetime.strftime("%b %d %Y")
-        return f"{self.get_semester_display()} {self.year} ({start_date} - {end_date})"
+        start_date = self.start_datetime.strftime("%b %d, %Y")
+        end_date = self.end_datetime.strftime("%b %d, %Y")
+        return f"{self.get_semester_display()} {self.year} ({start_date} to {end_date})"
 
 
 class Course(models.Model):
@@ -218,7 +218,7 @@ class CourseOffering(models.Model):
         unique_together = ["course", "term"]
 
     def __str__(self):
-        return f"{self.course} ({self.term})"
+        return f"{self.course} - {self.term}"
 
 
 class Enrollment(models.Model):

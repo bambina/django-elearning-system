@@ -1,5 +1,6 @@
 from celery import shared_task
 from .models import *
+from django.urls import reverse
 
 
 @shared_task
@@ -15,6 +16,22 @@ def create_notifications_for_enrolled_students(
     ).only("user")
     users = [student.user for student in students]
     send_notifications(users, message, link_path, link_text)
+
+
+@shared_task
+def notify_teacher_of_new_enrollment(course_id, offering_id, student_username):
+    """
+    A task to create a notification for a teacher when a student enrolls in a course.
+    """
+    course = Course.objects.select_related("teacher__user").get(id=course_id)
+    teacher = course.teacher.user
+    message = STUDENT_ENROLLED_NOTIFICATION_MSG.format(
+        username=student_username, course_title=course.title
+    )
+    link_path = reverse("enrolled-student-list", args=[course_id, offering_id])
+    send_notifications(
+        [teacher], message, link_path, STUDENT_ENROLLED_NOTIFICATION_LINK_TEXT
+    )
 
 
 def send_notifications(
