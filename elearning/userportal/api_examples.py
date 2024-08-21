@@ -6,7 +6,7 @@ teacher_example = OpenApiExample(
     value={
         "first_name": "John",
         "last_name": "Smith",
-        "title": "Dr.",
+        "title": "PROF",
         "profile": {
             "biography": "Prof. John Smith is a Professor of Computer Science ..."
         },
@@ -20,7 +20,7 @@ student_example = OpenApiExample(
     value={
         "first_name": "Michael",
         "last_name": "Brown",
-        "title": "Mr.",
+        "title": "MR",
         "profile": {
             "status": "Good!",
         },
