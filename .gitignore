@@ -5,6 +5,7 @@ image_store/images/
 image_store/celery.pid
 *.prof
 pyvenv.cfg
+schema.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

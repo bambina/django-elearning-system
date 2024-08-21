@@ -56,12 +56,12 @@ class PortalUser(AbstractUser):
         STUDENT = 2, _("Student")
 
     class Title(models.TextChoices):
-        PREFER_NOT_TO_SAY = ""
-        MR = "Mr."
-        MS = "Ms."
-        MRS = "Mrs."
-        DR = "Dr."
-        PROF = "Prof."
+        PREFER_NOT_TO_SAY = "NONE", _("Prefer Not to Say")
+        MR = "MR", _("Mr.")
+        MS = "MS", _("Ms.")
+        MRS = "MRS", _("Mrs.")
+        DR = "DR", _("Dr.")
+        PROF = "PROF", _("Prof.")
 
     email = models.EmailField(unique=True, null=True, blank=True)
     user_type = models.PositiveSmallIntegerField(

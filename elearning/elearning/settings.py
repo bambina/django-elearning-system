@@ -34,6 +34,8 @@ ALLOWED_HOSTS = ["127.0.0.1"]
 INSTALLED_APPS = [
     "userportal.apps.UserportalConfig",
     "rest_framework",
+    "rest_framework.authtoken",
+    "drf_spectacular",
     "django_bootstrap5",
     "django_bootstrap_icons",
     "django.contrib.admin",
@@ -45,10 +47,20 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "e-learning system API",
+    "DESCRIPTION": "This API provides comprehensive access and management tools for student and teacher data in the e-learning system.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SECURITY": [{"basic": []}],
+    "SECURITY_REQUIREMENTS": [{"basic": []}],
 }
 
 MIDDLEWARE = [
