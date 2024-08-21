@@ -59,7 +59,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "This API provides comprehensive access and management tools for student and teacher data in the e-learning system.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    "SCHEMA_PATH_PREFIX": "/api/",
+    "SCHEMA_PATH_PREFIX": "/api/v1/",
     "SECURITY": [{"basic": []}],
     "SECURITY_REQUIREMENTS": [{"basic": []}],
 }
