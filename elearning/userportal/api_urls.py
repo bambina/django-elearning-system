@@ -20,4 +20,5 @@ urlpatterns = [
     ),
     path("api-token-auth/", CustomObtainAuthToken.as_view(), name="api_token_auth"),
     path("users/me/", UserProfileView.as_view(), name="user-profile"),
+    path("users/", UserListView.as_view(), name="user-list"),
 ]

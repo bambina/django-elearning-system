@@ -103,3 +103,18 @@ class UserSerializer(serializers.ModelSerializer):
             serializer.is_valid(raise_exception=True)
             serializer.save()
         return instance
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "title",
+            "user_type",
+        ]
+        read_only_fields = ["id", "username", "email", "user_type"]

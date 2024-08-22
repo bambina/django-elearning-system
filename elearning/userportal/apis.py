@@ -8,6 +8,10 @@ from drf_spectacular.utils import extend_schema
 from .api_examples import *
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.generics import ListAPIView
+from userportal.api_permissions import IsTeacherGroupOrAdminUser
+from django.contrib.auth import get_user_model
+from .filters import UserFilter
 
 
 @extend_schema(
@@ -53,3 +57,10 @@ class UserProfileView(GenericAPIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserListView(ListAPIView):
+    queryset = get_user_model().objects.filter(is_staff=False, is_superuser=False)
+    serializer_class = UserSerializer
+    permission_classes = [IsTeacherGroupOrAdminUser]
+    filterset_class = UserFilter
