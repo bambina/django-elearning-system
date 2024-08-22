@@ -1,5 +1,16 @@
 from drf_spectacular.utils import OpenApiExample
 
+admin_example = OpenApiExample(
+    name="Admin Example",
+    description="Example showing editable fields for an admin profile",
+    value={
+        "first_name": "",
+        "last_name": "",
+        "title": None,
+    },
+    request_only=True,
+)
+
 teacher_example = OpenApiExample(
     name="Teacher Example",
     description="Example showing editable fields for a teacher profile",
@@ -25,5 +36,12 @@ student_example = OpenApiExample(
             "status": "Good!",
         },
     },
+    request_only=True,
+)
+
+auth_example = OpenApiExample(
+    name="Authentication Example",
+    description="Example showing a valid API token authentication request",
+    value={"username": "admin", "password": "abc"},
     request_only=True,
 )

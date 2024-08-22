@@ -49,8 +49,7 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
 }
 
@@ -60,8 +59,14 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": "/api/v1/",
-    "SECURITY": [{"basic": []}],
-    "SECURITY_REQUIREMENTS": [{"basic": []}],
+    "SECURITY": [
+        {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Token-based authentication. Format: Token <your_token>",
+        }
+    ],
 }
 
 MIDDLEWARE = [
