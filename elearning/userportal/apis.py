@@ -36,7 +36,7 @@ class CustomObtainAuthToken(ObtainAuthToken):
 class UserProfileView(GenericAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
 
     def get_object(self):
         return get_object_or_404(get_user_model(), pk=self.request.user.pk)
