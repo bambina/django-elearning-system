@@ -10,6 +10,7 @@ from django.http import FileResponse
 from django.urls import reverse
 from ..tasks import create_notifications_for_enrolled_students
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_http_methods
 
 
 class CourseListView(ListView):
@@ -174,3 +175,13 @@ def download_material(request, course_id, material_id):
         f'attachment; filename="{material.original_filename}"'
     )
     return response
+
+
+@require_http_methods(["POST"])
+def start_qa_session(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+
+    # Only teachers can start a QA session
+    # TODO: Check if the user is the teacher of the course or an admin
+
+    return render(request, "userportal/qa_session.html", {"course": course})

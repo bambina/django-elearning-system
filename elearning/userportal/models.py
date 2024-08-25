@@ -80,7 +80,7 @@ class PortalUser(AbstractUser):
 
     def get_full_name(self) -> str:
         if self.user_type:
-            title = self.title if self.title else ""
+            title = self.get_title_display() if self.title else ""
             return f"{title} {self.first_name} {self.last_name}".strip()
         else:
             return super().__str__()

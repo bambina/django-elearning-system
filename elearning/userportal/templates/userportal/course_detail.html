@@ -32,8 +32,15 @@
     </div>
     {% endif %}
 
+    <div class="py-3">
+        <form method="post" action="{% url 'start-qa-session' object.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Start Live QA Session</button>
+        </form>
+    </div>
     {% if is_instructor %}
     {% if current_offering %}
+
     <div class="py-3">
         <a href="{% url 'enrolled-student-list' object.id current_offering.id %}">View Currently Enrolled Students</a>
     </div>

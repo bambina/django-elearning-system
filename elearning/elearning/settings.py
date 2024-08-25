@@ -26,12 +26,13 @@ SECRET_KEY = "django-insecure-z64ldj!r$wol_-vh1fk=g2u(rm2vg0j^@-y#qtx7&uvn=^a-z&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "userportal.apps.UserportalConfig",
     "rest_framework",
     "rest_framework.authtoken",
@@ -101,8 +102,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "elearning.wsgi.application"
-
+# WSGI_APPLICATION = "elearning.wsgi.application"
+ASGI_APPLICATION = "elearning.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -178,3 +179,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 CELERY_BROKER_URL = "redis://localhost:6379/"
 
 CELERY_RESULT_BACKEND = "redis://localhost:6379/"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}

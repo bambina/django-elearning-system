@@ -92,4 +92,9 @@ urlpatterns = [
         course_views.download_material,
         name="material-download",
     ),
+    path(
+        "courses/<int:course_id>/start-qa-session/",
+        course_views.start_qa_session,
+        name="start-qa-session",
+    ),
 ]

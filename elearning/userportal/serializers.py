@@ -83,16 +83,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def _get_update_profile_serializer(self, instance, data):
         if instance.is_teacher():
-            return TeacherProfileSerializer(instance.teacher_profile, data=data, partial=True)
+            return TeacherProfileSerializer(
+                instance.teacher_profile, data=data, partial=True
+            )
         elif instance.is_student():
-            return StudentProfileSerializer(instance.student_profile, data=data, partial=True)
+            return StudentProfileSerializer(
+                instance.student_profile, data=data, partial=True
+            )
         return None
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         profile_data = validated_data.pop("profile", None)
         if profile_data:
-            if serializer := self._get_update_profile_serializer(instance, profile_data):
+            if serializer := self._get_update_profile_serializer(
+                instance, profile_data
+            ):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
         return instance
