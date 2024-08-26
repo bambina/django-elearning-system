@@ -382,3 +382,13 @@ class QASession(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class QAQuestion(models.Model):
+    room_name = models.CharField(max_length=200)
+    text = models.TextField()
+    sender = models.CharField(max_length=300, blank=True, null=True)
+    timestamp = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-timestamp"]

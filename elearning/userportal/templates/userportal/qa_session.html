@@ -42,6 +42,19 @@
 <div class="py-3">
     <h5>Q&amp;A</h5>
     <div id="question-list"></div>
+    {% if questions %}
+    {% for question in questions %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                {{ question.sender }}
+            </h5>
+            <p class="text-muted small utc-timestamp" data-timestamp="{{ question.timestamp.isoformat }}"></p>
+            <p class="card-text">{{ question.text }}</p>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
 </div>
 
 {% endblock %}
@@ -52,5 +65,7 @@
 {{ request.get_host | json_script:"host-name" }}
 {{ is_instructor | json_script:"is-instructor" }}
 <script src="{% static 'userportal/js/live_qa_websocket.js' %}"></script>
+{% else %}
+<script src="{% static 'userportal/js/ended_qa_websocket.js' %}"></script>
 {% endif %}
 {% endblock %}

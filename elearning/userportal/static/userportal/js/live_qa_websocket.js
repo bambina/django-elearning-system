@@ -7,13 +7,27 @@ var ws = new WebSocket('ws://' + hostName + '/ws/live-qa-session/' + roomName + 
 
 ws.onmessage = function (event) {
     console.log('Message received:', event.data);
-    var question = JSON.parse(event.data);
-    if (question.type === 'session.end.notice') {
-        disableFormElements();
+    const data = JSON.parse(event.data);
+    switch (data.type) {
+        case 'session.end.notice':
+            handleSessionEnd(data);
+            break;
+        case 'question.list':
+            handleQuestionList(data.questions);
+            break;
+        default:
+            createCard(data);
     }
-    var card = createCard(question);
-    document.getElementById("question-list").prepend(card);
 };
+
+function handleSessionEnd(data) {
+    disableFormElements();
+    createCard(data);
+}
+
+function handleQuestionList(questions) {
+    questions.forEach(createCard);
+}
 
 let messageInput = document.getElementById('chat-message-input');
 if (messageInput) {
@@ -42,8 +56,7 @@ function sendQuestion() {
     }
     ws.send(JSON.stringify({
         'message': message,
-        'sender': sender,
-        'timestamp': new Date().toISOString()
+        'sender': sender
     }));
     messageInputDom.value = '';
 }
@@ -71,7 +84,7 @@ function createCard(question) {
     newPost.className = "card-text";
     newPost.innerHTML = question.message.replace(/\n/g, '<br>');
     cardBody.appendChild(newPost);
-    return card;
+    document.getElementById("question-list").prepend(card);
 }
 
 function disableFormElements() {

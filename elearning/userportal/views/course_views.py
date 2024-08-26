@@ -209,14 +209,15 @@ def start_qa_session(request, course_id):
 def qa_session(request, course_id):
     course = get_object_or_404(Course, pk=course_id)
     qa_session = get_object_or_404(QASession, course=course)
-    is_instructor = (
-        request.user.is_teacher() and request.user.teacher_profile == course.teacher
-    )
     context = {
         "course": course,
         "qa_session": qa_session,
-        "is_instructor": is_instructor,
     }
+    if qa_session.is_ended():
+        context["questions"] = QAQuestion.objects.filter(room_name=qa_session.room_name)
+    context["is_instructor"] = (
+        request.user.is_teacher() and request.user.teacher_profile == course.teacher
+    )
     return render(request, "userportal/qa_session.html", context=context)
 
 
@@ -228,12 +229,22 @@ def end_qa_session(request, course_id):
     qa_session.save()
 
     # Close all connections
+    close_comment = QAQuestion(
+        room_name=qa_session.room_name,
+        text=LIVE_QA_END_SESSION_MSG,
+        sender="System",
+        timestamp=datetime.now(),
+    )
+    close_comment.save()
+    # Close all connections
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        f"{LIVE_QA_PREFIX}_{qa_session.room_name}",
+        f"{LIVE_QA_PREFIX}_{close_comment.room_name}",
         {
             "type": LIVE_QA_CLOSE_CONNECTION_EVENT,
-            "message": LIVE_QA_END_SESSION_MSG,
+            "message": close_comment.text,
+            "sender": close_comment.sender,
+            "timestamp": close_comment.timestamp.isoformat(),
         },
     )
     messages.success(request, QA_SESSION_END_SUCCESS_MSG)

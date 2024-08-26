@@ -15,6 +15,7 @@ def notify_students_of_live_qa_start(course_id):
         course, message, link_path, LIVE_QA_START_NOTIFICATION_LINK_TEXT
     )
 
+
 @shared_task
 def notify_students_of_material_creation(course_id, material_id):
     """
