@@ -8,19 +8,28 @@ var ws = new WebSocket('ws://' + hostName + '/ws/live-qa-session/' + roomName + 
 ws.onmessage = function (event) {
     console.log('Message received:', event.data);
     var question = JSON.parse(event.data);
+    if (question.type === 'session.end.notice') {
+        disableFormElements();
+    }
     var card = createCard(question);
     document.getElementById("question-list").prepend(card);
 };
 
-document.querySelector('#chat-message-input').onkeyup = function (e) {
-    if (e.keyCode === 13 && !e.shiftKey) {
-        e.preventDefault();
-        sendQuestion();
-    }
-};
+let messageInput = document.getElementById('chat-message-input');
+if (messageInput) {
+    messageInput.onkeyup = function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendQuestion();
+        }
+    };
+}
 
-document.getElementById('post-question-btn').onclick = function () {
-    sendQuestion();
+let postBtn = document.getElementById('post-question-btn');
+if (postBtn) {
+    postBtn.onclick = function () {
+        sendQuestion();
+    };
 }
 
 function sendQuestion() {
@@ -63,6 +72,21 @@ function createCard(question) {
     newPost.innerHTML = question.message.replace(/\n/g, '<br>');
     cardBody.appendChild(newPost);
     return card;
+}
+
+function disableFormElements() {
+    const elementIds = [
+        'post-question-btn',
+        'anonymous-checkbox',
+        'chat-message-input'
+    ];
+
+    elementIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.disabled = true;
+        }
+    });
 }
 
 ws.onopen = function () {

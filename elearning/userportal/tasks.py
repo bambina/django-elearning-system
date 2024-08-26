@@ -15,6 +15,7 @@ def notify_students_of_live_qa_start(course_id):
         course, message, link_path, LIVE_QA_START_NOTIFICATION_LINK_TEXT
     )
 
+
 @shared_task
 def create_notifications_for_enrolled_students(
     course_id, message, link_path, link_text
@@ -28,6 +29,7 @@ def create_notifications_for_enrolled_students(
     ).only("user")
     users = [student.user for student in students]
     send_notifications(users, message, link_path, link_text)
+
 
 @shared_task
 def notify_teacher_of_new_enrollment(course_id, offering_id, student_username):
@@ -44,13 +46,15 @@ def notify_teacher_of_new_enrollment(course_id, offering_id, student_username):
         [teacher], message, link_path, STUDENT_ENROLLED_NOTIFICATION_LINK_TEXT
     )
 
-def send_notifications_to_currently_enrolled_students(course, message, link_path, link_text):
+
+def send_notifications_to_currently_enrolled_students(
+    course, message, link_path, link_text
+):
     """
     Sends notifications to students currently enrolled in a course.
     """
     course_offering = CourseOffering.objects.filter(
-        course=course,
-        term=AcademicTerm.current()
+        course=course, term=AcademicTerm.current()
     ).first()
 
     if course_offering:
@@ -60,6 +64,7 @@ def send_notifications_to_currently_enrolled_students(course, message, link_path
     else:
         users = PortalUser.objects.none()
     send_notifications(users, message, link_path, link_text)
+
 
 def send_notifications(
     users: list[PortalUser], message: str, link_path: str = None, link_text: str = None

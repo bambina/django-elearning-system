@@ -12,7 +12,7 @@
         <p>for {{ course.title}}</p>
     </div>
     <div class="col-3 text-end">
-        {% if qa_session.is_active %}
+        {% if qa_session.is_active and is_instructor %}
         <form method="post" action="{% url 'end-qa-session' course.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">End QA Session</button>
@@ -44,12 +44,13 @@
     <div id="question-list"></div>
 </div>
 
+{% endblock %}
+{% block extra_js %}
+{% if qa_session.is_active %}
 {{ qa_session.room_name | json_script:"room-name" }}
 {{ user.get_full_name | json_script:"user-name" }}
 {{ request.get_host | json_script:"host-name" }}
 {{ is_instructor | json_script:"is-instructor" }}
-
-{% endblock %}
-{% block extra_js %}
 <script src="{% static 'userportal/js/live_qa_websocket.js' %}"></script>
+{% endif %}
 {% endblock %}

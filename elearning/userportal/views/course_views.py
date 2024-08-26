@@ -12,6 +12,9 @@ from ..tasks import *
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 from datetime import datetime
+from asgiref.sync import async_to_sync
+from ..consumers import ChatConsumer
+from channels.layers import get_channel_layer
 
 
 class CourseListView(ListView):
@@ -233,5 +236,15 @@ def end_qa_session(request, course_id):
     qa_session = get_object_or_404(QASession, course=course)
     qa_session.status = QASession.Status.ENDED
     qa_session.save()
+
+    # Close all connections
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"{LIVE_QA_PREFIX}_{qa_session.room_name}",
+        {
+            "type": "close.connection",
+            "message": "The QA session has ended.",
+        },
+    )
     messages.success(request, "QA session ended successfully.")
     return redirect("course-detail", pk=course.id)
