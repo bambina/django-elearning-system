@@ -25,8 +25,10 @@ ERR_MISSING_NOTIFICATION_LINK = _(
     "Both link_path and link_text must be provided together."
 )
 
+
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
+ACTIVE_QA_SESSION_EXISTS = _("An active QA session already exists for this course.")
 
 # Info messages
 USER_ALREADY_DEACTIVATED_MSG = _("User {username} is already deactivated.")

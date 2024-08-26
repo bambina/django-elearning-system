@@ -56,7 +56,7 @@ class PortalUser(AbstractUser):
         STUDENT = 2, _("Student")
 
     class Title(models.TextChoices):
-        PREFER_NOT_TO_SAY = "NONE", _("Prefer Not to Say")
+        PREFER_NOT_TO_SAY = "NONE", _("")
         MR = "MR", _("Mr.")
         MS = "MS", _("Ms.")
         MRS = "MRS", _("Mrs.")
@@ -358,3 +358,27 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.message[:20]}...)"
+
+
+class QASession(models.Model):
+    class Status(models.IntegerChoices):
+        ACTIVE = 1, _("Active")
+        ENDED = 2, _("Ended")
+
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="qa_sessions"
+    )
+    room_name = models.CharField(max_length=200, unique=True, blank=True)
+    status = models.PositiveSmallIntegerField(
+        choices=Status.choices, default=Status.ACTIVE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_active(self):
+        return self.status == self.Status.ACTIVE
+
+    def is_ended(self):
+        return self.status == self.Status.ENDED
+
+    class Meta:
+        ordering = ["-created_at"]

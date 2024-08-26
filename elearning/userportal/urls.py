@@ -97,4 +97,14 @@ urlpatterns = [
         course_views.start_qa_session,
         name="start-qa-session",
     ),
+    path(
+        "courses/<int:course_id>/end-qa-session/",
+        course_views.end_qa_session,
+        name="end-qa-session",
+    ),
+    path(
+        "courses/<int:course_id>/qa-session/",
+        course_views.qa_session,
+        name="qa-session",
+    ),
 ]

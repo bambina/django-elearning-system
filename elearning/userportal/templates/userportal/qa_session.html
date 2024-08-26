@@ -1,32 +1,55 @@
 {% extends "./common/base.html" %}
 {% load static %}
 {% block content %}
-    <h1>Live Q&amp;A Session</h1>
-    <p>for {{ course.title}}</p>
-    <div class="py-3">
-        <div class="mb-3">
-            <label for="chat-message-input" class="visually-hidden">Your question</label>
-            <textarea class="form-control" id="chat-message-input" placeholder="Ask your question here..." rows="2"></textarea>
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="anonymous-checkbox" checked>
-                <label class="form-check-label" for="anonymous-checkbox">
-                    Post as an anonymous user
-                </label>
-            </div>
-        </div>
-        <button class="btn btn-primary" id="post-question-btn">Post Question</button>
-    </div>
-    <div class="py-3">
-        <h5>Q&amp;A</h5>
-        <div id="question-list"></div>
-    </div>
 
-    {{ 'aaa' | json_script:"room-name" }}
-    {{ user.get_full_name | json_script:"user-name" }}
-    {{ request.get_host | json_script:"host-name" }}
+<div class="row">
+    <div class="col-9 text-start">
+        <h1>Live Q&amp;A Session
+            {% if qa_session.is_ended %}
+            <span class="badge bg-secondary">Closed</span>
+            {% endif %}
+        </h1>
+        <p>for {{ course.title}}</p>
+    </div>
+    <div class="col-3 text-end">
+        {% if qa_session.is_active %}
+        <form method="post" action="{% url 'end-qa-session' course.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">End QA Session</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% if qa_session.is_active %}
+<div class="py-3">
+    <div class="mb-3">
+        <label for="chat-message-input" class="visually-hidden">Your question</label>
+        <textarea class="form-control" id="chat-message-input" placeholder="Ask your question here..." rows="2"></textarea>
+        {% if not is_instructor %}
+        <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" id="anonymous-checkbox" checked>
+            <label class="form-check-label" for="anonymous-checkbox">
+                Post as an anonymous user
+            </label>
+        </div>
+        {% endif %}
+    </div>
+    <button class="btn btn-primary" id="post-question-btn">Post Question</button>
+</div>
+{% endif %}
+
+<div class="py-3">
+    <h5>Q&amp;A</h5>
+    <div id="question-list"></div>
+</div>
+
+{{ qa_session.room_name | json_script:"room-name" }}
+{{ user.get_full_name | json_script:"user-name" }}
+{{ request.get_host | json_script:"host-name" }}
+{{ is_instructor | json_script:"is-instructor" }}
 
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'userportal/js/live_qa_websocket.js' %}"></script>
 {% endblock %}
-

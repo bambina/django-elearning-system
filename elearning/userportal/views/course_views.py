@@ -11,6 +11,7 @@ from django.urls import reverse
 from ..tasks import create_notifications_for_enrolled_students
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
+from datetime import datetime
 
 
 class CourseListView(ListView):
@@ -67,6 +68,15 @@ class CourseDetailView(DetailView):
                     context["is_taking"] = Enrollment.objects.filter(
                         student=user.student_profile, offering=current_offering
                     ).exists()
+                if active_session := QASession.objects.filter(
+                    course=course, status=QASession.Status.ACTIVE
+                ).first():
+                    context["qa_session"] = active_session
+                else:
+                    context["show_start_session_button"] = True
+                    context["qa_session"] = QASession.objects.filter(
+                        course=course, status=QASession.Status.ENDED
+                    ).first()
 
         next_term = AcademicTerm.next()
         if next_term:
@@ -179,9 +189,46 @@ def download_material(request, course_id, material_id):
 
 @require_http_methods(["POST"])
 def start_qa_session(request, course_id):
-    course = get_object_or_404(Course, pk=course_id)
-
     # Only teachers can start a QA session
     # TODO: Check if the user is the teacher of the course or an admin
+    course = get_object_or_404(Course, pk=course_id)
+    # Show error message if an active QA session already exists
+    active_session = QASession.objects.filter(
+        course=course, status=QASession.Status.ACTIVE
+    ).first()
+    if active_session:
+        # TODO: redirect 'course-detail'
+        messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
+        return redirect("qa-session", course_id=course.id)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    room_name = f"{course.id}_{timestamp}"
+    qa_session, _ = QASession.objects.get_or_create(course=course)
+    qa_session.room_name = room_name
+    qa_session.status = QASession.Status.ACTIVE
+    qa_session.save()
+    context = {"course": course, "qa_session": qa_session, "is_instructor": True}
+    return render(request, "userportal/qa_session.html", context=context)
 
-    return render(request, "userportal/qa_session.html", {"course": course})
+
+def qa_session(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    qa_session = get_object_or_404(QASession, course=course)
+    is_instructor = (
+        request.user.is_teacher() and request.user.teacher_profile == course.teacher
+    )
+    context = {
+        "course": course,
+        "qa_session": qa_session,
+        "is_instructor": is_instructor,
+    }
+    return render(request, "userportal/qa_session.html", context=context)
+
+
+@require_http_methods(["POST"])
+def end_qa_session(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    qa_session = get_object_or_404(QASession, course=course)
+    qa_session.status = QASession.Status.ENDED
+    qa_session.save()
+    messages.success(request, "QA session ended successfully.")
+    return redirect("course-detail", pk=course.id)

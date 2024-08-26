@@ -1,9 +1,7 @@
-
-console.log("live_qa_websocket.js loaded");
-
 const roomName = JSON.parse(document.getElementById('room-name').textContent);
 const userName = JSON.parse(document.getElementById('user-name').textContent);
 const hostName = JSON.parse(document.getElementById('host-name').textContent)
+const isInstructor = JSON.parse(document.getElementById('is-instructor').textContent);
 
 var ws = new WebSocket('ws://' + hostName + '/ws/live-qa-session/' + roomName + '/');
 
@@ -28,8 +26,11 @@ document.getElementById('post-question-btn').onclick = function () {
 function sendQuestion() {
     const messageInputDom = document.getElementById('chat-message-input');
     const message = messageInputDom.value;
-    const anonymousCheckboxDom = document.getElementById('anonymous-checkbox');
-    const sender = anonymousCheckboxDom.checked ? 'Anonymous' : userName;
+    let sender = userName;
+    if (!isInstructor) {
+        const anonymousCheckboxDom = document.getElementById('anonymous-checkbox');
+        sender = anonymousCheckboxDom.checked ? 'Anonymous' : userName;
+    }
     ws.send(JSON.stringify({
         'message': message,
         'sender': sender,
