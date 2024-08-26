@@ -136,17 +136,7 @@ def create_material(request, course_id):
             material.save()
 
             # Asynchronously send notifications to students enrolled in the course
-            # TODO: Compose message in async task
-            message = MATERIAL_CREATED_NOTIFICATION_MSG % {
-                "material_title": material.title,
-                "course_title": course.title,
-            }
-            create_notifications_for_enrolled_students.delay(
-                course_id,
-                message,
-                reverse("material-list", kwargs={"course_id": course_id}),
-                MATERIAL_CREATED_NOTIFICATION_LINK_TEXT,
-            )
+            notify_students_of_material_creation.delay(course.id, material.id)
             messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
             return redirect("course-detail", pk=course_id)
     else:
@@ -242,9 +232,9 @@ def end_qa_session(request, course_id):
     async_to_sync(channel_layer.group_send)(
         f"{LIVE_QA_PREFIX}_{qa_session.room_name}",
         {
-            "type": "close.connection",
-            "message": "The QA session has ended.",
+            "type": LIVE_QA_CLOSE_CONNECTION_EVENT,
+            "message": LIVE_QA_END_SESSION_MSG,
         },
     )
-    messages.success(request, "QA session ended successfully.")
+    messages.success(request, QA_SESSION_END_SUCCESS_MSG)
     return redirect("course-detail", pk=course.id)

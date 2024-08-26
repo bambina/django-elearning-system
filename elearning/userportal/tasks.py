@@ -15,20 +15,20 @@ def notify_students_of_live_qa_start(course_id):
         course, message, link_path, LIVE_QA_START_NOTIFICATION_LINK_TEXT
     )
 
-
 @shared_task
-def create_notifications_for_enrolled_students(
-    course_id, message, link_path, link_text
-):
+def notify_students_of_material_creation(course_id, material_id):
     """
-    A task to create notifications for students enrolled in a course.
+    A task to notify students when a new material is added to a course.
     """
-    students = StudentProfile.objects.filter(
-        courses__offering__course_id=course_id,
-        courses__offering__term=AcademicTerm.current(),
-    ).only("user")
-    users = [student.user for student in students]
-    send_notifications(users, message, link_path, link_text)
+    course = Course.objects.get(id=course_id)
+    material = Material.objects.get(id=material_id)
+    message = MATERIAL_CREATED_NOTIFICATION_MSG.format(
+        material_title=material.title, course_title=course.title
+    )
+    link_path = reverse("material-list", args=[course.id])
+    send_notifications_to_currently_enrolled_students(
+        course, message, link_path, MATERIAL_CREATED_NOTIFICATION_LINK_TEXT
+    )
 
 
 @shared_task

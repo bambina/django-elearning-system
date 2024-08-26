@@ -45,10 +45,11 @@ SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")
 MATERIAL_CREATED_SUCCESS_MSG = _("The material has been created successfully.")
 DEACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully deactivated.")
 ACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully activated.")
+QA_SESSION_END_SUCCESS_MSG = _("QA session ended successfully.")
 
 # Notification messages
 MATERIAL_CREATED_NOTIFICATION_MSG = _(
-    "A new material '%(material_title)s' has been added to the course %(course_title)s."
+    "A new material {material_title} has been added to the course {course_title}."
 )
 MATERIAL_CREATED_NOTIFICATION_LINK_TEXT = _("View material")
 STUDENT_ENROLLED_NOTIFICATION_MSG = _(
@@ -62,3 +63,7 @@ LIVE_QA_START_NOTIFICATION_LINK_TEXT = _("Join the session")
 
 # Constants for live Q&A session
 LIVE_QA_PREFIX = "liveqa_"
+LIVE_QA_CLOSE_CONNECTION_EVENT = "close.connection"
+LIVE_QA_END_SESSION_MSG = _(
+    "This Q&A session has concluded. Thank you for participating! Messages can no longer be sent."
+)
