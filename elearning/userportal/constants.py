@@ -52,6 +52,8 @@ MATERIAL_CREATED_NOTIFICATION_MSG = _(
 )
 MATERIAL_CREATED_NOTIFICATION_LINK_TEXT = _("View material")
 STUDENT_ENROLLED_NOTIFICATION_MSG = _(
-    "Student {username} has enrolled in your upcoming course {course_title}"
+    "Student {username} has enrolled in your upcoming course {course_title}."
 )
 STUDENT_ENROLLED_NOTIFICATION_LINK_TEXT = _("View enrolled students")
+LIVE_QA_START_NOTIFICATION_MSG = _("A live Q&A session has started for the course {course_title}.")
+LIVE_QA_START_NOTIFICATION_LINK_TEXT = _("Join the session")

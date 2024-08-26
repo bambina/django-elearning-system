@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.conf import settings
 from django.http import FileResponse
 from django.urls import reverse
-from ..tasks import create_notifications_for_enrolled_students
+from ..tasks import *
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 from datetime import datetime
@@ -206,6 +206,9 @@ def start_qa_session(request, course_id):
     qa_session.room_name = room_name
     qa_session.status = QASession.Status.ACTIVE
     qa_session.save()
+    # Notify students enrolled in the course
+    notify_students_of_live_qa_start.delay(course.id)
+
     context = {"course": course, "qa_session": qa_session, "is_instructor": True}
     return render(request, "userportal/qa_session.html", context=context)
 

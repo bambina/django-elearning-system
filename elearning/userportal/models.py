@@ -228,7 +228,7 @@ class Enrollment(models.Model):
         FAIL = 3, _("Fail")
 
     student = models.ForeignKey(
-        StudentProfile, on_delete=models.CASCADE, related_name="courses"
+        StudentProfile, on_delete=models.CASCADE, related_name="enrollments"
     )
     offering = models.ForeignKey(
         CourseOffering, on_delete=models.CASCADE, related_name="students"
