@@ -15,6 +15,7 @@ from datetime import datetime
 from asgiref.sync import async_to_sync
 from ..consumers import ChatConsumer
 from channels.layers import get_channel_layer
+from userportal.permissions import PermissionChecker
 
 
 class CourseListView(ListView):
@@ -183,7 +184,10 @@ def download_material(request, course_id, material_id):
 @require_http_methods(["POST"])
 def start_qa_session(request, course_id):
     # Only teachers can start a QA session
-    # TODO: Check if the user is the teacher of the course or an admin
+    if not PermissionChecker.is_teacher_or_admin(request.user):
+        messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
+        return redirect("course-detail", pk=course_id)
+
     course = get_object_or_404(Course, pk=course_id)
     # Show error message if an active QA session already exists
     last_session = QASession.objects.filter(course=course).first()
@@ -223,6 +227,10 @@ def qa_session(request, course_id):
 
 @require_http_methods(["POST"])
 def end_qa_session(request, course_id):
+    if not PermissionChecker.is_teacher_or_admin(request.user):
+        messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
+        return redirect("qa-session", course_id=course_id)
+
     course = get_object_or_404(Course, pk=course_id)
     qa_session = get_object_or_404(QASession, course=course)
     qa_session.status = QASession.Status.ENDED
