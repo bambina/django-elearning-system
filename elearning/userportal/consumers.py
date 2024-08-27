@@ -6,6 +6,10 @@ from userportal.models import *
 from channels.db import database_sync_to_async
 from django.utils import timezone
 from userportal.permissions import *
+import logging
+import datetime
+
+logger = logging.getLogger(__name__)
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -15,15 +19,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-
         await self.accept()
 
-        # Send existing messages
-        questions = await self.get_questions()
+        # Send existing messages as a list
+        questions = await self.get_group_questions()
         await self.send(
             text_data=json.dumps(
                 {
-                    "type": "question.list",
+                    "type": MESSAGE_TYPE_QUESTION_LIST,
                     "questions": [
                         {
                             "message": question.text,
@@ -49,30 +52,36 @@ class ChatConsumer(AsyncWebsocketConsumer):
             timestamp = timezone.now()
 
             if not message:
-                # TODO: Log the error
+                logger.info(QA_SESSION_EMPTY_MSG)
                 return
 
-            if await self.is_session_ended():
+            if await self.is_qa_session_ended():
+                logger.info(QA_SESSION_ENDED_MSG)
                 return
 
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "question.message",
-                    "message": message,
-                    "sender": sender,
-                    "timestamp": timestamp.isoformat(),
-                },
+            # Send message to group and save to database
+            await self.send_message_to_group(
+                MESSAGE_TYPE_QUESTION, message, sender, timestamp
             )
-
-            # Save message to database
             await self.save_message(message, sender, timestamp)
-        except Exception:
-            # TODO: Log the error
-            pass
+        except json.JSONDecodeError:
+            logger.error(ERR_INVALID_JSON, exc_info=True)
+        except Exception as e:
+            logger.error(ERR_UNEXPECTED.format(message=str(e)), exc_info=True)
 
-    # Receive message from room group
+    async def send_message_to_group(
+        self, message_type: str, message: str, sender: str, timestamp: datetime
+    ):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": message_type,
+                "message": message,
+                "sender": sender,
+                "timestamp": timestamp.isoformat(),
+            },
+        )
+
     async def question_message(self, event):
         message = event["message"]
         sender = event["sender"]
@@ -112,10 +121,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         chat_msg.save()
 
     @database_sync_to_async
-    def get_questions(self):
-        return list(QAQuestion.objects.filter(room_name=self.room_name).order_by("timestamp"))
+    def get_group_questions(self):
+        return list(
+            QAQuestion.objects.filter(room_name=self.room_name).order_by("timestamp")
+        )
 
     @database_sync_to_async
-    def is_session_ended(self):
+    def is_qa_session_ended(self):
         qa_session = QASession.objects.filter(room_name=self.room_name).first()
         return qa_session and qa_session.status == QASession.Status.ENDED

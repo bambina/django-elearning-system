@@ -12,6 +12,7 @@ INVALID_COURSE_ALREADY_STARTED_MSG = _(
 )
 
 # Error messages
+ERR_UNEXPECTED = _("Unexpected error in receive: {message}")
 ERR_ONLY_STUDENTS_CAN_ENROLL = _("Only students can enroll in courses.")
 ERR_ONLY_STUDENTS_CAN_CREATE_FEEDBACK = _("Only students can create feedback.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")
@@ -27,6 +28,7 @@ ERR_MISSING_NOTIFICATION_LINK = _(
 ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS = _(
     "Only authorized personnel can manage QA sessions."
 )
+ERR_INVALID_JSON = _("Invalid JSON received")
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
@@ -35,6 +37,8 @@ ACTIVE_QA_SESSION_EXISTS = _("An active QA session already exists for this cours
 # Info messages
 USER_ALREADY_DEACTIVATED_MSG = _("User {username} is already deactivated.")
 USER_ALREADY_ACTIVATED_MSG = _("User {username} is already activated.")
+QA_SESSION_EMPTY_MSG = _("Empty message received and ignored")
+QA_SESSION_ENDED_MSG = _("Message received after session end and ignored")
 
 # Success messages
 CREATE_STUDENT_ACCOUNT_SUCCESS_MSG = _(
@@ -66,6 +70,8 @@ LIVE_QA_START_NOTIFICATION_LINK_TEXT = _("Join the session")
 # Constants for live Q&A session
 LIVE_QA_PREFIX = "liveqa_"
 LIVE_QA_CLOSE_CONNECTION_EVENT = "close.connection"
+MESSAGE_TYPE_QUESTION = "question.message"
+MESSAGE_TYPE_QUESTION_LIST = "question.list"
 LIVE_QA_END_SESSION_MSG = _(
     "This Q&A session has concluded. Thank you for participating! Messages can no longer be sent."
 )
