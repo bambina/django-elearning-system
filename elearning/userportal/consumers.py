@@ -102,7 +102,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
         # Close the connection
-        await self.close()
+        await self.close(code=4000)
 
     @database_sync_to_async
     def save_message(self, message, sender, timestamp):
