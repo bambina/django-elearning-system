@@ -4,6 +4,15 @@ from django.urls import reverse
 
 
 @shared_task
+def delete_qa_questions(room_name):
+    """
+    A task to delete all questions in the Q&A session.
+    """
+    num_deletions, _ = QAQuestion.objects.filter(room_name=room_name).delete()
+    print(f"Deleted {num_deletions} questions.")
+
+
+@shared_task
 def notify_students_of_live_qa_start(course_id):
     """
     A task to notify students when a live Q&A session starts.

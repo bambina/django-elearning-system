@@ -186,22 +186,22 @@ def start_qa_session(request, course_id):
     # TODO: Check if the user is the teacher of the course or an admin
     course = get_object_or_404(Course, pk=course_id)
     # Show error message if an active QA session already exists
-    active_session = QASession.objects.filter(
-        course=course, status=QASession.Status.ACTIVE
-    ).first()
-    if active_session:
+    last_session = QASession.objects.filter(course=course).first()
+    if last_session and last_session.is_active():
         # TODO: redirect 'course-detail'
         messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
         return redirect("qa-session", course_id=course.id)
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
     room_name = f"{course.id}_{timestamp}"
     qa_session, _ = QASession.objects.get_or_create(course=course)
+    previous_room_name = qa_session.room_name
     qa_session.room_name = room_name
     qa_session.status = QASession.Status.ACTIVE
     qa_session.save()
     # Notify students enrolled in the course
     notify_students_of_live_qa_start.delay(course.id)
-
+    # Delete all previous questions asynchronously
+    delete_qa_questions.delay(previous_room_name)
     context = {"course": course, "qa_session": qa_session, "is_instructor": True}
     return render(request, "userportal/qa_session.html", context=context)
 

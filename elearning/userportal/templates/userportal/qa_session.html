@@ -64,8 +64,8 @@
 {{ user.get_full_name | json_script:"user-name" }}
 {{ request.get_host | json_script:"host-name" }}
 {{ is_instructor | json_script:"is-instructor" }}
-<script src="{% static 'userportal/js/live_qa_websocket.js' %}"></script>
+<script src="{% static 'userportal/js/active_qa_session.js' %}"></script>
 {% else %}
-<script src="{% static 'userportal/js/ended_qa_websocket.js' %}"></script>
+<script src="{% static 'userportal/js/ended_qa_session.js' %}"></script>
 {% endif %}
 {% endblock %}
