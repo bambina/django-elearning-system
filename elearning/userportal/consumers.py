@@ -48,7 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender = data.get("sender")
             timestamp = timezone.now()
 
-            if not (message and sender):
+            if not message:
                 # TODO: Log the error
                 return
 
@@ -113,9 +113,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_questions(self):
-        return list(
-            QAQuestion.objects.filter(room_name=self.room_name).order_by("-timestamp")
-        )
+        return list(QAQuestion.objects.filter(room_name=self.room_name))
 
     @database_sync_to_async
     def is_session_ended(self):

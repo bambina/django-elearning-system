@@ -391,4 +391,4 @@ class QAQuestion(models.Model):
     timestamp = models.DateTimeField()
 
     class Meta:
-        ordering = ["-timestamp"]
+        ordering = ["timestamp"]

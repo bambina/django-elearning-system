@@ -1,14 +1,13 @@
-const roomName = JSON.parse(document.getElementById('room-name').textContent);
-const userName = JSON.parse(document.getElementById('user-name').textContent);
-const hostName = JSON.parse(document.getElementById('host-name').textContent)
-const isInstructor = JSON.parse(document.getElementById('is-instructor').textContent);
+const MAX_RETRIES = 2;
+const RECONNECT_INTERVAL = 1000 * 3;
+const SESSION_TERMINATE_CODE = 4000;
 
 class WebSocketClient {
     constructor(url) {
         this.url = url;
         this.ws = null;
-        this.maxRetries = 5;
-        this.autoReconnectInterval = 1000 * 3;
+        this.maxRetries = MAX_RETRIES;
+        this.autoReconnectInterval = RECONNECT_INTERVAL;
         this.messageHandlers = new Map();
     }
 
@@ -16,17 +15,17 @@ class WebSocketClient {
         this.ws = new WebSocket(this.url);
         this.ws.onopen = () => {
             console.log('WebSocket connection opened');
-            this.maxRetries = 5;
+            this.maxRetries = MAX_RETRIES;
             this.triggerHandler('open');
         }
         this.ws.onclose = (e) => {
             console.log('WebSocket connection closed:', e.reason);
-            if (e.code === 4000) {
+            if (e.code === SESSION_TERMINATE_CODE) {
                 console.log('The instructor has ended the session.');
-                return;
-            }
-            if (!e.wasClean) {
-                this.reconnect();
+            } else {
+                if (!e.wasClean) {
+                    this.reconnect();
+                }
             }
         }
         this.ws.onerror = (e) => {
@@ -51,6 +50,17 @@ class WebSocketClient {
         }
     }
 
+    send(message, sender) {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({
+                'message': message,
+                'sender': sender
+            }));
+        } else {
+            console.error('WebSocket connection is not open.');
+        }
+    }
+
     addHandler(event, handler) {
         if (!this.messageHandlers.has(event)) {
             this.messageHandlers.set(event, new Set());
@@ -66,11 +76,17 @@ class WebSocketClient {
     }
 }
 
+const roomName = JSON.parse(document.getElementById('room-name').textContent);
+const userName = JSON.parse(document.getElementById('user-name').textContent);
+const hostName = JSON.parse(document.getElementById('host-name').textContent)
+const isInstructor = JSON.parse(document.getElementById('is-instructor').textContent);
+
 url = 'ws://' + hostName + '/ws/live-qa-session/' + roomName + '/';
 const client = new WebSocketClient(url);
 
 client.addHandler('open', () => {
     setupFormEventListeners();
+    toggleFormElements(false);
 });
 
 client.addHandler('message', (data) => {
@@ -85,7 +101,7 @@ client.addHandler('message', (data) => {
 });
 
 function handleSessionEnd(data) {
-    disableFormElements();
+    toggleFormElements(true);
     createCard(data);
 }
 
@@ -98,21 +114,6 @@ function handleQuestionList(questions) {
     questions.forEach(createCard);
 }
 
-function sendQuestion() {
-    const messageInputDom = document.getElementById('chat-message-input');
-    const message = messageInputDom.value;
-    let sender = userName;
-    if (!isInstructor) {
-        const anonymousCheckboxDom = document.getElementById('anonymous-checkbox');
-        sender = anonymousCheckboxDom.checked ? 'Anonymous' : userName;
-    }
-    client.ws.send(JSON.stringify({
-        'message': message,
-        'sender': sender
-    }));
-    messageInputDom.value = '';
-}
-
 function createCard(question) {
     // Create a new card element
     var card = document.createElement("div");
@@ -123,7 +124,7 @@ function createCard(question) {
     // Add the sender name
     var sender = document.createElement("h5");
     sender.className = "card-title";
-    sender.textContent = question.sender;
+    sender.textContent = question.sender || "Anonymous";
     cardBody.appendChild(sender);
     // Add the timestamp
     var timeStamp = document.createElement("p");
@@ -139,13 +140,25 @@ function createCard(question) {
     document.getElementById("question-list").prepend(card);
 }
 
+function sendMessage() {
+    const messageInputDom = document.getElementById('chat-message-input');
+    const message = messageInputDom.value;
+    let sender = userName;
+    const anonymousCheckboxDom = document.getElementById('anonymous-checkbox');
+    if (anonymousCheckboxDom && anonymousCheckboxDom.checked) {
+        sender = "";
+    }
+    client.send(message, sender);
+    messageInputDom.value = '';
+}
+
 function setupFormEventListeners() {
     let messageInput = document.getElementById('chat-message-input');
     if (messageInput) {
         messageInput.onkeyup = function (e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                sendQuestion();
+                sendMessage();
             }
         };
     }
@@ -153,12 +166,12 @@ function setupFormEventListeners() {
     let postBtn = document.getElementById('post-question-btn');
     if (postBtn) {
         postBtn.onclick = function () {
-            sendQuestion();
+            sendMessage();
         };
     }
 }
 
-function disableFormElements() {
+function toggleFormElements(disable) {
     const elementIds = [
         'post-question-btn',
         'anonymous-checkbox',
@@ -168,7 +181,7 @@ function disableFormElements() {
     elementIds.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.disabled = true;
+            element.disabled = disable;
         }
     });
 }
