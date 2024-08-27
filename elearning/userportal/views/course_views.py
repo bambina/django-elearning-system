@@ -1,20 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from ..models import *
-from ..forms import *
+
 from django.views.generic import ListView, DetailView
+from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from django.conf import settings
 from django.http import FileResponse
-from django.urls import reverse
-from ..tasks import *
-from django.shortcuts import get_object_or_404
-from django.views.decorators.http import require_http_methods
-from datetime import datetime
-from asgiref.sync import async_to_sync
-from ..consumers import ChatConsumer
 from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+from userportal.consumers import *
+from userportal.models import *
+from userportal.forms import *
+from userportal.tasks import *
 from userportal.permissions import PermissionChecker
 
 
@@ -195,7 +194,7 @@ def start_qa_session(request, course_id):
         # TODO: redirect 'course-detail'
         messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
         return redirect("qa-session", course_id=course.id)
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+    timestamp = timezone.now().strftime("%Y%m%d%H%M%S%f")
     room_name = f"{course.id}_{timestamp}"
     qa_session, _ = QASession.objects.get_or_create(course=course)
     previous_room_name = qa_session.room_name
@@ -241,7 +240,7 @@ def end_qa_session(request, course_id):
         room_name=qa_session.room_name,
         text=LIVE_QA_END_SESSION_MSG,
         sender="System",
-        timestamp=datetime.now(),
+        timestamp=timezone.now(),
     )
     close_comment.save()
     # Close all connections
@@ -249,7 +248,7 @@ def end_qa_session(request, course_id):
     async_to_sync(channel_layer.group_send)(
         f"{LIVE_QA_PREFIX}_{close_comment.room_name}",
         {
-            "type": LIVE_QA_CLOSE_CONNECTION_EVENT,
+            "type": MESSAGE_TYPE_CLOSE,
             "message": close_comment.text,
             "sender": close_comment.sender,
             "timestamp": close_comment.timestamp.isoformat(),

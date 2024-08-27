@@ -1,19 +1,22 @@
 import json
-
-from channels.generic.websocket import AsyncWebsocketConsumer
-from .constants import *
-from userportal.models import *
-from channels.db import database_sync_to_async
-from django.utils import timezone
-from userportal.permissions import *
-import logging
 import datetime
+import logging
+from typing import Dict
+
+from django.utils import timezone
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+
+from userportal.models import *
+from userportal.constants import *
+from userportal.permissions import *
 
 logger = logging.getLogger(__name__)
 
 
-class ChatConsumer(AsyncWebsocketConsumer):
+class QASessionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        """Connection event handler provided by AsyncWebsocketConsumer."""
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"{LIVE_QA_PREFIX}_{self.room_name}"
 
@@ -21,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        # Send existing messages as a list
+        # Send existing questions to the user
         questions = await self.get_group_questions()
         await self.send(
             text_data=json.dumps(
@@ -40,11 +43,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def disconnect(self, close_code):
+        """Disconnection event handler provided by AsyncWebsocketConsumer."""
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
-    # Receive message from WebSocket
     async def receive(self, text_data):
+        """Message receive handler provided by AsyncWebsocketConsumer."""
         try:
             data = json.loads(text_data)
             message = data.get("message")
@@ -71,7 +75,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def send_message_to_group(
         self, message_type: str, message: str, sender: str, timestamp: datetime
-    ):
+    ) -> None:
+        """Send a message to the group channel."""
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -82,51 +87,51 @@ class ChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
-    async def question_message(self, event):
-        message = event["message"]
-        sender = event["sender"]
-        timestamp = event["timestamp"]
-
-        # Send message to WebSocket
-        await self.send(
-            text_data=json.dumps(
-                {"message": message, "sender": sender, "timestamp": timestamp}
-            )
-        )
-
-    async def close_connection(self, event):
-        # Send close message
-        message = event["message"]
-        sender = event["sender"]
-        timestamp = event["timestamp"]
-
+    async def question_message(self, message_data: Dict[str, str]) -> None:
+        """Send the question to the group"""
         await self.send(
             text_data=json.dumps(
                 {
-                    "type": "session.end.notice",
-                    "message": message,
-                    "sender": sender,
-                    "timestamp": timestamp,
+                    "type": MESSAGE_TYPE_QUESTION,
+                    "message": message_data["message"],
+                    "sender": message_data["sender"],
+                    "timestamp": message_data["timestamp"],
+                }
+            )
+        )
+
+    async def close_connection(self, message_data: Dict[str, str]) -> None:
+        """Close the connection. This is called when the instructor has ended the QA session"""
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": MESSAGE_TYPE_CLOSE,
+                    "message": message_data["message"],
+                    "sender": message_data["sender"],
+                    "timestamp": message_data["timestamp"],
                 }
             )
         )
         # Close the connection
-        await self.close(code=4000)
+        await self.close(code=SESSION_TERMINATE_CODE)
 
     @database_sync_to_async
-    def save_message(self, message, sender, timestamp):
-        chat_msg = QAQuestion(
+    def save_message(self, message: str, sender: str, timestamp: datetime) -> None:
+        """Save the message to the database"""
+        qa_question = QAQuestion(
             room_name=self.room_name, text=message, sender=sender, timestamp=timestamp
         )
-        chat_msg.save()
+        qa_question.save()
 
     @database_sync_to_async
-    def get_group_questions(self):
+    def get_group_questions(self) -> list[QAQuestion]:
+        """Get all questions in the group"""
         return list(
             QAQuestion.objects.filter(room_name=self.room_name).order_by("timestamp")
         )
 
     @database_sync_to_async
-    def is_qa_session_ended(self):
+    def is_qa_session_ended(self) -> bool:
+        """Check if the QA session is ended"""
         qa_session = QASession.objects.filter(room_name=self.room_name).first()
         return qa_session and qa_session.status == QASession.Status.ENDED

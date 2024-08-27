@@ -69,9 +69,10 @@ LIVE_QA_START_NOTIFICATION_LINK_TEXT = _("Join the session")
 
 # Constants for live Q&A session
 LIVE_QA_PREFIX = "liveqa_"
-LIVE_QA_CLOSE_CONNECTION_EVENT = "close.connection"
+MESSAGE_TYPE_CLOSE = "close.connection"
 MESSAGE_TYPE_QUESTION = "question.message"
 MESSAGE_TYPE_QUESTION_LIST = "question.list"
 LIVE_QA_END_SESSION_MSG = _(
     "This Q&A session has concluded. Thank you for participating! Messages can no longer be sent."
 )
+SESSION_TERMINATE_CODE = 4000

@@ -3,7 +3,7 @@
 {% block content %}
 
 <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3">
-  <div id="statusToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="status_toast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div class="toast-body"></div>
       <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -33,18 +33,18 @@
 {% if qa_session.is_active %}
 <div class="py-3">
     <div class="mb-3">
-        <label for="chat-message-input" class="visually-hidden">Your question</label>
-        <textarea class="form-control" id="chat-message-input" placeholder="Ask your question here..." rows="2" disabled></textarea>
+        <label for="message_input" class="visually-hidden">Your question</label>
+        <textarea class="form-control" id="message_input" placeholder="Ask your question here..." rows="2" disabled></textarea>
         {% if not is_instructor %}
         <div class="form-check mt-2">
-            <input class="form-check-input" type="checkbox" id="anonymous-checkbox" disabled checked>
-            <label class="form-check-label" for="anonymous-checkbox">
+            <input class="form-check-input" type="checkbox" id="anonymous_checkbox" disabled checked>
+            <label class="form-check-label" for="anonymous_checkbox">
                 Post as an anonymous user
             </label>
         </div>
         {% endif %}
     </div>
-    <button class="btn btn-primary" id="post-question-btn" disabled>Post Question</button>
+    <button class="btn btn-primary" id="post_question_btn" disabled>Post Question</button>
 </div>
 {% endif %}
 

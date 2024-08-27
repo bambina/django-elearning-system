@@ -1,5 +1,8 @@
+const MESSAGE_TYPE_CLOSE = "close.connection";
+const MESSAGE_TYPE_QUESTION = "question.message";
+const MESSAGE_TYPE_QUESTION_LIST = "question.list";
 const MAX_RETRIES = 3;
-const RECONNECT_INTERVAL = 1000 * 10;
+const RECONNECT_INTERVAL = 1000 * 5;
 const SESSION_TERMINATE_CODE = 4000;
 const TOAST_DELAY = 5000;
 
@@ -81,7 +84,7 @@ class WebSocketClient {
   }
 
   initStatusToast() {
-    const toastEl = document.getElementById("statusToast");
+    const toastEl = document.getElementById("status_toast");
     const toastBody = toastEl.querySelector(".toast-body");
     if (!toastEl || !toastBody) {
       return;
@@ -116,11 +119,11 @@ client.addHandler("open", () => {
 });
 
 client.addHandler("message", (data) => {
-  if (data.type === "session.end.notice") {
+  if (data.type === MESSAGE_TYPE_CLOSE) {
     handleSessionEnd(data);
-  } else if (data.type === "question.list") {
+  } else if (data.type === MESSAGE_TYPE_QUESTION_LIST) {
     handleQuestionList(data.questions);
-  } else {
+  } else if (data.type === MESSAGE_TYPE_QUESTION) {
     // Normal message
     createCard(data);
   }
@@ -169,10 +172,10 @@ function createCard(question) {
 }
 
 function sendMessage() {
-  const messageInputDom = document.getElementById("chat-message-input");
+  const messageInputDom = document.getElementById("message_input");
   const message = messageInputDom.value;
   let sender = userName;
-  const anonymousCheckboxDom = document.getElementById("anonymous-checkbox");
+  const anonymousCheckboxDom = document.getElementById("anonymous_checkbox");
   if (anonymousCheckboxDom && anonymousCheckboxDom.checked) {
     sender = "";
   }
@@ -181,7 +184,7 @@ function sendMessage() {
 }
 
 function setupFormEventListeners() {
-  let messageInput = document.getElementById("chat-message-input");
+  let messageInput = document.getElementById("message_input");
   if (messageInput) {
     messageInput.onkeyup = function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -191,7 +194,7 @@ function setupFormEventListeners() {
     };
   }
 
-  let postBtn = document.getElementById("post-question-btn");
+  let postBtn = document.getElementById("post_question_btn");
   if (postBtn) {
     postBtn.onclick = function () {
       sendMessage();
@@ -201,9 +204,9 @@ function setupFormEventListeners() {
 
 function toggleFormElements(disable) {
   const elementIds = [
-    "post-question-btn",
-    "anonymous-checkbox",
-    "chat-message-input",
+    "post_question_btn",
+    "anonymous_checkbox",
+    "message_input",
   ];
 
   elementIds.forEach((id) => {
