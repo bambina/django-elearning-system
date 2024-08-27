@@ -1,7 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
-from userportal.models import PortalUser, Program
 
+from userportal.models import *
 from userportal.constants import *
 
 
@@ -15,7 +15,12 @@ class BaseTestCase(TestCase):
             password="testpassword",
             first_name="Firstname",
             last_name="Lastname",
+            title=PortalUser.Title.PROF,
             user_type=PortalUser.UserType.TEACHER,
+        )
+        cls.teacher_profile = TeacherProfile.objects.create(
+            user=cls.user,
+            biography="Prof. Firstname Lastname is a Professor of Computer Science at the University of California.",
         )
 
 
@@ -71,7 +76,7 @@ class PasswordChangeViewTestCase(BaseTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.url = reverse("password_change")
+        cls.url = reverse("password-change")
         cls.new_password = "apple52cat"
 
     def test_password_change_view_get(self):
@@ -160,7 +165,7 @@ class SignUpViewTestCase(BaseTestCase):
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertTrue(response.wsgi_request.user.is_student())
         self.assertEqual(
-            response.wsgi_request.user.studentprofile.program, self.program
+            response.wsgi_request.user.student_profile.program, self.program
         )
 
     def test_signup_view_post_invalid(self):
