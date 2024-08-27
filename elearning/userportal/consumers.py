@@ -113,7 +113,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_questions(self):
-        return list(QAQuestion.objects.filter(room_name=self.room_name))
+        return list(QAQuestion.objects.filter(room_name=self.room_name).order_by("timestamp"))
 
     @database_sync_to_async
     def is_session_ended(self):
