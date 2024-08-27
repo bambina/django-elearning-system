@@ -1,3 +1,10 @@
+const roomName = JSON.parse(document.getElementById("room-name").textContent);
+const userName = JSON.parse(document.getElementById("user-name").textContent);
+const hostName = JSON.parse(document.getElementById("host-name").textContent);
+const isInstructor = JSON.parse(
+  document.getElementById("is-instructor").textContent
+);
+const url = "ws://" + hostName + "/ws/live-qa-session/" + roomName + "/";
 const MESSAGE_TYPE_CLOSE = "close.connection";
 const MESSAGE_TYPE_QUESTION = "question.message";
 const MESSAGE_TYPE_QUESTION_LIST = "question.list";
@@ -102,14 +109,6 @@ class WebSocketClient {
     }
   }
 }
-
-const roomName = JSON.parse(document.getElementById("room-name").textContent);
-const userName = JSON.parse(document.getElementById("user-name").textContent);
-const hostName = JSON.parse(document.getElementById("host-name").textContent);
-const isInstructor = JSON.parse(
-  document.getElementById("is-instructor").textContent
-);
-const url = "ws://" + hostName + "/ws/live-qa-session/" + roomName + "/";
 
 const client = new WebSocketClient(url);
 
