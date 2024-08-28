@@ -70,6 +70,7 @@
 {% block extra_js %}
 {% if qa_session.is_active %}
 {{ qa_session.room_name | json_script:"room-name" }}
+{{ course.id | json_script:"course-id" }}
 {{ user.get_full_name | json_script:"user-name" }}
 {{ request.get_host | json_script:"host-name" }}
 {{ is_instructor | json_script:"is-instructor" }}

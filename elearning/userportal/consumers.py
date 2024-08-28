@@ -19,10 +19,16 @@ class QASessionConsumer(AsyncWebsocketConsumer):
         """Connection event handler provided by AsyncWebsocketConsumer."""
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"{LIVE_QA_PREFIX}_{self.room_name}"
-
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
+
+        # Verify if the user has permission to join the live QA session
+        self.course_id = self.scope["url_route"]["kwargs"]["course_id"]
+        if not await self.has_permission_for_live_qa():
+            logger.info(UNAUTHORIZED_ACCESS_MSG)
+            await self.close(code=UNAUTHORIZED_ACCESS_CODE)
+            return
 
         # Send existing questions to the user
         questions = await self.get_group_questions()
@@ -136,3 +142,12 @@ class QASessionConsumer(AsyncWebsocketConsumer):
         qa_session = QASession.objects.filter(room_name=self.room_name).first()
         # If the session does not exist or its status is ENDED, return True
         return not qa_session or qa_session.status == QASession.Status.ENDED
+
+    @database_sync_to_async
+    def has_permission_for_live_qa(self) -> bool:
+        """Check if the user has permission to join the live QA session"""
+        course = Course.objects.filter(id=self.course_id).first()
+        if not course:
+            return False
+        user = self.scope["user"]
+        return PermissionChecker.is_active_in_course(user, course)

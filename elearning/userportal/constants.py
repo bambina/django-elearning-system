@@ -75,4 +75,7 @@ MESSAGE_TYPE_QUESTION_LIST = "question.list"
 LIVE_QA_END_SESSION_MSG = _(
     "This Q&A session has concluded. Thank you for participating! Messages can no longer be sent."
 )
+UNAUTHORIZED_ACCESS_MSG = _("Unauthorized access to the live Q&A session.")
+
 SESSION_TERMINATE_CODE = 4000
+UNAUTHORIZED_ACCESS_CODE = 4001

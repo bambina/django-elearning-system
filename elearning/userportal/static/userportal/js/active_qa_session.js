@@ -1,16 +1,18 @@
 const roomName = JSON.parse(document.getElementById("room-name").textContent);
+const courseId = JSON.parse(document.getElementById("course-id").textContent);
 const userName = JSON.parse(document.getElementById("user-name").textContent);
 const hostName = JSON.parse(document.getElementById("host-name").textContent);
 const isInstructor = JSON.parse(
   document.getElementById("is-instructor").textContent
 );
-const url = "ws://" + hostName + "/ws/live-qa-session/" + roomName + "/";
+const url = `ws://${hostName}/ws/course/${courseId}/live-qa-session/${roomName}/`;
 const MESSAGE_TYPE_CLOSE = "close.connection";
 const MESSAGE_TYPE_QUESTION = "question.message";
 const MESSAGE_TYPE_QUESTION_LIST = "question.list";
+const SESSION_TERMINATE_CODE = 4000;
+const UNAUTHORIZED_ACCESS_CODE = 4001;
 const MAX_RETRIES = 3;
 const RECONNECT_INTERVAL = 1000 * 5;
-const SESSION_TERMINATE_CODE = 4000;
 const TOAST_DELAY = 5000;
 
 class WebSocketClient {
@@ -35,8 +37,15 @@ class WebSocketClient {
       this.triggerHandler("open");
     };
     this.ws.onclose = (e) => {
-      if (e.code !== SESSION_TERMINATE_CODE && !e.wasClean) {
-        this.reconnect();
+      if (
+        e.code === SESSION_TERMINATE_CODE ||
+        e.code === UNAUTHORIZED_ACCESS_CODE
+      ) {
+        toggleFormElements(true);
+      } else {
+        if (!e.wasClean) {
+          this.reconnect();
+        }
       }
     };
     this.ws.onerror = (e) => {
