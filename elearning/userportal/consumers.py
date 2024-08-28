@@ -134,4 +134,5 @@ class QASessionConsumer(AsyncWebsocketConsumer):
     def is_qa_session_ended(self) -> bool:
         """Check if the QA session is ended"""
         qa_session = QASession.objects.filter(room_name=self.room_name).first()
-        return qa_session and qa_session.status == QASession.Status.ENDED
+        # If the session does not exist or its status is ENDED, return True
+        return not qa_session or qa_session.status == QASession.Status.ENDED
