@@ -6,6 +6,9 @@ from channels.testing import WebsocketCommunicator
 
 from userportal.consumers import *
 
+# Get the auth user model
+User = get_user_model()
+
 # Room name for testing
 TEST_ROOM_NAME = "test"
 
@@ -14,7 +17,7 @@ TEST_ROOM_NAME = "test"
 def qa_session_fixture(db):
     # Create a QA session for testing
     # TODO: Use factories to create objects
-    user = PortalUser.objects.create_user(
+    user = User.objects.create_user(
         username="testuser",
         email="test@example.com",
         password="testpassword",
@@ -41,16 +44,21 @@ def qa_session_fixture(db):
         course=course,
         room_name=TEST_ROOM_NAME,
     )
+    return user, course.id
 
 
-async def setup_communicator():
+async def setup_communicator(user: User, course_id: int):
     application = URLRouter(
         [
-            path("ws/live-qa-session/<room_name>/", QASessionConsumer.as_asgi()),
+            path(
+                "ws/course/<int:course_id>/live-qa-session/<room_name>/",
+                QASessionConsumer.as_asgi(),
+            ),
         ]
     )
-    url = "/ws/live-qa-session/test/"
+    url = f"/ws/course/{course_id}/live-qa-session/test/"
     communicator = WebsocketCommunicator(application, url)
+    communicator.scope["user"] = user
     connected, _ = await communicator.connect()
     assert connected, "WebSocket connection failed"
     response = await communicator.receive_json_from()
@@ -62,7 +70,7 @@ async def setup_communicator():
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_send_receive_json(qa_session_fixture):
-    communicator = await setup_communicator()
+    communicator = await setup_communicator(*qa_session_fixture)
     message_text = "hello"
     sender = "user1"
     await communicator.send_json_to({"message": message_text, "sender": sender})
@@ -75,8 +83,8 @@ async def test_send_receive_json(qa_session_fixture):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_send_receive_json_empty_message():
-    communicator = await setup_communicator()
+async def test_send_receive_json_empty_message(qa_session_fixture):
+    communicator = await setup_communicator(*qa_session_fixture)
     await communicator.send_json_to({"message": "", "sender": "user1"})
     assert await communicator.receive_nothing() is True
     await communicator.disconnect()
