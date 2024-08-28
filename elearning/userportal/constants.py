@@ -29,6 +29,9 @@ ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS = _(
     "Only authorized personnel can manage QA sessions."
 )
 ERR_INVALID_JSON = _("Invalid JSON received")
+ERR_FAILED_TO_SEND_NOTIFICATION = _(
+    "Failed to send notifications to users. Error: {exception}."
+)
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
