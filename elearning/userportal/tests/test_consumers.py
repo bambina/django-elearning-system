@@ -1,4 +1,5 @@
 import pytest
+from typing import Type
 
 from django.urls import path
 from channels.routing import URLRouter
@@ -8,6 +9,7 @@ from userportal.consumers import *
 
 # Get the auth user model
 User = get_user_model()
+UserType = Type[get_user_model()]
 
 # Room name for testing
 TEST_ROOM_NAME = "test"
@@ -47,7 +49,7 @@ def qa_session_fixture(db):
     return user, course.id
 
 
-async def setup_communicator(user: User, course_id: int):
+async def setup_communicator(user: UserType, course_id: int):
     application = URLRouter(
         [
             path(
