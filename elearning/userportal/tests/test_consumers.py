@@ -30,7 +30,6 @@ def active_qa_session_with_unenrolled_student_fixture(db):
     # Create an active QA session, and a student not enrolled in the course.
     qa_session = QASessionFactory.create()
     student = StudentProfileFactory.create()
-    print(f"{student.user.user_type=}")
     return qa_session, student.user
 
 

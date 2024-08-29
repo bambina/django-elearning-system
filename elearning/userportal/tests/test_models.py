@@ -117,8 +117,6 @@ class StudentProfileModelTest(TestCase):
         )
 
     def test_create_student_profile(self):
-        print(AcademicTermFactory.create())
-        print(self.student.registration_date)
         self.assertTrue(self.student.user.username, "testusername")
 
     #     student = StudentProfileFactory.create(

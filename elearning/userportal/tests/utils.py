@@ -1,5 +1,5 @@
 from django.utils import timezone
-from userportal.utils import create_aware_datetime
+from userportal.utils import create_timezone_aware_datetime
 
 
 def get_current_term_datetimes():
@@ -11,14 +11,14 @@ def get_current_term_datetimes():
     previous_year = current_year - 1
 
     # Fall term is from October 1 to March 31
-    fall_start = create_aware_datetime(previous_year, 10, 1)
-    fall_end = create_aware_datetime(current_year, 3, 31)
+    fall_start = create_timezone_aware_datetime(previous_year, 10, 1)
+    fall_end = create_timezone_aware_datetime(current_year, 3, 31)
     # Spring term is from April 1 to September 30
-    spring_start = create_aware_datetime(current_year, 4, 1)
-    spring_end = create_aware_datetime(current_year, 9, 30)
+    spring_start = create_timezone_aware_datetime(current_year, 4, 1)
+    spring_end = create_timezone_aware_datetime(current_year, 9, 30)
     # Fall term is from October 1 to March 31
-    fall_start2 = create_aware_datetime(current_year, 10, 1)
-    fall_end2 = create_aware_datetime(next_year, 3, 31)
+    fall_start2 = create_timezone_aware_datetime(current_year, 10, 1)
+    fall_end2 = create_timezone_aware_datetime(next_year, 3, 31)
 
     if fall_start <= today <= fall_end:
         return fall, fall_start.year, fall_start, fall_end
