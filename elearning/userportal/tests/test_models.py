@@ -188,6 +188,21 @@ class AcademicTermModelTest(TestCase):
             end_datetime=next_end,
         )
         self.assertEqual(next_term.status, AcademicTerm.TermStatus.NOT_STARTED)
+    
+    def test_clean_method_with_valid_dates(self):
+        valid_term = AcademicTermFactory.create()
+        try:
+            valid_term.clean()
+        except ValidationError as e:
+            self.fail(f"clean() raised ValidationError unexpectedly. {e}")
+
+    def test_clean_method_with_invalid_dates(self):
+        invalid_term = AcademicTermFactory.create()
+        invalid_term.start_datetime = invalid_term.end_datetime + relativedelta(days=1)
+        with self.assertRaises(ValidationError) as context:
+            invalid_term.clean()
+        errors = context.exception.error_dict
+        self.assertIn("start_datetime", errors)
 
     def test_str(self):
         start = self.term.start_datetime.strftime("%b %d, %Y")
