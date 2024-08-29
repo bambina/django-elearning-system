@@ -2,6 +2,8 @@ from django.test import TestCase
 from userportal.models import *
 from django.contrib.auth import get_user_model
 from userportal.tests.model_factories import *
+from django.core.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 
 User = get_user_model()
 
@@ -85,13 +87,13 @@ class TeacherProfileModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create(username="testusername")
+        cls.teacher = TeacherProfileFactory.create(
+            user=cls.user, biography="I am a teacher."
+        )
 
     def test_create_teacher_profile(self):
-        teacher = TeacherProfileFactory.create(
-            user=self.user, biography="I am a teacher."
-        )
-        self.assertEqual(teacher.user, self.user)
-        self.assertEqual(teacher.biography, "I am a teacher.")
+        self.assertEqual(self.teacher.user, self.user)
+        self.assertEqual(self.teacher.biography, "I am a teacher.")
 
     def test_field_constraints(self):
         user_related_name = TeacherProfile._meta.get_field("user")._related_name
@@ -100,27 +102,42 @@ class TeacherProfileModelTest(TestCase):
         self.assertEqual(title_max_length, 500)
 
     def test_str(self):
-        teacher = TeacherProfileFactory.create(
-            user=self.user, biography="I am a teacher."
-        )
-        self.assertEqual(str(teacher), self.user.username)
+        self.assertEqual(str(self.teacher), self.user.username)
 
 
 class StudentProfileModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = UserFactory.create(username="testusername")
+        cls.user = UserFactory.create()
+        cls.program = ProgramFactory.create()
         cls.student = StudentProfileFactory.create(
             user=cls.user,
             status="Feeling good!",
-            program=ProgramFactory.create(),
+            program=cls.program,
         )
 
     def test_create_student_profile(self):
-        self.assertTrue(self.student.user.username, "testusername")
+        self.assertEqual(self.student.user, self.user)
+        self.assertEqual(self.student.status, "Feeling good!")
+        self.assertEqual(self.student.program, self.program)
+        expected_expiry_date = self.student.registration_date + relativedelta(years=6)
+        self.assertEqual(self.student.registration_expiry_date, expected_expiry_date)
 
-    #     student = StudentProfileFactory.create(
-    #         user=self.user,
-    #         status="Feeling good!",
-    #         program=ProgramFactory.create(),
-    #     )
+    def test_field_constraints(self):
+        user_related_name = StudentProfile._meta.get_field("user")._related_name
+        self.assertEqual(user_related_name, "student_profile")
+        program_related_name = StudentProfile._meta.get_field("program")._related_name
+        self.assertEqual(program_related_name, "students")
+        status_max_length = StudentProfile._meta.get_field("status").max_length
+        self.assertEqual(status_max_length, 100)
+        registration_date_editable = StudentProfile._meta.get_field(
+            "registration_date"
+        ).editable
+        self.assertFalse(registration_date_editable)
+        registration_expiry_date_editable = StudentProfile._meta.get_field(
+            "registration_expiry_date"
+        ).editable
+        self.assertFalse(registration_expiry_date_editable)
+
+    def test_str(self):
+        self.assertEqual(str(self.student), self.user.username)

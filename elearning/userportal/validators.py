@@ -5,6 +5,7 @@ from .constants import *
 
 # Custom validators
 
+
 def file_size_validator(value):
     """
     Validates that the file size is not greater than 1 MB.

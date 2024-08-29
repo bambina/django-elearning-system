@@ -84,6 +84,21 @@ class PortalUser(AbstractUser):
         ordering = ["username"]
 
 
+class TeacherProfile(models.Model):
+    user = models.OneToOneField(
+        PortalUser, on_delete=models.CASCADE, related_name="teacher_profile"
+    )
+    biography = models.TextField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="A professional biography of the teacher",
+    )
+
+    def __str__(self):
+        return str(self.user)
+
+
 class StudentProfile(models.Model):
     user = models.OneToOneField(
         PortalUser, on_delete=models.CASCADE, related_name="student_profile"
@@ -99,21 +114,6 @@ class StudentProfile(models.Model):
         self.registration_date = get_registration_date()
         self.registration_expiry_date = self.registration_date + relativedelta(years=6)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return str(self.user)
-
-
-class TeacherProfile(models.Model):
-    user = models.OneToOneField(
-        PortalUser, on_delete=models.CASCADE, related_name="teacher_profile"
-    )
-    biography = models.TextField(
-        max_length=500,
-        blank=True,
-        null=True,
-        help_text="A professional biography of the teacher",
-    )
 
     def __str__(self):
         return str(self.user)
