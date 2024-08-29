@@ -24,25 +24,19 @@ class PortalUserManager(UserManager):
     def create_user(self, username, email=None, password=None, **extra_fields):
         # email, first_name, last_name and user_type are required fields
         errors = {}
+
         if not email:
             errors["email"] = ValidationError(
-                _("Email must be specified"), code=VALIDATION_ERR_REQUIRED
+                VALIDATION_ERR_MISSING_FIELD.format(entity="Email"),
+                code=VALIDATION_ERR_REQUIRED,
             )
 
-        if not extra_fields.get("first_name"):
-            errors["first_name"] = ValidationError(
-                _("First name must be specified"), code=VALIDATION_ERR_REQUIRED
-            )
-
-        if not extra_fields.get("last_name"):
-            errors["last_name"] = ValidationError(
-                _("Last name must be specified"), code=VALIDATION_ERR_REQUIRED
-            )
-
-        if not extra_fields.get("user_type"):
-            errors["user_type"] = ValidationError(
-                _("User type must be specified"), code=VALIDATION_ERR_REQUIRED
-            )
+        for field_name in ["first_name", "last_name", "user_type"]:
+            if not extra_fields.get(field_name):
+                errors[field_name] = ValidationError(
+                    VALIDATION_ERR_MISSING_FIELD.format(entity=field_name.capitalize()),
+                    code=VALIDATION_ERR_REQUIRED,
+                )
 
         if errors:
             raise ValidationError(errors)

@@ -30,6 +30,11 @@ class UserFactory(DjangoModelFactory):
     title = User.Title.PROF
     user_type = User.UserType.TEACHER
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        manager = cls._get_manager(model_class)
+        return manager.create_user(*args, **kwargs)
+
     @factory.post_generation
     def save_user(self, create, extracted, **kwargs):
         if create:

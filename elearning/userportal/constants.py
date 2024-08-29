@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 # Validation error codes
 VALIDATION_ERR_REQUIRED = "required"
 VALIDATION_ERR_INVALID = "invalid"
+VALIDATION_ERR_MISSING_FIELD = _("{entity} must be specified")
 
 # Invalid value error messages
 INVALID_VALUE_MSG = _("Invalid value: %(value)s.")
