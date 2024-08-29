@@ -33,14 +33,10 @@ class StudentProfileForm(forms.ModelForm):
     program = forms.ModelChoiceField(
         queryset=Program.objects.all(), help_text="Required."
     )
-    registration_date = forms.DateField(initial=date.today, help_text="Required.")
 
     class Meta:
         model = StudentProfile
-        fields = (
-            "program",
-            "registration_date",
-        )
+        fields = ("program",)
 
 
 class UserSearchForm(forms.Form):

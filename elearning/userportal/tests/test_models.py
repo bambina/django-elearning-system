@@ -104,3 +104,25 @@ class TeacherProfileModelTest(TestCase):
             user=self.user, biography="I am a teacher."
         )
         self.assertEqual(str(teacher), self.user.username)
+
+
+class StudentProfileModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create(username="testusername")
+        cls.student = StudentProfileFactory.create(
+            user=cls.user,
+            status="Feeling good!",
+            program=ProgramFactory.create(),
+        )
+
+    def test_create_student_profile(self):
+        print(AcademicTermFactory.create())
+        print(self.student.registration_date)
+        self.assertTrue(self.student.user.username, "testusername")
+
+    #     student = StudentProfileFactory.create(
+    #         user=self.user,
+    #         status="Feeling good!",
+    #         program=ProgramFactory.create(),
+    #     )

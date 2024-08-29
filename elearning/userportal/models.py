@@ -10,6 +10,7 @@ from django.core.validators import FileExtensionValidator
 from .constants import *
 from .validators import *
 from .utils import path_and_rename
+from userportal.tests.utils import *
 
 
 class Program(models.Model):
@@ -91,10 +92,11 @@ class StudentProfile(models.Model):
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="students"
     )
-    registration_date = models.DateField(validators=[registration_date_validator])
+    registration_date = models.DateField(editable=False)
     registration_expiry_date = models.DateField(editable=False)
 
     def save(self, *args, **kwargs):
+        self.registration_date = get_registration_date()
         self.registration_expiry_date = self.registration_date + relativedelta(years=6)
         super().save(*args, **kwargs)
 

@@ -4,7 +4,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from userportal.models import *
-from userportal.tests.utils import get_current_term
+from userportal.tests.utils import get_current_term_datetimes
 
 User = get_user_model()
 
@@ -56,10 +56,6 @@ class StudentProfileFactory(DjangoModelFactory):
     user = factory.SubFactory(UserFactory, user_type=User.UserType.STUDENT)
     status = factory.Faker("text")
     program = factory.SubFactory(ProgramFactory)
-    registration_date = get_current_term().start_datetime
-    registration_expiry_date = registration_date.replace(
-        year=registration_date.year + 6
-    )
 
 
 class AcademicTermFactory(DjangoModelFactory):
@@ -69,12 +65,12 @@ class AcademicTermFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         # Get the current term
-        current_term = get_current_term()
+        semester_val, year, start, end = get_current_term_datetimes()
         defaults = {
-            "semester": current_term.semester,
-            "year": current_term.year,
-            "start_datetime": current_term.start_datetime,
-            "end_datetime": current_term.end_datetime,
+            "semester": AcademicTerm.SemesterType(semester_val),
+            "year": year,
+            "start_datetime": start,
+            "end_datetime": end,
         }
         # Update defaults with any keyword arguments passed
         defaults.update(kwargs)
