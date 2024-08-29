@@ -6,50 +6,41 @@ from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
 
 from userportal.consumers import *
+from userportal.tests.model_factories import *
 
 # Get the auth user model
 User = get_user_model()
-UserType = Type[get_user_model()]
-
-# Room name for testing
-TEST_ROOM_NAME = "test"
+AuthUserType = Type[get_user_model()]
 
 
 @pytest.fixture
-def qa_session_fixture(db):
-    # Create a QA session for testing
-    # TODO: Use factories to create objects
-    user = User.objects.create_user(
-        username="testuser",
-        email="test@example.com",
-        password="testpassword",
-        first_name="Firstname",
-        last_name="Lastname",
-        title=PortalUser.Title.PROF,
-        user_type=PortalUser.UserType.TEACHER,
-    )
-    teacher_profile = TeacherProfile.objects.create(
-        user=user,
-        biography="Prof. Firstname Lastname is a Professor...",
-    )
-    program = Program.objects.create(
-        title="Bachelor of Science in Computer Science",
-        description="This 360-credit degree programme...",
-    )
-    course = Course.objects.create(
-        title="Introduction to Computer Science",
-        description="This course provides an introduction...",
-        program=program,
-        teacher=teacher_profile,
-    )
-    QASession.objects.create(
-        course=course,
-        room_name=TEST_ROOM_NAME,
-    )
-    return user, course.id
+def active_qa_session_fixture(db):
+    # Create an active QA session along with related entities.
+    return QASessionFactory.create()
 
 
-async def setup_communicator(user: UserType, course_id: int):
+@pytest.fixture
+def ended_qa_session_fixture(db):
+    # Create an ended QA session along with related entities.
+    return QASessionFactory.create(status=QASession.Status.ENDED)
+
+
+@pytest.fixture
+def active_qa_session_with_unenrolled_student_fixture(db):
+    # Create an active QA session, and a student not enrolled in the course.
+    qa_session = QASessionFactory.create()
+    student = StudentProfileFactory.create()
+    print(f"{student.user.user_type=}")
+    return qa_session, student.user
+
+
+async def setup_communicator(
+    qa_session: QASession, user: AuthUserType = None
+) -> WebsocketCommunicator:
+    """Setup a WebSocket communicator for the QA session."""
+    course = qa_session.course
+    request_user = user if user else course.teacher.user
+    room_name = qa_session.room_name
     application = URLRouter(
         [
             path(
@@ -58,21 +49,27 @@ async def setup_communicator(user: UserType, course_id: int):
             ),
         ]
     )
-    url = f"/ws/course/{course_id}/live-qa-session/test/"
+    url = f"/ws/course/{course.id}/live-qa-session/{room_name}/"
     communicator = WebsocketCommunicator(application, url)
-    communicator.scope["user"] = user
+    communicator.scope["user"] = request_user
+    return communicator
+
+
+async def connect_and_get_questions(communicator) -> None:
+    """Connect to the WebSocket and get the existing questions."""
     connected, _ = await communicator.connect()
     assert connected, "WebSocket connection failed"
     response = await communicator.receive_json_from()
     expected_response = {"type": MESSAGE_TYPE_QUESTION_LIST, "questions": []}
     assert response == expected_response
-    return communicator
 
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_send_receive_json(qa_session_fixture):
-    communicator = await setup_communicator(*qa_session_fixture)
+async def test_send_receive_json(active_qa_session_fixture):
+    """Test sending and receiving JSON messages."""
+    communicator = await setup_communicator(active_qa_session_fixture)
+    await connect_and_get_questions(communicator)
     message_text = "hello"
     sender = "user1"
     await communicator.send_json_to({"message": message_text, "sender": sender})
@@ -85,8 +82,38 @@ async def test_send_receive_json(qa_session_fixture):
 
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
-async def test_send_receive_json_empty_message(qa_session_fixture):
-    communicator = await setup_communicator(*qa_session_fixture)
+async def test_receive_nothing_for_empty_message(active_qa_session_fixture):
+    """Test that the consumer does not respond to empty messages."""
+    communicator = await setup_communicator(active_qa_session_fixture)
+    await connect_and_get_questions(communicator)
     await communicator.send_json_to({"message": "", "sender": "user1"})
     assert await communicator.receive_nothing() is True
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+async def test_deny_connect_for_ended_session(ended_qa_session_fixture):
+    """Test that the consumer denies connection for an ended QA session."""
+    communicator = await setup_communicator(ended_qa_session_fixture)
+    await communicator.connect()
+    response = await communicator.receive_output()
+    expected_response = {"type": "websocket.close", "code": SESSION_TERMINATE_CODE}
+    assert response == expected_response
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+async def test_deny_connect_for_unenrolled_student(
+    active_qa_session_with_unenrolled_student_fixture,
+):
+    """Test that the consumer denies connection for an unenrolled student."""
+    communicator = await setup_communicator(
+        *active_qa_session_with_unenrolled_student_fixture
+    )
+    await communicator.connect()
+    response = await communicator.receive_output()
+    expected_response = {"type": "websocket.close", "code": UNAUTHORIZED_ACCESS_CODE}
+    assert response == expected_response
     await communicator.disconnect()

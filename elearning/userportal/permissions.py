@@ -3,16 +3,16 @@ from django.contrib.auth import get_user_model
 from typing import Type
 
 # Get the auth user model type
-UserType = Type[get_user_model()]
+AuthUserType = Type[get_user_model()]
 
 
 class PermissionChecker:
     @staticmethod
-    def is_admin(user: UserType) -> bool:
+    def is_admin(user: AuthUserType) -> bool:
         return user.is_staff or user.is_superuser
 
     @staticmethod
-    def is_teacher_or_admin(user: UserType) -> bool:
+    def is_teacher_or_admin(user: AuthUserType) -> bool:
         is_authenticated = user.is_authenticated
         is_teacher = user.groups.filter(name="teacher").exists()
         is_manager = PermissionChecker.is_admin(user)
@@ -33,9 +33,9 @@ class PermissionChecker:
         return profile == course.teacher
 
     @staticmethod
-    def is_active_in_course(user: UserType, course: Course) -> bool:
-        if user.is_teacher:
+    def is_active_in_course(user: AuthUserType, course: Course) -> bool:
+        if user.is_teacher():
             return PermissionChecker.is_teaching_course(user.teacher_profile, course)
-        if user.is_student:
+        if user.is_student():
             return PermissionChecker.is_taking_course(user.student_profile, course)
         return False
