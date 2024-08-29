@@ -1,4 +1,5 @@
 from userportal.models import *
+from userportal.repositories.academic_term_repository import *
 from django.contrib.auth import get_user_model
 from typing import Type
 
@@ -22,7 +23,7 @@ class PermissionChecker:
     def is_taking_course(profile: StudentProfile, course: Course) -> bool:
         offering = CourseOffering.objects.filter(
             course=course,
-            term=AcademicTerm.current(),
+            term=AcademicTermRepository.current(),
         ).first()
         if not offering:
             return False

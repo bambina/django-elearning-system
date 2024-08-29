@@ -2,6 +2,7 @@ from celery import shared_task
 from .models import *
 from django.urls import reverse
 from celery.utils.log import get_task_logger
+from userportal.repositories.academic_term_repository import AcademicTermRepository
 
 logger = get_task_logger(__name__)
 
@@ -83,7 +84,7 @@ def send_notifications_to_currently_enrolled_students(
     Sends notifications to students currently enrolled in a course.
     """
     course_offering = CourseOffering.objects.filter(
-        course=course, term=AcademicTerm.current()
+        course=course, term=AcademicTermRepository.current()
     ).first()
 
     if course_offering:

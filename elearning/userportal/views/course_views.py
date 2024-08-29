@@ -15,6 +15,7 @@ from userportal.models import *
 from userportal.forms import *
 from userportal.tasks import *
 from userportal.permissions import PermissionChecker
+from userportal.repositories.academic_term_repository import *
 
 
 class CourseListView(ListView):
@@ -60,7 +61,7 @@ class CourseDetailView(DetailView):
 
         course = self.object
 
-        current_term = AcademicTerm.current()
+        current_term = AcademicTermRepository.current()
         if current_term:
             current_offering = CourseOffering.objects.filter(
                 course=course, term=current_term
@@ -81,7 +82,7 @@ class CourseDetailView(DetailView):
                         course=course, status=QASession.Status.ENDED
                     ).first()
 
-        next_term = AcademicTerm.next()
+        next_term = AcademicTermRepository.next()
         if next_term:
             next_offering = CourseOffering.objects.filter(
                 course=course, term=next_term

@@ -137,26 +137,6 @@ class AcademicTerm(models.Model):
     class Meta:
         ordering = ["-start_datetime"]
 
-    @classmethod
-    def current(cls):
-        return cls.objects.filter(
-            start_datetime__lte=now(), end_datetime__gte=now()
-        ).first()
-
-    @classmethod
-    def next(cls):
-        return (
-            cls.objects.filter(start_datetime__gt=now())
-            .order_by("start_datetime")
-            .first()
-        )
-
-    @classmethod
-    def previous(cls):
-        return (
-            cls.objects.filter(end_datetime__lt=now()).order_by("-end_datetime").first()
-        )
-
     @property
     def status(self):
         current_time = now()

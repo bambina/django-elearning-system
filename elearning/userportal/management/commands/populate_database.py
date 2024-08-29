@@ -6,6 +6,7 @@ import random
 from userportal.models import *
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.hashers import make_password
+from userportal.repositories.academic_term_repository import AcademicTermRepository
 
 
 class Command(BaseCommand):
@@ -313,13 +314,13 @@ class Command(BaseCommand):
 
     def create_enrollments(self):
         next_course_1, next_course_2, _ = CourseOffering.objects.filter(
-            term=AcademicTerm.next()
+            term=AcademicTermRepository.next()
         )
         curr_course_1, curr_course_2, _ = CourseOffering.objects.filter(
-            term=AcademicTerm.current()
+            term=AcademicTermRepository.current()
         )
         prev_course_1, _, _ = CourseOffering.objects.filter(
-            term=AcademicTerm.previous()
+            term=AcademicTermRepository.previous()
         )
 
         enrollments = [

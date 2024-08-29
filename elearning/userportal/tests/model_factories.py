@@ -4,7 +4,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from userportal.models import *
-from userportal.tests.utils import get_current_term_datetimes
+from userportal.tests.utils import get_term_datetimes
 
 User = get_user_model()
 
@@ -65,7 +65,7 @@ class AcademicTermFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         # Get the current term
-        semester_val, year, start, end = get_current_term_datetimes()
+        semester_val, year, start, end = get_term_datetimes()
         defaults = {
             "semester": AcademicTerm.SemesterType(semester_val),
             "year": year,
