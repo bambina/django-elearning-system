@@ -108,6 +108,15 @@ class EnrollmentFactory(DjangoModelFactory):
         return self.offering.term.start_datetime - timezone.timedelta(days=20)
 
 
+class FeedbackFactory(DjangoModelFactory):
+    class Meta:
+        model = Feedback
+
+    student = factory.SubFactory(StudentProfileFactory)
+    course = factory.SubFactory(CourseFactory)
+    comments = factory.Faker("text")
+
+
 class QASessionFactory(DjangoModelFactory):
     class Meta:
         model = QASession

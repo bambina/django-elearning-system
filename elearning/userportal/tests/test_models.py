@@ -336,3 +336,34 @@ class EnrollmentModelTest(TestCase, TermTestMixin):
 
     def test_str(self):
         self.assertEqual(str(self.enrollment), f"{self.student} ({self.offering})")
+
+
+class FeedbackModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.student = StudentProfileFactory.create()
+        cls.course = CourseFactory.create()
+        cls.feedback = FeedbackFactory.create(student=cls.student, course=cls.course)
+
+    def test_create_feedback(self):
+        self.assertEqual(self.feedback.student, self.student)
+        self.assertEqual(self.feedback.course, self.course)
+
+    def test_field_constraints(self):
+        student_related_name = Feedback._meta.get_field("student")._related_name
+        self.assertEqual(student_related_name, "feedbacks")
+        course_related_name = Feedback._meta.get_field("course")._related_name
+        self.assertEqual(course_related_name, "feedbacks")
+        comments_max_length = Feedback._meta.get_field("comments").max_length
+        self.assertEqual(comments_max_length, 500)
+        updated_at_auto_now = Feedback._meta.get_field("updated_at").auto_now
+        self.assertTrue(updated_at_auto_now)
+        created_at_auto_now_add = Feedback._meta.get_field("created_at").auto_now_add
+        self.assertTrue(created_at_auto_now_add)
+
+    def test_unique_together(self):
+        with self.assertRaises(IntegrityError):
+            FeedbackFactory.create(student=self.student, course=self.course)
+
+    def test_str(self):
+        self.assertEqual(str(self.feedback), f"{self.student} ({self.course})")
