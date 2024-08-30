@@ -537,3 +537,31 @@ class QASessionModelTest(TestCase):
 
     def test_ordering(self):
         self.assertEqual(QASession._meta.ordering, ["-created_at"])
+
+
+class QAQuestionModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.qa_question = QAQuestionFactory.create(
+            room_name="1_20240801000000000000",
+            text="I have a question.",
+            sender="John Doe",
+            timestamp="2024-08-01 00:00:00+00:00",
+        )
+
+    def test_create_qa_question(self):
+        self.assertEqual(self.qa_question.room_name, "1_20240801000000000000")
+        self.assertEqual(self.qa_question.text, "I have a question.")
+        self.assertEqual(self.qa_question.sender, "John Doe")
+        self.assertEqual(self.qa_question.timestamp, "2024-08-01 00:00:00+00:00")
+
+    def test_field_constraints(self):
+        room_name_max_length = QAQuestion._meta.get_field("room_name").max_length
+        self.assertEqual(room_name_max_length, 200)
+        sender_max_length = QAQuestion._meta.get_field("sender").max_length
+        self.assertEqual(sender_max_length, 310)
+        timestamp_auto_now_add = QAQuestion._meta.get_field("timestamp").auto_now_add
+        self.assertFalse(timestamp_auto_now_add)
+
+    def test_ordering(self):
+        self.assertEqual(QAQuestion._meta.ordering, ["-timestamp"])

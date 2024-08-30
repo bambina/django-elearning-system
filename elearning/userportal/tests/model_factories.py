@@ -171,4 +171,4 @@ class QAQuestionFactory(DjangoModelFactory):
     room_name = factory.Faker("text")
     text = factory.Faker("text")
     sender = factory.Faker("name")
-    timestamp = timezone.now() - timezone.timedelta(minutes=5)
+    timestamp = timezone.now()

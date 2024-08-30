@@ -358,7 +358,9 @@ class QASession(models.Model):
 class QAQuestion(models.Model):
     room_name = models.CharField(max_length=200)
     text = models.TextField()
-    sender = models.CharField(max_length=300, blank=True, null=True)
+    sender = models.CharField(
+        max_length=310, blank=True, null=True
+    )  # A concatenated string of the User's title, first name, and last name.
     timestamp = models.DateTimeField()
 
     class Meta:
