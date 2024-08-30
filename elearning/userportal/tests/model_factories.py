@@ -1,4 +1,5 @@
 from django.utils import timezone
+import random
 from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
@@ -139,6 +140,16 @@ class MaterialFactory(DjangoModelFactory):
             content = ContentFile(b"Dummy file content")
             self.file.save("test.png", content, save=False)
         self.save()
+
+
+class NotificationFactory(DjangoModelFactory):
+    class Meta:
+        model = Notification
+
+    user = factory.SubFactory(UserFactory)
+    message = factory.Faker("text", max_nb_chars=500)
+    link_path = factory.Faker("file_path", depth=2, extension=[])
+    link_text = factory.Faker("text", max_nb_chars=100)
 
 
 class QASessionFactory(DjangoModelFactory):

@@ -7,6 +7,7 @@ from django.test import TestCase, override_settings
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 
 from userportal.models import *
 from userportal.tests.model_factories import *
@@ -446,3 +447,64 @@ class MaterialModelTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.material), self.material.title)
+
+
+class NotificationModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+        cls.notification = NotificationFactory.create(
+            user=cls.user,
+            message="You have a new notification.",
+            link_path="/",
+            link_text="View materials",
+        )
+
+    def test_create_notification(self):
+        self.assertEqual(self.notification.user, self.user)
+        self.assertEqual(self.notification.message, "You have a new notification.")
+        self.assertEqual(self.notification.link_path, "/")
+        self.assertEqual(self.notification.link_text, "View materials")
+
+    def test_field_constraints(self):
+        user_related_name = Notification._meta.get_field("user")._related_name
+        self.assertEqual(user_related_name, "notifications")
+        message_max_length = Notification._meta.get_field("message").max_length
+        self.assertEqual(message_max_length, 500)
+        created_at_auto_now_add = Notification._meta.get_field(
+            "created_at"
+        ).auto_now_add
+        self.assertTrue(created_at_auto_now_add)
+        is_read_default = Notification._meta.get_field("is_read").default
+        self.assertFalse(is_read_default)
+
+    def test_clean_method_with_valid_data(self):
+        course = CourseFactory.create()
+        link_path = reverse("material-list", args=[course.id])
+        valid_notification = NotificationFactory.build(
+            user=self.user,
+            link_path=link_path,
+            link_text=MATERIAL_CREATED_NOTIFICATION_LINK_TEXT,
+        )
+        try:
+            valid_notification.clean()
+        except ValidationError as e:
+            self.fail(f"clean() raised ValidationError unexpectedly. {e}")
+
+    def test_clean_method_with_invalid_data(self):
+        invalid_notification = NotificationFactory.build(
+            user=self.user, link_path="/", link_text=None
+        )
+        with self.assertRaises(ValidationError) as context:
+            invalid_notification.clean()
+        errors = context.exception.error_dict
+        self.assertIn("link_path", errors)
+
+    def test_ordering(self):
+        self.assertEqual(Notification._meta.ordering, ["-created_at"])
+
+    def test_str(self):
+        self.assertEqual(
+            str(self.notification),
+            f"{self.user.username} ({self.notification.message[:20]}...)",
+        )
