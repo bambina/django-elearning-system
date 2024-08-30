@@ -349,11 +349,14 @@ class FeedbackModelTest(TestCase):
     def setUpTestData(cls):
         cls.student = StudentProfileFactory.create()
         cls.course = CourseFactory.create()
-        cls.feedback = FeedbackFactory.create(student=cls.student, course=cls.course)
+        cls.feedback = FeedbackFactory.create(
+            student=cls.student, course=cls.course, comments="This is a test feedback."
+        )
 
     def test_create_feedback(self):
         self.assertEqual(self.feedback.student, self.student)
         self.assertEqual(self.feedback.course, self.course)
+        self.assertEqual(self.feedback.comments, "This is a test feedback.")
 
     def test_field_constraints(self):
         student_related_name = Feedback._meta.get_field("student")._related_name
@@ -380,9 +383,15 @@ class MaterialModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
-        cls.material = MaterialFactory.create(course=cls.course)
+        cls.material = MaterialFactory.create(
+            title="Test Material",
+            description="This is a test material.",
+            course=cls.course,
+        )
 
     def test_create_material(self):
+        self.assertEqual(self.material.title, "Test Material")
+        self.assertEqual(self.material.description, "This is a test material.")
         self.assertEqual(self.material.course, self.course)
 
     def test_field_constraints(self):
