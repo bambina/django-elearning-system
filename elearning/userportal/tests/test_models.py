@@ -3,6 +3,7 @@ from userportal.models import *
 from django.contrib.auth import get_user_model
 from userportal.tests.model_factories import *
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 
@@ -236,3 +237,27 @@ class CourseModelTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.course), self.course.title)
+
+class CourseOfferingModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.course = CourseFactory.create()
+        cls.term = AcademicTermFactory.create()
+        cls.offering = CourseOfferingFactory.create(course=cls.course, term=cls.term)
+
+    def test_create_course_offering(self):
+        self.assertEqual(self.offering.course, self.course)
+        self.assertEqual(self.offering.term, self.term)
+
+    def test_field_constraints(self):
+        course_related_name = CourseOffering._meta.get_field("course")._related_name
+        self.assertEqual(course_related_name, "offerings")
+        term_related_name = CourseOffering._meta.get_field("term")._related_name
+        self.assertEqual(term_related_name, "offerings")
+    
+    def test_unique_together(self):
+        with self.assertRaises(IntegrityError):
+            CourseOfferingFactory.create(course=self.course, term=self.term)
+    
+    def test_str(self):
+        self.assertEqual(str(self.offering), f"{self.course} - {self.term}")
