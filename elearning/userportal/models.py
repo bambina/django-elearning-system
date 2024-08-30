@@ -279,7 +279,7 @@ class Material(models.Model):
     file = models.FileField(
         upload_to=path_and_rename,
         validators=[
-            FileExtensionValidator(allowed_extensions=["pdf", "jpg", "png", "jpeg"]),
+            FileExtensionValidator(allowed_extensions=ALLOWED_MATERIAL_EXTENSIONS),
             file_size_validator,
         ],
     )

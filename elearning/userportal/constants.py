@@ -83,3 +83,7 @@ UNAUTHORIZED_ACCESS_MSG = _("Unauthorized access to the live Q&A session.")
 
 SESSION_TERMINATE_CODE = 4000
 UNAUTHORIZED_ACCESS_CODE = 4001
+
+# Constants for models
+ALLOWED_MATERIAL_EXTENSIONS = ["pdf", "jpg", "png", "jpeg"]
+MAX_MATERIAL_FILE_SIZE = 1 * 1024 * 1024  # 1 MB

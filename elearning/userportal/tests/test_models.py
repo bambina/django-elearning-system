@@ -1,11 +1,16 @@
-from django.test import TestCase
-from userportal.models import *
-from django.contrib.auth import get_user_model
-from userportal.tests.model_factories import *
-from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
+import os
+import tempfile
 from dateutil.relativedelta import relativedelta
-from django.utils import timezone
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from django.db.utils import IntegrityError
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+
+from userportal.models import *
+from userportal.tests.model_factories import *
+
 
 User = get_user_model()
 
@@ -367,3 +372,77 @@ class FeedbackModelTest(TestCase):
 
     def test_str(self):
         self.assertEqual(str(self.feedback), f"{self.student} ({self.course})")
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class MaterialModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.course = CourseFactory.create()
+        cls.material = MaterialFactory.create(course=cls.course)
+
+    def test_create_material(self):
+        self.assertEqual(self.material.course, self.course)
+
+    def test_field_constraints(self):
+        title_max_length = Material._meta.get_field("title").max_length
+        self.assertEqual(title_max_length, 100)
+        original_filename_max_length = Material._meta.get_field(
+            "original_filename"
+        ).max_length
+        self.assertEqual(original_filename_max_length, 255)
+        uploaded_at_auto_now_add = Material._meta.get_field("uploaded_at").auto_now_add
+        self.assertTrue(uploaded_at_auto_now_add)
+        course_related_name = Material._meta.get_field("course")._related_name
+        self.assertEqual(course_related_name, "materials")
+
+    def test_ordering(self):
+        self.assertEqual(Material._meta.ordering, ["-uploaded_at"])
+
+    def test_file_upload_and_validation(self):
+        file_content = b"Dummy PNG content"
+        file = SimpleUploadedFile("test.png", file_content, content_type="image/png")
+        material = MaterialFactory.create(course=self.course, file=file)
+        self.assertTrue(material.file)
+        self.assertEqual(material.original_filename, "test.png")
+        self.assertTrue(os.path.exists(material.file.path))
+        self.assertIn("materials/", material.file.name)
+
+    def test_valid_file_extension(self):
+        for valid_ext in ALLOWED_MATERIAL_EXTENSIONS:
+            file = SimpleUploadedFile(
+                f"test.{valid_ext}",
+                b"Dummy text content",
+                content_type="application/octet-stream",
+            )
+            material = MaterialFactory.build(course=self.course, file=file)
+            try:
+                material.full_clean()
+            except ValidationError as e:
+                self.fail(f"full_clean() raised ValidationError unexpectedly. {e}")
+
+    def test_invalid_file_extension(self):
+        for invalid_ext in ["txt", "doc", "docx"]:
+            file = SimpleUploadedFile(
+                f"test.{invalid_ext}",
+                b"Dummy text content",
+                content_type="application/octet-stream",
+            )
+            material = MaterialFactory.build(course=self.course, file=file)
+            with self.assertRaises(ValidationError) as context:
+                material.full_clean()
+            errors = context.exception.error_dict
+            self.assertIn("file", errors)
+
+    def test_file_size_validator(self):
+        large_file = SimpleUploadedFile(
+            "large.png", b"0" * (MAX_MATERIAL_FILE_SIZE + 1)
+        )  # 1MB + 1 byte
+        material = MaterialFactory.build(course=self.course, file=large_file)
+        with self.assertRaises(ValidationError) as context:
+            material.full_clean()
+        errors = context.exception.error_dict
+        self.assertIn("file", errors)
+
+    def test_str(self):
+        self.assertEqual(str(self.material), self.material.title)

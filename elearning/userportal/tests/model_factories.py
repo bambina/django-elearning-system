@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
+from django.core.files.base import ContentFile
 
 from userportal.models import *
 from userportal.tests.utils import get_term_datetimes
@@ -13,8 +14,8 @@ class ProgramFactory(DjangoModelFactory):
     class Meta:
         model = Program
 
-    title = factory.Faker("text")
-    description = factory.Faker("text")
+    title = factory.Faker("catch_phrase")
+    description = factory.Faker("paragraph")
 
 
 class UserFactory(DjangoModelFactory):
@@ -81,8 +82,8 @@ class CourseFactory(DjangoModelFactory):
     class Meta:
         model = Course
 
-    title = factory.Faker("text")
-    description = factory.Faker("text")
+    title = factory.Faker("catch_phrase")
+    description = factory.Faker("paragraph")
     program = factory.SubFactory(ProgramFactory)
     teacher = factory.SubFactory(TeacherProfileFactory)
 
@@ -114,7 +115,30 @@ class FeedbackFactory(DjangoModelFactory):
 
     student = factory.SubFactory(StudentProfileFactory)
     course = factory.SubFactory(CourseFactory)
-    comments = factory.Faker("text")
+    comments = factory.Faker("sentence")
+
+
+class MaterialFactory(DjangoModelFactory):
+    class Meta:
+        model = Material
+        skip_postgeneration_save = True
+
+    title = factory.Faker("text", max_nb_chars=100)
+    description = factory.Faker("paragraph")
+    original_filename = factory.Faker("file_name", extension="pdf")
+    file = factory.django.FileField(filename="test.pdf")
+    course = factory.SubFactory(CourseFactory)
+
+    @factory.post_generation
+    def create_file(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            self.file = extracted
+        else:
+            content = ContentFile(b"Dummy file content")
+            self.file.save("test.png", content, save=False)
+        self.save()
 
 
 class QASessionFactory(DjangoModelFactory):
