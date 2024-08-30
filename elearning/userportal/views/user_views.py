@@ -9,7 +9,6 @@ from django.contrib.auth import get_user_model
 from userportal.repositories.enrollment_repository import *
 from userportal.models import *
 from userportal.forms import *
-from userportal.repositories.course_repository import *
 from userportal.repositories.user_repository import *
 
 AuthUser = get_user_model()
@@ -36,10 +35,9 @@ class UserDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add student's enrollment data categorized into upcoming, current, and past enrollments.
-        if self.object.is_student():
-            enrollments = EnrollmentRepository.fetch_enrollments_for_student(
-                self.object
-            )
+        user = self.object
+        if user.is_student():
+            enrollments = EnrollmentRepository.fetch_enrollments_for_student(user)
             # Unpack the enrollments tuple into context
             (
                 context["upcoming_enrollments"],
@@ -47,10 +45,9 @@ class UserDetailView(DetailView):
                 context["past_enrollments"],
             ) = enrollments
         # Add a list of courses that the teacher is currently offering.
-        if self.object.is_teacher():
-            context["offered_courses"] = CourseRepository.fetch_teacher_courses(
-                self.object.teacher_profile
-            )
+        if user.is_teacher():
+            context["offered_courses"] = user.teacher_profile.courses.all()
+
         return context
 
 

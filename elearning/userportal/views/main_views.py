@@ -9,7 +9,6 @@ from userportal.forms import *
 from userportal.tasks import mark_notifications_as_read
 from userportal.repositories.enrollment_repository import *
 from userportal.repositories.user_repository import *
-from userportal.repositories.course_repository import *
 from userportal.repositories.notification_repository import *
 
 
@@ -57,7 +56,7 @@ def handle_student_view(request, user):
 
 def handle_teacher_view(user):
     return {
-        "offered_courses": CourseRepository.fetch_teacher_courses(user.teacher_profile)
+        "offered_courses": user.teacher_profile.courses.all(),
     }
 
 

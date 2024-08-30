@@ -19,18 +19,13 @@ class EnrollmentRepository:
                 student=user.student_profile
             ).select_related("offering", "offering__course", "offering__term")
 
-            for enrollment in enrollments:
-                if (
-                    enrollment.offering.term.status
-                    == AcademicTerm.TermStatus.NOT_STARTED
-                ):
-                    upcoming_enrollments.append(enrollment)
-                elif (
-                    enrollment.offering.term.status
-                    == AcademicTerm.TermStatus.IN_PROGRESS
-                ):
-                    current_enrollments.append(enrollment)
+            for e in enrollments:
+                status = e.offering.term.status
+                if status == AcademicTerm.TermStatus.NOT_STARTED:
+                    upcoming_enrollments.append(e)
+                elif status == AcademicTerm.TermStatus.IN_PROGRESS:
+                    current_enrollments.append(e)
                 else:
-                    past_enrollments.append(enrollment)
+                    past_enrollments.append(e)
 
         return upcoming_enrollments, current_enrollments, past_enrollments
