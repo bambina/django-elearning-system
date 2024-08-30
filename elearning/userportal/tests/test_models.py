@@ -211,3 +211,28 @@ class AcademicTermModelTest(TestCase):
             str(self.term),
             f"{self.term.get_semester_display()} {self.term.year} ({start} to {end})",
         )
+
+class CourseModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.course = CourseFactory.create(title="Math", description="Math is fun!")
+
+    def test_create_course(self):
+        self.assertEqual(self.course.title, "Math")
+        self.assertEqual(self.course.description, "Math is fun!")
+
+    def test_field_constraints(self):
+        title_max_length = Course._meta.get_field("title").max_length
+        self.assertEqual(title_max_length, 100)
+        description_max_length = Course._meta.get_field("description").max_length
+        self.assertEqual(description_max_length, 500)
+        program_related_name = Course._meta.get_field("program")._related_name
+        self.assertEqual(program_related_name, "courses")
+        teacher_related_name = Course._meta.get_field("teacher")._related_name
+        self.assertEqual(teacher_related_name, "courses")
+    
+    def test_ordering(self):
+        self.assertEqual(Course._meta.ordering, ["title"])
+
+    def test_str(self):
+        self.assertEqual(str(self.course), self.course.title)
