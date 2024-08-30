@@ -3,6 +3,8 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
+from userportal.models import StudentProfile
+
 AuthUser = get_user_model()
 AuthUserType = Type[get_user_model()]
 
@@ -39,3 +41,10 @@ class UserRepository:
             user.save()
             return True
         return False
+
+    @staticmethod
+    def update_student_profile_status(user, status):
+        student_profile = get_object_or_404(StudentProfile, user=user)
+        student_profile.status = status
+        student_profile.save()
+        return True

@@ -1,17 +1,20 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from ..models import *
-from ..forms import *
-
-from django.views.generic import ListView
 from django.conf import settings
+from django.shortcuts import render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView
 
-from ..tasks import mark_notifications_as_read
+from userportal.models import *
+from userportal.forms import *
+from userportal.tasks import mark_notifications_as_read
 from userportal.repositories.enrollment_repository import *
+from userportal.repositories.user_repository import *
+from userportal.repositories.course_repository import *
+from userportal.repositories.notification_repository import *
 
 
 def index(request):
+    # TODO: Swith to the Swagger ui
     context = {
         "somedata": "Hello, world!",
     }
@@ -20,39 +23,42 @@ def index(request):
 
 @login_required(login_url="login")
 def home(request):
+    context = {}
+    user = request.user
+
+    if user.is_student():
+        context.update(handle_student_view(request, user))
+    elif user.is_teacher():
+        context.update(handle_teacher_view(user))
+
+    return render(request, "userportal/home.html", context)
+
+
+def handle_student_view(request, user):
+    context = {}
     if request.method == "POST":
         status_form = StatusForm(request.POST)
         if status_form.is_valid():
-            student_profile = request.user.student_profile
-            student_profile.status = status_form.cleaned_data["status"]
-            student_profile.save()
-            messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+            status = status_form.cleaned_data["status"]
+            if UserRepository.update_student_profile_status(user, status):
+                messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
     else:
-        status = (
-            request.user.student_profile.status if request.user.is_student() else ""
-        )
-        initial = {"status": status}
+        initial = {"status": user.student_profile.status}
         status_form = StatusForm(initial=initial)
+    context["status_form"] = status_form
+    enrollments = EnrollmentRepository.fetch_enrollments_for_student(user)
+    (
+        context["upcoming_enrollments"],
+        context["current_enrollments"],
+        context["past_enrollments"],
+    ) = enrollments
+    return context
 
-    # Prepare the context
-    next_url = request.POST.get("next") or request.GET.get("next", "/")
-    context = {"next": next_url, "status_form": status_form}
 
-    # Get student's courses
-    if request.user.is_student():
-        enrollments = fetch_enrollments_for_student(request.user)
-        (
-            context["upcoming_enrollments"],
-            context["current_enrollments"],
-            context["past_enrollments"],
-        ) = enrollments
-
-    # Get teacher's courses
-    if request.user.is_teacher():
-        teacher = request.user.teacher_profile
-        context["offered_courses"] = teacher.courses.all()
-
-    return render(request, "userportal/home.html", context)
+def handle_teacher_view(user):
+    return {
+        "offered_courses": CourseRepository.fetch_teacher_courses(user.teacher_profile)
+    }
 
 
 class NotificationListView(ListView):
@@ -63,13 +69,11 @@ class NotificationListView(ListView):
     login_url = "login"
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user).order_by(
-            "-created_at"
-        )
+        return NotificationRepository.fetch_notifications_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Search for new notifications and mark them as read
+        # Search for new notifications, and mark them as read asynchronously
         page_obj = context.get("page_obj")
         if page_obj:
             unread_notification_ids = [
