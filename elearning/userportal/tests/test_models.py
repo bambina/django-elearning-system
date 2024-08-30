@@ -10,6 +10,28 @@ from django.utils import timezone
 User = get_user_model()
 
 
+class TermTestMixin:
+    def create_academic_term(self, semester_val, year, start_date, end_date):
+        return AcademicTermFactory.create(
+            semester=AcademicTerm.SemesterType(semester_val),
+            year=year,
+            start_datetime=start_date,
+            end_datetime=end_date,
+        )
+
+    def create_next_term(self, current_term: AcademicTerm) -> AcademicTerm:
+        next_term_properties = get_term_datetimes(
+            current_term.end_datetime + relativedelta(days=1)
+        )
+        return self.create_academic_term(*next_term_properties)
+
+    def create_previous_term(self, current_term: AcademicTerm) -> AcademicTerm:
+        prev_term_properties = get_term_datetimes(
+            current_term.start_datetime - relativedelta(days=1)
+        )
+        return self.create_academic_term(*prev_term_properties)
+
+
 class UserModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -145,7 +167,7 @@ class StudentProfileModelTest(TestCase):
         self.assertEqual(str(self.student), self.user.username)
 
 
-class AcademicTermModelTest(TestCase):
+class AcademicTermModelTest(TestCase, TermTestMixin):
     @classmethod
     def setUpTestData(cls):
         cls.semester_val, cls.year, cls.start, cls.end = get_term_datetimes()
@@ -169,27 +191,11 @@ class AcademicTermModelTest(TestCase):
 
     def test_status_property(self):
         self.assertEqual(self.term.status, AcademicTerm.TermStatus.IN_PROGRESS)
-        prev_semester_val, prev_year, prev_start, prev_end = get_term_datetimes(
-            self.start - relativedelta(days=1)
-        )
-        prev_term = AcademicTermFactory.create(
-            semester=AcademicTerm.SemesterType(prev_semester_val),
-            year=prev_year,
-            start_datetime=prev_start,
-            end_datetime=prev_end,
-        )
+        prev_term = self.create_previous_term(self.term)
         self.assertEqual(prev_term.status, AcademicTerm.TermStatus.ENDED)
-        next_semester_val, next_year, next_start, next_end = get_term_datetimes(
-            self.end + relativedelta(days=1)
-        )
-        next_term = AcademicTermFactory.create(
-            semester=AcademicTerm.SemesterType(next_semester_val),
-            year=next_year,
-            start_datetime=next_start,
-            end_datetime=next_end,
-        )
+        next_term = self.create_next_term(self.term)
         self.assertEqual(next_term.status, AcademicTerm.TermStatus.NOT_STARTED)
-    
+
     def test_clean_method_with_valid_dates(self):
         valid_term = AcademicTermFactory.create()
         try:
@@ -213,6 +219,7 @@ class AcademicTermModelTest(TestCase):
             f"{self.term.get_semester_display()} {self.term.year} ({start} to {end})",
         )
 
+
 class CourseModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -231,12 +238,13 @@ class CourseModelTest(TestCase):
         self.assertEqual(program_related_name, "courses")
         teacher_related_name = Course._meta.get_field("teacher")._related_name
         self.assertEqual(teacher_related_name, "courses")
-    
+
     def test_ordering(self):
         self.assertEqual(Course._meta.ordering, ["title"])
 
     def test_str(self):
         self.assertEqual(str(self.course), self.course.title)
+
 
 class CourseOfferingModelTest(TestCase):
     @classmethod
@@ -254,10 +262,77 @@ class CourseOfferingModelTest(TestCase):
         self.assertEqual(course_related_name, "offerings")
         term_related_name = CourseOffering._meta.get_field("term")._related_name
         self.assertEqual(term_related_name, "offerings")
-    
+
     def test_unique_together(self):
         with self.assertRaises(IntegrityError):
             CourseOfferingFactory.create(course=self.course, term=self.term)
-    
+
     def test_str(self):
         self.assertEqual(str(self.offering), f"{self.course} - {self.term}")
+
+
+class EnrollmentModelTest(TestCase, TermTestMixin):
+    @classmethod
+    def setUpTestData(cls):
+        cls.student = StudentProfileFactory.create()
+        cls.offering = CourseOfferingFactory.create()
+        cls.enrollment = EnrollmentFactory.create(
+            student=cls.student, offering=cls.offering
+        )
+
+    def test_create_enrollment(self):
+        self.assertEqual(self.enrollment.student, self.student)
+        self.assertEqual(self.enrollment.offering, self.offering)
+        self.assertEqual(self.enrollment.grade, Enrollment.Grade.NOT_GRADED)
+
+    def test_field_constraints(self):
+        student_related_name = Enrollment._meta.get_field("student")._related_name
+        self.assertEqual(student_related_name, "enrollments")
+        offering_related_name = Enrollment._meta.get_field("offering")._related_name
+        self.assertEqual(offering_related_name, "enrollments")
+        grade_default = Enrollment._meta.get_field("grade").default
+        self.assertEqual(grade_default, Enrollment.Grade.NOT_GRADED)
+        enrolled_at_auto_now_add = Enrollment._meta.get_field(
+            "enrolled_at"
+        ).auto_now_add
+        self.assertTrue(enrolled_at_auto_now_add)
+
+    def test_unique_together(self):
+        with self.assertRaises(IntegrityError):
+            EnrollmentFactory.create(student=self.student, offering=self.offering)
+
+    def test_status_property(self):
+        self.assertEqual(self.enrollment.status, "In Progress")
+        next_term = self.create_next_term(self.offering.term)
+        next_offering = CourseOfferingFactory.create(term=next_term)
+        next_enrollment = EnrollmentFactory.create(offering=next_offering)
+        self.assertEqual(next_enrollment.status, "Registered")
+        prev_term = self.create_previous_term(self.offering.term)
+        prev_offering = CourseOfferingFactory.create(term=prev_term)
+        prev_enrollment = EnrollmentFactory.create(offering=prev_offering)
+        self.assertEqual(prev_enrollment.status, "Ended")
+
+    def test_clean_method_with_valid_data(self):
+        next_term = self.create_next_term(self.offering.term)
+        next_offering = CourseOfferingFactory.create(term=next_term)
+        student = StudentProfileFactory.create()
+        valid_enrollment = EnrollmentFactory.build(
+            student=student, offering=next_offering
+        )
+        try:
+            valid_enrollment.clean()
+        except ValidationError as e:
+            self.fail(f"clean() raised ValidationError unexpectedly. {e}")
+
+    def test_clean_method_with_invalid_data(self):
+        invalid_enrollment = EnrollmentFactory.build(
+            student=self.student, offering=self.offering
+        )
+        with self.assertRaises(ValidationError) as context:
+            invalid_enrollment.clean()
+        errors = context.exception.error_dict
+        self.assertIn("offering_started", errors)
+        self.assertIn("enrollment_duplicate", errors)
+
+    def test_str(self):
+        self.assertEqual(str(self.enrollment), f"{self.student} ({self.offering})")

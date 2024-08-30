@@ -207,7 +207,7 @@ class Enrollment(models.Model):
         StudentProfile, on_delete=models.CASCADE, related_name="enrollments"
     )
     offering = models.ForeignKey(
-        CourseOffering, on_delete=models.CASCADE, related_name="students"
+        CourseOffering, on_delete=models.CASCADE, related_name="enrollments"
     )
     grade = models.PositiveSmallIntegerField(
         choices=Grade.choices, default=Grade.NOT_GRADED
@@ -231,29 +231,24 @@ class Enrollment(models.Model):
             return "In Progress"
 
     def clean(self):
-        current_time = now()
-        if current_time > self.offering.term.start_datetime:
-            raise ValidationError(
-                {
-                    "offering": ValidationError(
-                        f"{INVALID_VALUE_MSG} {INVALID_COURSE_ALREADY_STARTED_MSG}",
-                        code=VALIDATION_ERR_INVALID,
-                        params={"value": self.offering},
-                    )
-                }
+        errors = {}
+        if now() > self.offering.term.start_datetime:
+            errors["offering_started"] = ValidationError(
+                f"{INVALID_VALUE_MSG} {INVALID_COURSE_ALREADY_STARTED_MSG}",
+                code=VALIDATION_ERR_INVALID,
+                params={"value": self.offering},
             )
         if Enrollment.objects.filter(
             student=self.student, offering=self.offering
         ).exists():
-            raise ValidationError(
-                {
-                    "offering": ValidationError(
-                        f"{INVALID_VALUE_MSG} {ALREADY_ENROLLED_MSG}",
-                        code=VALIDATION_ERR_INVALID,
-                        params={"value": self.offering},
-                    )
-                }
+            errors["enrollment_duplicate"] = ValidationError(
+                f"{INVALID_VALUE_MSG} {ALREADY_ENROLLED_MSG}",
+                code=VALIDATION_ERR_INVALID,
+                params={"value": self.offering},
             )
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         return f"{self.student} ({self.offering})"
