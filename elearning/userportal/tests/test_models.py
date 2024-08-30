@@ -508,3 +508,32 @@ class NotificationModelTest(TestCase):
             str(self.notification),
             f"{self.user.username} ({self.notification.message[:20]}...)",
         )
+
+
+class QASessionModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.course = CourseFactory.create()
+        cls.qa_session = QASessionFactory.create(
+            course=cls.course,
+            room_name="1_20240801000000000000",
+        )
+
+    def test_create_qa_session(self):
+        self.assertEqual(self.qa_session.course, self.course)
+        self.assertEqual(self.qa_session.room_name, "1_20240801000000000000")
+
+    def test_field_constraints(self):
+        course_related_name = QASession._meta.get_field("course")._related_name
+        self.assertEqual(course_related_name, "qa_sessions")
+        room_name_max_length = QASession._meta.get_field("room_name").max_length
+        self.assertEqual(room_name_max_length, 200)
+        created_at_auto_now_add = QASession._meta.get_field("created_at").auto_now_add
+        self.assertTrue(created_at_auto_now_add)
+
+    def test_status_methods(self):
+        self.assertTrue(self.qa_session.is_active())
+        self.assertFalse(self.qa_session.is_ended())
+
+    def test_ordering(self):
+        self.assertEqual(QASession._meta.ordering, ["-created_at"])

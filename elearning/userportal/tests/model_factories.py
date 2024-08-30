@@ -157,8 +157,7 @@ class QASessionFactory(DjangoModelFactory):
         model = QASession
 
     course = factory.SubFactory(CourseFactory)
-    status = QASession.Status.ACTIVE
-    created_at = timezone.now() - timezone.timedelta(hours=1)
+    created_at = timezone.now()
 
     @factory.lazy_attribute
     def room_name(self):
