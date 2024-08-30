@@ -1,8 +1,8 @@
-from django.utils import timezone
-import random
-from django.contrib.auth import get_user_model
 import factory
 from factory.django import DjangoModelFactory
+
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
 from userportal.models import *

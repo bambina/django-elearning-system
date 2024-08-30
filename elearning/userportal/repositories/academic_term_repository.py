@@ -1,4 +1,5 @@
 from django.utils.timezone import now
+
 from userportal.models import AcademicTerm
 
 

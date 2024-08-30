@@ -39,8 +39,7 @@ ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
 ACTIVE_QA_SESSION_EXISTS = _("An active QA session already exists for this course.")
 
 # Info messages
-USER_ALREADY_DEACTIVATED_MSG = _("User {username} is already deactivated.")
-USER_ALREADY_ACTIVATED_MSG = _("User {username} is already activated.")
+USER_ALREADY_CHANGED_MSG = _("User {username} is already {action}.")
 QA_SESSION_EMPTY_MSG = _("Empty message received and ignored")
 QA_SESSION_ENDED_MSG = _("Message received after session end and ignored")
 
@@ -53,7 +52,9 @@ UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")
 ENROLL_COURSE_SUCCESS_MSG = _("You have successfully enrolled in the course.")
 SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")
 MATERIAL_CREATED_SUCCESS_MSG = _("The material has been created successfully.")
-DEACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully deactivated.")
+UPDATE_USER_ACTIVE_STATUS_SUCCESS_MSG = _(
+    "User {username} has been successfully {action}."
+)
 ACTIVATE_USER_SUCCESS_MSG = _("User {username} has been successfully activated.")
 QA_SESSION_END_SUCCESS_MSG = _("QA session ended successfully.")
 
