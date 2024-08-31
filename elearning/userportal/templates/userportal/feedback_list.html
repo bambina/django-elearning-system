@@ -14,18 +14,18 @@
                     <div class="col">Academic Performance</div>
                 </div>
             </li>
-            {% for feedback in feedbacks %}
+            {% for f in feedbacks %}
                 <li class="list-group-item">
                     <div class="row">
-                        <div class="col">{{ feedback.created_at|date:"M j, Y" }}</div>
+                        <div class="col">{{ f.created_at|date:"M j, Y" }}</div>
                         <div class="col">
-                            <a href="{% url 'user-detail' feedback.student.user.username %}">
-                            {{ feedback.student.user.get_full_name }}
+                            <a href="{% url 'user-detail' f.student.user.username %}">
+                            {{ f.student.user.get_full_name }}
                             </a>
                         </div>
-                        <div class="col">{{ feedback.comments }}</div>
+                        <div class="col">{{ f.comments }}</div>
                         <div class="col">
-                            {{ feedback.grade_display }}
+                            {{ f.grade_display }}
                         </div>
                     </div>
                 </li>

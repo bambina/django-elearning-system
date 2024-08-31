@@ -2,6 +2,7 @@ from .academic_term_repository import AcademicTermRepository
 from .course_repository import CourseRepository
 from .course_offering_repository import CourseOfferingRepository
 from .enrollment_repository import EnrollmentRepository
+from .feedback_repository import FeedbackRepository
 from .material_repository import MaterialRepository
 from .notification_repository import NotificationRepository
 from .qa_session_repository import QASessionRepository

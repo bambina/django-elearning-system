@@ -1,8 +1,8 @@
 from typing import Type, Tuple, List
 from django.contrib.auth import get_user_model
 from userportal.models import *
-from django.db.models import QuerySet
-
+from django.db.models import QuerySet, OuterRef
+from django.utils.timezone import now
 
 User = get_user_model()
 AuthUserType = Type[get_user_model()]
@@ -45,4 +45,16 @@ class EnrollmentRepository:
             Enrollment.objects.filter(offering_id=offering_id)
             .select_related("student")
             .order_by("-enrolled_at")
+        )
+
+    @staticmethod
+    def get_latest_grades_subquery(course_id):
+        return (
+            Enrollment.objects.filter(
+                student=OuterRef("student"),
+                offering__course_id=course_id,
+                offering__term__end_datetime__lt=now(),
+            )
+            .order_by("-offering__term__end_datetime")
+            .values("grade")[:1]
         )
