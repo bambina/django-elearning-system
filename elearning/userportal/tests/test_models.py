@@ -544,9 +544,6 @@ class QASessionModelTest(TestCase):
         self.assertTrue(self.qa_session.is_active())
         self.assertFalse(self.qa_session.is_ended())
 
-    def test_ordering(self):
-        self.assertEqual(QASession._meta.ordering, ["-created_at"])
-
 
 class QAQuestionModelTest(TestCase):
     @classmethod

@@ -351,10 +351,6 @@ class QASession(models.Model):
     def is_ended(self):
         return self.status == self.Status.ENDED
 
-    class Meta:
-        # QASessionRepositry rely on this ordering
-        ordering = ["-created_at"]
-
 
 class QAQuestion(models.Model):
     room_name = models.CharField(max_length=200)

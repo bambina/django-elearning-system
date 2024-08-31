@@ -19,6 +19,8 @@ from userportal.repositories import *
 from userportal.views.mixins import QueryParamsMixin
 from django.contrib.auth import get_user_model
 from typing import Type
+from userportal.constants import *
+from django.db import transaction
 
 AuthUserType = Type[get_user_model()]
 
@@ -88,11 +90,10 @@ class CourseDetailView(DetailView):
     @staticmethod
     def get_qa_session_context(course: Course) -> dict:
         """Get the active or ended QA session for the course."""
-        active_session = QASessionRepository.get_active_session(course)
-        ended_session = QASessionRepository.get_ended_session(course)
+        qa_session = QASessionRepository.get(course)
         return {
-            "qa_session": active_session if active_session else ended_session,
-            "show_start_session_button": not active_session,
+            "qa_session": qa_session,
+            "show_start_session_button": not qa_session or qa_session.is_ended(),
         }
 
 
@@ -176,16 +177,20 @@ def start_qa_session(request, course_id):
         return redirect("course-detail", pk=course_id)
 
     course = get_object_or_404(Course, pk=course_id)
-    if last_session := QASessionRepository.get_last_session(course):
-        if last_session.status == QASession.Status.ACTIVE:
-            # Show a warning message if already exists
+    qa_session, created = QASession.objects.get_or_create(course=course)
+
+    # Check the last session status
+    if not created:
+        if qa_session.is_active():
+            # Show a message and redirect to the QA session page if already started
             messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
             return redirect("qa-session", course_id=course.id)
-        elif last_session.status == QASession.Status.ENDED:
+        elif qa_session.is_ended():
             # Delete all previous questions asynchronously
-            delete_qa_questions.delay(last_session.room_name)
+            delete_qa_questions.delay(qa_session.room_name)
 
-    qa_session = QASessionRepository.create(course)
+    # Update the room name
+    qa_session = QASessionRepository.update_room_name(qa_session)
     # Notify students enrolled in the course
     notify_students_of_live_qa_start.delay(course.id)
     # Prepare context for the template
@@ -198,17 +203,18 @@ def start_qa_session(request, course_id):
 
 
 def qa_session(request, course_id):
+    user = request.user
     course = get_object_or_404(Course, pk=course_id)
     qa_session = get_object_or_404(QASession, course=course)
+    # Setup the context for the QA session page
     context = {
         "course": course,
         "qa_session": qa_session,
+        "is_instructor": user.is_teacher() and user.teacher_profile == course.teacher,
     }
     if qa_session.is_ended():
+        # If the QA session has ended, fetch the questions as WebSocket is not available
         context["questions"] = QAQuestion.objects.filter(room_name=qa_session.room_name)
-    context["is_instructor"] = (
-        request.user.is_teacher() and request.user.teacher_profile == course.teacher
-    )
     return render(request, "userportal/qa_session.html", context=context)
 
 
@@ -219,19 +225,33 @@ def end_qa_session(request, course_id):
         return redirect("qa-session", course_id=course_id)
 
     course = get_object_or_404(Course, pk=course_id)
-    qa_session = get_object_or_404(QASession, course=course)
-    qa_session.status = QASession.Status.ENDED
-    qa_session.save()
 
-    # Close all connections
-    close_comment = QAQuestion(
-        room_name=qa_session.room_name,
-        text=LIVE_QA_END_SESSION_MSG,
-        sender="System",
-        timestamp=timezone.now(),
-    )
-    close_comment.save()
-    # Close all connections
+    try:
+        with transaction.atomic():
+            _, close_comment = _end_session_and_create_comment(course)
+    except Exception as e:
+        messages.error(request, ERR_FAILED_TO_END_SESSION.format(exception=e))
+        return redirect("qa-session", course_id=course.id)
+
+    _send_close_message(close_comment)
+
+    messages.success(request, QA_SESSION_END_SUCCESS_MSG)
+    return redirect("course-detail", pk=course.id)
+
+
+def _end_session_and_create_comment(course: Course) -> tuple[QASession, QAQuestion]:
+    """
+    End the QA session and create a close comment in an atomic operation.
+    """
+    qa_session = QASessionRepository.end(course)
+    close_comment = QAQuestionRepository.create_and_save_close_comment(qa_session)
+    return qa_session, close_comment
+
+
+def _send_close_message(close_comment: QAQuestion) -> None:
+    """
+    Send a close message to the group via WebSocket.
+    """
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"{LIVE_QA_PREFIX}_{close_comment.room_name}",
@@ -242,5 +262,3 @@ def end_qa_session(request, course_id):
             "timestamp": close_comment.timestamp.isoformat(),
         },
     )
-    messages.success(request, QA_SESSION_END_SUCCESS_MSG)
-    return redirect("course-detail", pk=course.id)

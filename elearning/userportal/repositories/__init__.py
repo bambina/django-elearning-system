@@ -5,4 +5,5 @@ from .enrollment_repository import EnrollmentRepository
 from .material_repository import MaterialRepository
 from .notification_repository import NotificationRepository
 from .qa_session_repository import QASessionRepository
+from .qa_question_repository import QAQuestionRepository
 from .user_repository import UserRepository

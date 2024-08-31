@@ -6,10 +6,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
-from userportal.repositories.enrollment_repository import *
+from userportal.repositories import *
 from userportal.models import *
 from userportal.forms import *
-from userportal.repositories.user_repository import *
 from userportal.views.mixins import QueryParamsMixin
 
 AuthUser = get_user_model()

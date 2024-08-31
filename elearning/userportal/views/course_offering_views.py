@@ -7,7 +7,6 @@ from django.views.generic import ListView
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
-from django.urls import reverse
 from ..tasks import notify_teacher_of_new_enrollment
 
 

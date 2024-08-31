@@ -7,9 +7,7 @@ from django.views.generic import ListView
 from userportal.models import *
 from userportal.forms import *
 from userportal.tasks import mark_notifications_as_read
-from userportal.repositories.enrollment_repository import *
-from userportal.repositories.user_repository import *
-from userportal.repositories.notification_repository import *
+from userportal.repositories import *
 
 
 def index(request):

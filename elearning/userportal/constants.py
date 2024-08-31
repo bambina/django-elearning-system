@@ -33,6 +33,7 @@ ERR_INVALID_JSON = _("Invalid JSON received")
 ERR_FAILED_TO_SEND_NOTIFICATION = _(
     "Failed to send notifications to users. Error: {exception}."
 )
+ERR_FAILED_TO_END_SESSION = _("Failed to end the QA session. Error: {exception}.")
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
