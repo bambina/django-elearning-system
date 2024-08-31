@@ -16,31 +16,27 @@ from userportal.forms import *
 from userportal.tasks import *
 from userportal.permissions import PermissionChecker
 from userportal.repositories.academic_term_repository import *
+from userportal.repositories.course_repository import *
+from userportal.repositories.course_offering_repository import *
+from userportal.repositories.qa_session_repository import *
+from userportal.repositories.enrollment_repository import *
+from userportal.repositories.material_repository import *
+from userportal.views.mixins import QueryParamsMixin
+from django.contrib.auth import get_user_model
+from typing import Type
+
+AuthUserType = Type[get_user_model()]
 
 
-class CourseListView(ListView):
+class CourseListView(QueryParamsMixin, ListView):
     model = Course
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/course_list.html"
     context_object_name = "courses"
 
     def get_queryset(self):
-        queryset = Course.objects.select_related("teacher__user").only(
-            "id",
-            "title",
-            "description",
-            "teacher__user__title",
-            "teacher__user__first_name",
-            "teacher__user__last_name",
-        )
         keywords = self.request.GET.get("keywords")
-        if keywords:
-            query_words = keywords.split()
-            q_objects = Q()
-            for word in query_words:
-                q_objects |= Q(title__icontains=word) | Q(description__icontains=word)
-            queryset = queryset.filter(q_objects)
-        return queryset
+        return CourseRepository.get_filtered_courses(keywords)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,50 +51,54 @@ class CourseDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-
+        course = self.object
+        # Return early for anonymous users
         if user.is_anonymous:
             return context
 
-        course = self.object
-
-        current_term = AcademicTermRepository.current()
-        if current_term:
-            current_offering = CourseOffering.objects.filter(
-                course=course, term=current_term
-            ).first()
-            if current_offering:
-                context["current_offering"] = current_offering
-                if user.is_student():
-                    context["is_taking"] = Enrollment.objects.filter(
-                        student=user.student_profile, offering=current_offering
-                    ).exists()
-                if active_session := QASession.objects.filter(
-                    course=course, status=QASession.Status.ACTIVE
-                ).first():
-                    context["qa_session"] = active_session
-                else:
-                    context["show_start_session_button"] = True
-                    context["qa_session"] = QASession.objects.filter(
-                        course=course, status=QASession.Status.ENDED
-                    ).first()
-
-        next_term = AcademicTermRepository.next()
-        if next_term:
-            next_offering = CourseOffering.objects.filter(
-                course=course, term=next_term
-            ).first()
-            if next_offering:
-                context["next_offering"] = next_offering
-                if user.is_student():
-                    context["is_enrolled"] = Enrollment.objects.filter(
-                        student=user.student_profile, offering=next_offering
-                    ).exists()
-
-        context["is_instructor"] = (
-            user.is_teacher() and user.teacher_profile == course.teacher
-        )
+        # Add course offering data
+        context.update(self.get_course_offerings_context(course))
+        # Add QA session data
+        context.update(self.get_qa_session_context(course))
+        # Add request user's data
+        if user.is_student():
+            context.update(self.get_student_context(user.student_profile, context))
+        elif user.is_teacher():
+            context["is_instructor"] = user.teacher_profile == course.teacher
 
         return context
+
+    @staticmethod
+    def get_course_offerings_context(course: Course) -> dict:
+        """Get the current and next course offerings for the given course."""
+        return {
+            "next_offering": CourseOfferingRepository.get_next_course_offering(course),
+            "current_offering": CourseOfferingRepository.get_current_course_offering(
+                course
+            ),
+        }
+
+    @staticmethod
+    def get_student_context(profile: StudentProfile, context: dict) -> dict:
+        """Get the student's enrollment status for the current and next course offerings."""
+        return {
+            "is_taking": EnrollmentRepository.is_enrolled(
+                profile, context["current_offering"]
+            ),
+            "is_registered": EnrollmentRepository.is_enrolled(
+                profile, context["next_offering"]
+            ),
+        }
+
+    @staticmethod
+    def get_qa_session_context(course: Course) -> dict:
+        """Get the active or ended QA session for the course."""
+        active_session = QASessionRepository.get_active_session(course)
+        ended_session = QASessionRepository.get_ended_session(course)
+        return {
+            "qa_session": active_session if active_session else ended_session,
+            "show_start_session_button": not active_session,
+        }
 
 
 @login_required(login_url="login")
@@ -107,14 +107,11 @@ def create_course(request):
         messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSES)
         return redirect("course-list")
 
-    teacher_profile = get_object_or_404(TeacherProfile, user=request.user)
-
+    teacher = get_object_or_404(TeacherProfile, user=request.user)
     if request.method == "POST":
         form = CourseForm(request.POST)
         if form.is_valid():
-            course = form.save(commit=False)
-            course.teacher = teacher_profile
-            course.save()
+            course = CourseRepository.create_course(form.cleaned_data, teacher)
             return redirect("course-detail", pk=course.pk)
     else:
         form = CourseForm()
@@ -128,18 +125,14 @@ def create_material(request, course_id):
         return redirect("course-list")
 
     course = get_object_or_404(Course, pk=course_id)
-
     if request.method == "POST":
         form = MaterialForm(request.POST, request.FILES)
         if form.is_valid():
-            material = form.save(commit=False)
-            material.course = course
-            material.save()
-
+            material = MaterialRepository.create_material(form.cleaned_data, course)
             # Asynchronously send notifications to students enrolled in the course
             notify_students_of_material_creation.delay(course.id, material.id)
             messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
-            return redirect("course-detail", pk=course_id)
+            return redirect("course-detail", pk=course.id)
     else:
         form = MaterialForm()
     return render(
@@ -156,9 +149,8 @@ class MaterialListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return Material.objects.filter(course_id=course_id).only(
-            "id", "title", "description", "uploaded_at", "file"
-        )
+        course = get_object_or_404(Course, pk=course_id)
+        return MaterialRepository.get_materials_for(course)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -189,24 +181,24 @@ def start_qa_session(request, course_id):
         return redirect("course-detail", pk=course_id)
 
     course = get_object_or_404(Course, pk=course_id)
-    # Show error message if an active QA session already exists
-    last_session = QASession.objects.filter(course=course).first()
-    if last_session and last_session.is_active():
-        # TODO: redirect 'course-detail'
-        messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
-        return redirect("qa-session", course_id=course.id)
-    timestamp = timezone.now().strftime("%Y%m%d%H%M%S%f")
-    room_name = f"{course.id}_{timestamp}"
-    qa_session, _ = QASession.objects.get_or_create(course=course)
-    previous_room_name = qa_session.room_name
-    qa_session.room_name = room_name
-    qa_session.status = QASession.Status.ACTIVE
-    qa_session.save()
+    if last_session := QASessionRepository.get_last_session(course):
+        if last_session.status == QASession.Status.ACTIVE:
+            # Show a warning message if already exists
+            messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
+            return redirect("qa-session", course_id=course.id)
+        elif last_session.status == QASession.Status.ENDED:
+            # Delete all previous questions asynchronously
+            delete_qa_questions.delay(last_session.room_name)
+
+    qa_session = QASessionRepository.create(course)
     # Notify students enrolled in the course
     notify_students_of_live_qa_start.delay(course.id)
-    # Delete all previous questions asynchronously
-    delete_qa_questions.delay(previous_room_name)
-    context = {"course": course, "qa_session": qa_session, "is_instructor": True}
+    # Prepare context for the template
+    context = {
+        "course": course,
+        "qa_session": qa_session,
+        "is_instructor": request.user.teacher_profile == course.teacher,
+    }
     return render(request, "userportal/qa_session.html", context=context)
 
 

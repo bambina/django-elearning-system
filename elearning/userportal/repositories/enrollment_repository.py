@@ -29,3 +29,10 @@ class EnrollmentRepository:
                     past_enrollments.append(e)
 
         return upcoming_enrollments, current_enrollments, past_enrollments
+
+    @staticmethod
+    def is_enrolled(student_profile: StudentProfile, offering: CourseOffering) -> bool:
+        """Check if the student is enrolled in the given course offering."""
+        return Enrollment.objects.filter(
+            student=student_profile, offering=offering
+        ).exists()

@@ -10,8 +10,26 @@ from userportal.repositories.enrollment_repository import *
 from userportal.models import *
 from userportal.forms import *
 from userportal.repositories.user_repository import *
+from userportal.views.mixins import QueryParamsMixin
 
 AuthUser = get_user_model()
+
+
+class UserListView(QueryParamsMixin, ListView):
+    model = AuthUser
+    paginate_by = settings.PAGINATION_PAGE_SIZE
+    template_name = "userportal/user_list.html"
+    context_object_name = "users"
+
+    def get_queryset(self):
+        keywords = self.request.GET.get("keywords")
+        user_types = self.request.GET.getlist("user_type")
+        return UserRepository.get_filtered_users(keywords, user_types)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_form"] = UserSearchForm(self.request.GET or None)
+        return context
 
 
 class UserDetailView(DetailView):
@@ -48,27 +66,6 @@ class UserDetailView(DetailView):
         if user.is_teacher():
             context["offered_courses"] = user.teacher_profile.courses.all()
 
-        return context
-
-
-class UserListView(ListView):
-    model = AuthUser
-    paginate_by = settings.PAGINATION_PAGE_SIZE
-    template_name = "userportal/user_list.html"
-    context_object_name = "users"
-
-    def get_queryset(self):
-        keywords = self.request.GET.get("keywords")
-        user_types = self.request.GET.getlist("user_type")
-        return UserRepository.get_filtered_users(keywords, user_types)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_form"] = UserSearchForm(self.request.GET or None)
-        query_dict = self.request.GET.copy()
-        if "page" in query_dict:
-            del query_dict["page"]
-        context["query_params"] = query_dict.urlencode()
         return context
 
 

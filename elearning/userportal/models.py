@@ -352,6 +352,7 @@ class QASession(models.Model):
         return self.status == self.Status.ENDED
 
     class Meta:
+        # QASessionRepositry rely on this ordering
         ordering = ["-created_at"]
 
 

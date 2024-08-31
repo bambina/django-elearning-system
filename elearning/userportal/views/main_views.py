@@ -68,7 +68,7 @@ class NotificationListView(ListView):
     login_url = "login"
 
     def get_queryset(self):
-        return NotificationRepository.fetch_notifications_for_user(self.request.user)
+        return NotificationRepository.fetch_notifications_for(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
