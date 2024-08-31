@@ -43,8 +43,7 @@ class UserRepository:
         return False
 
     @staticmethod
-    def update_student_profile_status(user, status):
-        student_profile = get_object_or_404(StudentProfile, user=user)
-        student_profile.status = status
-        student_profile.save()
-        return True
+    def update_status(student: StudentProfile, status: str) -> StudentProfile:
+        student.status = status
+        student.save()
+        return student

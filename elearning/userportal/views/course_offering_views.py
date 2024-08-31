@@ -8,11 +8,16 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from django.conf import settings
 from ..tasks import notify_teacher_of_new_enrollment
+from userportal.repositories import *
 
 
 @login_required(login_url="login")
 @require_POST
 def enroll_course(request, course_id, offering_id):
+    """
+    Student enrolls in a next course offering.
+    Displays a warning message if already enrolled.
+    """
     if not request.user.is_student():
         messages.error(request, ERR_ONLY_STUDENTS_CAN_ENROLL)
         return redirect("course-list")
@@ -43,11 +48,7 @@ class CourseOfferingListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return (
-            CourseOffering.objects.filter(course_id=course_id)
-            .select_related("term")
-            .order_by("-term__start_datetime")
-        )
+        return CourseOfferingRepository.get_with_academic_terms(course_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -67,15 +68,12 @@ def create_course_offering(request, course_id):
     if request.method == "POST":
         form = CourseOfferingForm(request.POST, course=course)
         if form.is_valid():
-            offering = form.save(commit=False)
-            offering.course = course
-            offering.save()
+            CourseOfferingRepository.create(form.cleaned_data, course)
             return redirect("offering-list", course_id=course_id)
     else:
         form = CourseOfferingForm(course=course)
-    return render(
-        request, "userportal/offering_create.html", {"form": form, "course": course}
-    )
+    context = {"form": form, "course": course}
+    return render(request, "userportal/offering_create.html", context=context)
 
 
 class EnrolledStudentListView(ListView):
@@ -86,16 +84,10 @@ class EnrolledStudentListView(ListView):
 
     def get_queryset(self):
         offering_id = self.kwargs.get("offering_id")
-        return (
-            Enrollment.objects.filter(offering_id=offering_id)
-            .select_related("student")
-            .order_by("-enrolled_at")
-        )
+        return EnrollmentRepository.get_with_student(offering_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        course_id = self.kwargs.get("course_id")
         offering_id = self.kwargs.get("offering_id")
-        context["course"] = get_object_or_404(Course, pk=course_id)
         context["offering"] = get_object_or_404(CourseOffering, pk=offering_id)
         return context

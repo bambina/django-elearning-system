@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
+from django.http import HttpRequest, HttpResponse
 
 from userportal.models import *
 from userportal.forms import *
@@ -19,31 +20,30 @@ def index(request):
 
 
 @login_required(login_url="login")
-def home(request):
+def home(request: HttpRequest) -> HttpResponse:
     context = {}
     user = request.user
 
     if user.is_student():
-        context.update(handle_student_view(request, user))
+        context.update(_handle_student_view(request, user.student_profile))
     elif user.is_teacher():
-        context.update(handle_teacher_view(user))
+        context.update(_handle_teacher_view(user.teacher_profile))
 
     return render(request, "userportal/home.html", context)
 
 
-def handle_student_view(request, user):
-    context = {}
+def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
     if request.method == "POST":
-        status_form = StatusForm(request.POST)
-        if status_form.is_valid():
-            status = status_form.cleaned_data["status"]
-            if UserRepository.update_student_profile_status(user, status):
-                messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            status = form.cleaned_data["status"]
+            UserRepository.update_status(student, status)
+            messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
     else:
-        initial = {"status": user.student_profile.status}
-        status_form = StatusForm(initial=initial)
-    context["status_form"] = status_form
-    enrollments = EnrollmentRepository.fetch_enrollments_for_student(user)
+        initial = {"status": student.status}
+        form = StatusForm(initial=initial)
+    context = {"status_form": form}
+    enrollments = EnrollmentRepository.get(student)
     (
         context["upcoming_enrollments"],
         context["current_enrollments"],
@@ -52,9 +52,9 @@ def handle_student_view(request, user):
     return context
 
 
-def handle_teacher_view(user):
+def _handle_teacher_view(teacher: TeacherProfile) -> dict:
     return {
-        "offered_courses": user.teacher_profile.courses.all(),
+        "offered_courses": teacher.courses.all(),
     }
 
 

@@ -69,10 +69,8 @@ class CourseDetailView(DetailView):
     def get_course_offerings_context(course: Course) -> dict:
         """Get the current and next course offerings for the given course."""
         return {
-            "next_offering": CourseOfferingRepository.get_next_course_offering(course),
-            "current_offering": CourseOfferingRepository.get_current_course_offering(
-                course
-            ),
+            "next_offering": CourseOfferingRepository.get_next(course),
+            "current_offering": CourseOfferingRepository.get_current(course),
         }
 
     @staticmethod
