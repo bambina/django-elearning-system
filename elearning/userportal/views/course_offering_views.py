@@ -48,7 +48,7 @@ class CourseOfferingListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return CourseOfferingRepository.get_with_academic_terms(course_id)
+        return CourseOfferingRepository.fetch_with_academic_terms(course_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,7 +84,7 @@ class EnrolledStudentListView(ListView):
 
     def get_queryset(self):
         offering_id = self.kwargs.get("offering_id")
-        return EnrollmentRepository.get_with_student(offering_id)
+        return EnrollmentRepository.fetch_with_student(offering_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

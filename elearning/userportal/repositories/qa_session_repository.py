@@ -7,7 +7,7 @@ class QASessionRepository:
     """Repository for Q&A session related operations."""
 
     @staticmethod
-    def get(course: Course) -> Union[QASession, None]:
+    def fetch(course: Course) -> Union[QASession, None]:
         """Retrieve a Q&A session for the specified course."""
         return QASession.objects.filter(course=course).first()
 

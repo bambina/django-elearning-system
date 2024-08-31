@@ -1,13 +1,16 @@
-from userportal.models import *
-from userportal.repositories.academic_term_repository import *
 from typing import Union
 from django.db.models import QuerySet
 
+from userportal.models import *
+from userportal.repositories import *
+
 
 class CourseOfferingRepository:
+    """Repository for CourseOffering model."""
+
     @staticmethod
-    def get_current(course: Course) -> Union[CourseOffering, None]:
-        """Get the current course offering for the given course."""
+    def fetch_current(course: Course) -> Union[CourseOffering, None]:
+        """Fetch the current course offering for the given course."""
         current_term = AcademicTermRepository.current()
         if current_term:
             return CourseOffering.objects.filter(
@@ -16,15 +19,15 @@ class CourseOfferingRepository:
         return None
 
     @staticmethod
-    def get_next(course: Course) -> Union[CourseOffering, None]:
-        """Get the next course offering for the given course."""
+    def fetch_next(course: Course) -> Union[CourseOffering, None]:
+        """Fetch the next course offering for the given course."""
         next_term = AcademicTermRepository.next()
         if next_term:
             return CourseOffering.objects.filter(course=course, term=next_term).first()
         return None
 
     @staticmethod
-    def get_with_academic_terms(course_id: int) -> QuerySet[CourseOffering]:
+    def fetch_with_academic_terms(course_id: int) -> QuerySet[CourseOffering]:
         """
         Retrieve all course offerings for the given course, including related academic terms.
         """

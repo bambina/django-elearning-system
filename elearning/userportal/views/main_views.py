@@ -43,7 +43,7 @@ def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
         initial = {"status": student.status}
         form = StatusForm(initial=initial)
     context = {"status_form": form}
-    enrollments = EnrollmentRepository.get(student)
+    enrollments = EnrollmentRepository.fetch(student)
     (
         context["upcoming_enrollments"],
         context["current_enrollments"],
@@ -66,7 +66,7 @@ class NotificationListView(ListView):
     login_url = "login"
 
     def get_queryset(self):
-        return NotificationRepository.fetch_notifications_for(self.request.user)
+        return NotificationRepository.fetch(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

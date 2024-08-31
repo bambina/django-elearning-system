@@ -23,7 +23,7 @@ class UserListView(QueryParamsMixin, ListView):
     def get_queryset(self):
         keywords = self.request.GET.get("keywords")
         user_types = self.request.GET.getlist("user_type")
-        return UserRepository.get_filtered_users(keywords, user_types)
+        return UserRepository.fetch_filtered_by(keywords, user_types)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

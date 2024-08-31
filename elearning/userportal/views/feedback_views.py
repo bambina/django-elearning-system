@@ -17,7 +17,7 @@ def create_feedback(request, course_id):
 
     course = get_object_or_404(Course, pk=course_id)
     student = request.user.student_profile
-    feedback = FeedbackRepository.get_or_none(student, course)
+    feedback = FeedbackRepository.fetch(student, course)
 
     if request.method == "POST":
         form = FeedbackForm(request.POST, instance=feedback)
@@ -40,7 +40,7 @@ class FeedbackListView(ListView):
 
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
-        return FeedbackRepository.get_with_student_grade(course_id)
+        return FeedbackRepository.fetch_with_student_grade(course_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -1,20 +1,23 @@
+from typing import Union
+
+from django.db.models import QuerySet
+from django.db.models import Subquery, Case, When, Value
+
 from userportal.models import *
-from django.db.models import OuterRef, Subquery, Case, When, Value
-from django.utils.timezone import now
 from userportal.repositories import EnrollmentRepository
 
 
 class FeedbackRepository:
+    """Repository for Feedback model."""
+
     @staticmethod
-    def get_or_none(student, course):
-        try:
-            feedback = Feedback.objects.get(student=student, course=course)
-        except Feedback.DoesNotExist:
-            feedback = None
-        return feedback
+    def fetch(student: StudentProfile, course: Course) -> Union[Feedback, None]:
+        """Fetches feedback for a given student and course."""
+        return Feedback.objects.filter(student=student, course=course).first()
 
     @staticmethod
     def create(form_data, course, student) -> Feedback:
+        """Create a feedback with given form data, course, and student."""
         feedback = Feedback(**form_data)
         feedback.course = course
         feedback.student = student
@@ -22,8 +25,9 @@ class FeedbackRepository:
         return feedback
 
     @staticmethod
-    def get_with_student_grade(course_id):
-        latest_grade = EnrollmentRepository.get_latest_grades_subquery(course_id)
+    def fetch_with_student_grade(course_id: int) -> QuerySet[Feedback]:
+        """Fetch feedback with student grade for a given course."""
+        latest_grade = EnrollmentRepository.fetch_latest_grades_subquery(course_id)
 
         return (
             Feedback.objects.filter(course_id=course_id)

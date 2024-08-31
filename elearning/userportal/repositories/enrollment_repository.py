@@ -1,35 +1,39 @@
 from typing import Type, Tuple, List
-from django.contrib.auth import get_user_model
-from userportal.models import *
-from django.db.models import QuerySet, OuterRef
+
 from django.utils.timezone import now
+from django.contrib.auth import get_user_model
+from django.db.models import QuerySet, OuterRef
+
+from userportal.models import *
 
 User = get_user_model()
 AuthUserType = Type[get_user_model()]
 
 
 class EnrollmentRepository:
-    @staticmethod
-    def get(student: StudentProfile) -> Tuple[List, List, List]:
-        """Get the student's enrollments grouped by term status."""
-        upcoming_enrollments = []
-        current_enrollments = []
-        past_enrollments = []
+    """Repository for Enrollment model."""
 
+    @staticmethod
+    def fetch(student: StudentProfile) -> Tuple[List, List, List]:
+        """
+        Fetch a student's enrollments and groups them by their term status
+        into upcoming, current, and past categories.
+        """
         enrollments = Enrollment.objects.filter(student=student).select_related(
             "offering", "offering__course", "offering__term"
         )
 
-        for e in enrollments:
-            status = e.offering.term.status
-            if status == AcademicTerm.TermStatus.NOT_STARTED:
-                upcoming_enrollments.append(e)
-            elif status == AcademicTerm.TermStatus.IN_PROGRESS:
-                current_enrollments.append(e)
+        upcoming, current, past = [], [], []
+        for enrollment in enrollments:
+            term_status = enrollment.offering.term.status
+            if term_status == AcademicTerm.TermStatus.NOT_STARTED:
+                upcoming.append(enrollment)
+            elif term_status == AcademicTerm.TermStatus.IN_PROGRESS:
+                current.append(enrollment)
             else:
-                past_enrollments.append(e)
+                past.append(enrollment)
 
-        return upcoming_enrollments, current_enrollments, past_enrollments
+        return upcoming, current, past
 
     @staticmethod
     def is_enrolled(student_profile: StudentProfile, offering: CourseOffering) -> bool:
@@ -39,7 +43,7 @@ class EnrollmentRepository:
         ).exists()
 
     @staticmethod
-    def get_with_student(offering_id: int) -> QuerySet[Enrollment]:
+    def fetch_with_student(offering_id: int) -> QuerySet[Enrollment]:
         """Get all enrollments for the given course offering, including related student data."""
         return (
             Enrollment.objects.filter(offering_id=offering_id)
@@ -48,7 +52,8 @@ class EnrollmentRepository:
         )
 
     @staticmethod
-    def get_latest_grades_subquery(course_id):
+    def fetch_latest_grades_subquery(course_id):
+        """Get a subquery for the latest grade of a student enrolled in the given course."""
         return (
             Enrollment.objects.filter(
                 student=OuterRef("student"),

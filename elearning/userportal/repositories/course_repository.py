@@ -1,10 +1,15 @@
 from django.db.models import Q
-from userportal.models import Course
+from django.db.models.query import QuerySet
+
+from userportal.models import *
 
 
 class CourseRepository:
+    """Repository for Course model."""
+
     @staticmethod
-    def get_filtered_courses(keywords=None):
+    def fetch_filtered_by(keywords: dict = None) -> QuerySet[Course]:
+        """Fetch courses that match the given keywords."""
         queryset = Course.objects.select_related("teacher__user").only(
             "id",
             "title",
@@ -27,7 +32,7 @@ class CourseRepository:
         return queryset
 
     @staticmethod
-    def create_course(form_data, teacher):
+    def create_course(form_data: dict, teacher: TeacherProfile) -> Course:
         """Create a course with given form data and teacher."""
         course = Course(**form_data)
         course.teacher = teacher

@@ -33,7 +33,7 @@ class CourseListView(QueryParamsMixin, ListView):
 
     def get_queryset(self):
         keywords = self.request.GET.get("keywords")
-        return CourseRepository.get_filtered_courses(keywords)
+        return CourseRepository.fetch_filtered_by(keywords)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -69,8 +69,8 @@ class CourseDetailView(DetailView):
     def get_course_offerings_context(course: Course) -> dict:
         """Get the current and next course offerings for the given course."""
         return {
-            "next_offering": CourseOfferingRepository.get_next(course),
-            "current_offering": CourseOfferingRepository.get_current(course),
+            "next_offering": CourseOfferingRepository.fetch_next(course),
+            "current_offering": CourseOfferingRepository.fetch_current(course),
         }
 
     @staticmethod
@@ -88,7 +88,7 @@ class CourseDetailView(DetailView):
     @staticmethod
     def get_qa_session_context(course: Course) -> dict:
         """Get the active or ended QA session for the course."""
-        qa_session = QASessionRepository.get(course)
+        qa_session = QASessionRepository.fetch(course)
         return {
             "qa_session": qa_session,
             "show_start_session_button": not qa_session or qa_session.is_ended(),
@@ -122,7 +122,7 @@ def create_material(request, course_id):
     if request.method == "POST":
         form = MaterialForm(request.POST, request.FILES)
         if form.is_valid():
-            material = MaterialRepository.create_material(form.cleaned_data, course)
+            material = MaterialRepository.create(form.cleaned_data, course)
             # Asynchronously send notifications to students enrolled in the course
             notify_students_of_material_creation.delay(course.id, material.id)
             messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
@@ -144,7 +144,7 @@ class MaterialListView(ListView):
     def get_queryset(self):
         course_id = self.kwargs.get("course_id")
         course = get_object_or_404(Course, pk=course_id)
-        return MaterialRepository.get_materials_for(course)
+        return MaterialRepository.fetch(course)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

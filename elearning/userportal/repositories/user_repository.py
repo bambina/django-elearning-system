@@ -1,5 +1,6 @@
 from typing import Type
 from django.db.models import Q
+from django.db.models.query import QuerySet
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
@@ -10,8 +11,11 @@ AuthUserType = Type[get_user_model()]
 
 
 class UserRepository:
+    """Repository for User model."""
+
     @staticmethod
-    def get_filtered_users(keywords=None, user_types=None):
+    def fetch_filtered_by(keywords=None, user_types=None) -> QuerySet[AuthUserType]:
+        """Fetch users that match the given keywords and user types."""
         queryset = AuthUser.objects.filter(is_staff=False, is_superuser=False).only(
             "id", "username", "user_type", "is_active"
         )
@@ -35,6 +39,7 @@ class UserRepository:
 
     @staticmethod
     def toggle_user_active_status(username, activate=True) -> bool:
+        """Toggle the active status of the user with the given username."""
         user = get_object_or_404(AuthUser, username=username)
         if activate != user.is_active:
             user.is_active = activate
@@ -44,6 +49,7 @@ class UserRepository:
 
     @staticmethod
     def update_status(student: StudentProfile, status: str) -> StudentProfile:
+        """Update the status of the student."""
         student.status = status
         student.save()
         return student
