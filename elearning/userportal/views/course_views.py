@@ -15,12 +15,7 @@ from userportal.models import *
 from userportal.forms import *
 from userportal.tasks import *
 from userportal.permissions import PermissionChecker
-from userportal.repositories.academic_term_repository import *
-from userportal.repositories.course_repository import *
-from userportal.repositories.course_offering_repository import *
-from userportal.repositories.qa_session_repository import *
-from userportal.repositories.enrollment_repository import *
-from userportal.repositories.material_repository import *
+from userportal.repositories import *
 from userportal.views.mixins import QueryParamsMixin
 from django.contrib.auth import get_user_model
 from typing import Type

@@ -1,12 +1,5 @@
 from django.urls import path
-from .views import (
-    registration_views,
-    user_views,
-    main_views,
-    course_views,
-    course_offering_views,
-    feedback_views,
-)
+from .views import *
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 
