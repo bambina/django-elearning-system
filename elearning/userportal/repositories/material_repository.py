@@ -6,8 +6,9 @@ class MaterialRepository:
     """Repository for Material model."""
 
     @staticmethod
-    def create(form_data: dict, course: Course) -> Material:
+    def create(form_data: dict, course: Course, files: dict) -> Material:
         """Create a material with given form data and course."""
+        form_data["file"] = files.get("file")
         material = Material(**form_data)
         material.course = course
         material.save()
