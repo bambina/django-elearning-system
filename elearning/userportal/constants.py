@@ -13,7 +13,9 @@ INVALID_COURSE_ALREADY_STARTED_MSG = _(
 )
 
 # Error messages
-ERR_UNEXPECTED = _("Unexpected error in receive: {message}")
+ERR_UNEXPECTED_LOG = _("Unexpected error occurred: {error}.")
+ERR_UNEXPECTED_MSG = _("Unexpected error occurred. Please try again later.")
+ERR_ALREADY_EXISTS = _("The {entity} already exists.")
 ERR_ONLY_STUDENTS_CAN_ENROLL = _("Only students can enroll in courses.")
 ERR_ONLY_STUDENTS_CAN_CREATE_FEEDBACK = _("Only students can create feedback.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")
@@ -52,7 +54,7 @@ PASSWORD_CHANGE_SUCCESS_MSG = _("Your password has been successfully changed.")
 UPDATE_STATUS_SUCCESS_MSG = _("Your status has been successfully updated.")
 ENROLL_COURSE_SUCCESS_MSG = _("You have successfully enrolled in the course.")
 SAVE_FEEDBACK_SUCCESS_MSG = _("Your feedback has been saved successfully.")
-MATERIAL_CREATED_SUCCESS_MSG = _("The material has been created successfully.")
+CREATED_SUCCESS_MSG = _("The {entity} has been created successfully.")
 UPDATE_USER_ACTIVE_STATUS_SUCCESS_MSG = _(
     "User {username} has been successfully {action}."
 )

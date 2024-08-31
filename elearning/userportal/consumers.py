@@ -82,7 +82,7 @@ class QASessionConsumer(AsyncWebsocketConsumer):
         except json.JSONDecodeError:
             logger.error(ERR_INVALID_JSON, exc_info=True)
         except Exception as e:
-            logger.error(ERR_UNEXPECTED.format(message=str(e)), exc_info=True)
+            logger.error(ERR_UNEXPECTED_LOG.format(error=str(e)), exc_info=True)
 
     async def send_message_to_group(
         self, message_type: str, message: str, sender: str, timestamp: datetime

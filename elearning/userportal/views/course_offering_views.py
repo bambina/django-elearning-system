@@ -68,8 +68,14 @@ def create_course_offering(request, course_id):
     if request.method == "POST":
         form = CourseOfferingForm(request.POST, course=course)
         if form.is_valid():
-            CourseOfferingRepository.create(form.cleaned_data, course)
-            return redirect("offering-list", course_id=course_id)
+            try:
+                CourseOfferingRepository.create(form.cleaned_data, course)
+                messages.success(
+                    request, CREATED_SUCCESS_MSG.format(entity="course offering")
+                )
+                return redirect("offering-list", course_id=course_id)
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         form = CourseOfferingForm(course=course)
     context = {"form": form, "course": course}

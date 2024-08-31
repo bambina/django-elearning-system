@@ -105,7 +105,7 @@ def create_course(request):
     if request.method == "POST":
         form = CourseForm(request.POST)
         if form.is_valid():
-            course = CourseRepository.create_course(form.cleaned_data, teacher)
+            course = CourseRepository.create(form.cleaned_data, teacher)
             return redirect("course-detail", pk=course.pk)
     else:
         form = CourseForm()
@@ -125,7 +125,7 @@ def create_material(request, course_id):
             material = MaterialRepository.create(form.cleaned_data, course)
             # Asynchronously send notifications to students enrolled in the course
             notify_students_of_material_creation.delay(course.id, material.id)
-            messages.success(request, MATERIAL_CREATED_SUCCESS_MSG)
+            messages.success(request, CREATED_SUCCESS_MSG.format(entity="material"))
             return redirect("course-detail", pk=course.id)
     else:
         form = MaterialForm()

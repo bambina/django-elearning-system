@@ -32,7 +32,7 @@ class CourseRepository:
         return queryset
 
     @staticmethod
-    def create_course(form_data: dict, teacher: TeacherProfile) -> Course:
+    def create(form_data: dict, teacher: TeacherProfile) -> Course:
         """Create a course with given form data and teacher."""
         course = Course(**form_data)
         course.teacher = teacher
