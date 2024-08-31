@@ -231,19 +231,16 @@ class CourseModelTest(TestCase):
     def setUpTestData(cls):
         cls.course_title = "Math"
         cls.program = ProgramFactory.create()
-        cls.teacher = TeacherProfileFactory.create()
         cls.course = CourseFactory.create(
             title=cls.course_title,
             description="Math is fun!",
             program=cls.program,
-            teacher=cls.teacher,
         )
 
     def test_create_course(self):
         self.assertEqual(self.course.title, "Math")
         self.assertEqual(self.course.description, "Math is fun!")
         self.assertEqual(self.course.program, self.program)
-        self.assertEqual(self.course.teacher, self.teacher)
 
     def test_field_constraints(self):
         title_max_length = Course._meta.get_field("title").max_length
@@ -260,9 +257,7 @@ class CourseModelTest(TestCase):
 
     def test_unique_together(self):
         with self.assertRaises(IntegrityError):
-            CourseFactory.create(
-                title=self.course_title, program=self.program, teacher=self.teacher
-            )
+            CourseFactory.create(title=self.course_title, program=self.program)
 
     def test_str(self):
         self.assertEqual(str(self.course), self.course.title)

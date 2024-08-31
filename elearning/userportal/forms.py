@@ -1,5 +1,3 @@
-from datetime import date
-
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 
@@ -80,6 +78,18 @@ class CourseForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control"}),
             "program": forms.Select(attrs={"class": "form-control"}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        title = cleaned_data.get("title")
+        program = cleaned_data.get("program")
+        if title and program:
+            # Check if the course already exists for the selected program
+            if Course.objects.filter(title=title, program=program).exists():
+                raise ValidationError(
+                    f"The course '{title}' already exists for the selected program."
+                )
+        return cleaned_data
 
 
 class CourseOfferingForm(forms.ModelForm):

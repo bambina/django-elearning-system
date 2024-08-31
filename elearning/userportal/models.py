@@ -177,7 +177,7 @@ class Course(models.Model):
 
     class Meta:
         ordering = ["title"]
-        unique_together = ["title", "program", "teacher"]
+        unique_together = ["title", "program"]
 
     def __str__(self):
         return self.title

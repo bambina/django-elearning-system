@@ -22,9 +22,14 @@ def create_feedback(request, course_id):
     if request.method == "POST":
         form = FeedbackForm(request.POST, instance=feedback)
         if form.is_valid():
-            FeedbackRepository.create(form.cleaned_data, course, student)
-            messages.success(request, SAVE_FEEDBACK_SUCCESS_MSG)
-            return redirect("home")
+            try:
+                FeedbackRepository.create_or_update(
+                    form.cleaned_data, course, student, feedback
+                )
+                messages.success(request, SAVE_FEEDBACK_SUCCESS_MSG)
+                return redirect("home")
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         form = FeedbackForm(instance=feedback)
     context = {"form": form, "course": course}

@@ -52,7 +52,7 @@ class EnrollmentRepository:
         )
 
     @staticmethod
-    def fetch_latest_grades_subquery(course_id):
+    def fetch_latest_grades_subquery(course_id) -> QuerySet[Enrollment]:
         """Get a subquery for the latest grade of a student enrolled in the given course."""
         return (
             Enrollment.objects.filter(

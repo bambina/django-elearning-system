@@ -16,9 +16,17 @@ class FeedbackRepository:
         return Feedback.objects.filter(student=student, course=course).first()
 
     @staticmethod
-    def create(form_data, course, student) -> Feedback:
-        """Create a feedback with given form data, course, and student."""
-        feedback = Feedback(**form_data)
+    def create_or_update(
+        form_data: dict,
+        course: Course,
+        student: StudentProfile,
+        feedback: Feedback = None,
+    ) -> Feedback:
+        """Create or update a feedback with given form data, course, and student."""
+        if not feedback:
+            feedback = Feedback()
+        for field, value in form_data.items():
+            setattr(feedback, field, value)
         feedback.course = course
         feedback.student = student
         feedback.save()

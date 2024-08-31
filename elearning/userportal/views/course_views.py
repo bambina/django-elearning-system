@@ -105,8 +105,12 @@ def create_course(request):
     if request.method == "POST":
         form = CourseForm(request.POST)
         if form.is_valid():
-            course = CourseRepository.create(form.cleaned_data, teacher)
-            return redirect("course-detail", pk=course.pk)
+            try:
+                course = CourseRepository.create(form.cleaned_data, teacher)
+                messages.success(request, CREATED_SUCCESS_MSG.format(entity="course"))
+                return redirect("course-detail", pk=course.pk)
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         form = CourseForm()
     return render(request, "userportal/course_create.html", {"form": form})
