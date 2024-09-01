@@ -126,13 +126,16 @@ def create_material(request, course_id):
     if request.method == "POST":
         form = MaterialForm(request.POST, request.FILES)
         if form.is_valid():
-            material = MaterialRepository.create(
-                form.cleaned_data, course, request.FILES
-            )
-            # Asynchronously send notifications to students enrolled in the course
-            notify_students_of_material_creation.delay(course.id, material.id)
-            messages.success(request, CREATED_SUCCESS_MSG.format(entity="material"))
-            return redirect("course-detail", pk=course.id)
+            try:
+                material = form.save(commit=False)
+                material.course = course
+                material.save()
+                # Asynchronously send notifications to students enrolled in the course
+                notify_students_of_material_creation.delay(course.id, material.id)
+                messages.success(request, CREATED_SUCCESS_MSG.format(entity="material"))
+                return redirect("course-detail", pk=course.id)
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         form = MaterialForm()
     return render(

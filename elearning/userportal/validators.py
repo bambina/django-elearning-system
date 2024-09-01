@@ -12,7 +12,7 @@ def file_size_validator(value):
     """
     if value.size > MAX_MATERIAL_FILE_SIZE:
         raise ValidationError(
-            f"{INVALID_VALUE_MSG} {_('File size must be less than 1 MB.')}",
-            code=VALIDATION_ERR_INVALID,
-            params={"value": value},
+            _(f"File size must be less than 1 MB."),
+            code='invalid_size',
+            params={'value': value.size},
         )
