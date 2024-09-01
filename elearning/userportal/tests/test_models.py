@@ -545,7 +545,7 @@ class QASessionModelTest(TestCase):
 
     def test_field_constraints(self):
         course_related_name = QASession._meta.get_field("course")._related_name
-        self.assertEqual(course_related_name, "qa_sessions")
+        self.assertEqual(course_related_name, "qa_session")
         room_name_max_length = QASession._meta.get_field("room_name").max_length
         self.assertEqual(room_name_max_length, 200)
         created_at_auto_now_add = QASession._meta.get_field("created_at").auto_now_add
@@ -554,6 +554,10 @@ class QASessionModelTest(TestCase):
     def test_status_methods(self):
         self.assertTrue(self.qa_session.is_active())
         self.assertFalse(self.qa_session.is_ended())
+
+    def test_unique_constraint(self):
+        with self.assertRaises(IntegrityError):
+            QASessionFactory.create(course=self.course)
 
 
 class QAQuestionModelTest(TestCase):

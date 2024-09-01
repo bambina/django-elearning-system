@@ -184,29 +184,24 @@ def start_qa_session(request, course_id):
         return redirect("course-detail", pk=course_id)
 
     course = get_object_or_404(Course, pk=course_id)
-    qa_session, created = QASession.objects.get_or_create(course=course)
+    try:
+        already_exists, previous_room_name = QASessionRepository.get_or_create(
+            course=course
+        )
+    except Exception as e:
+        print(e)
+        messages.error(request, ERR_UNEXPECTED_MSG)
+        return redirect("course-detail", pk=course.id)
 
-    # Check the last session status
-    if not created:
-        if qa_session.is_active():
-            # Show a message and redirect to the QA session page if already started
-            messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
-            return redirect("qa-session", course_id=course.id)
-        elif qa_session.is_ended():
-            # Delete all previous questions asynchronously
-            delete_qa_questions.delay(qa_session.room_name)
-
-    # Update the room name
-    qa_session = QASessionRepository.update_room_name(qa_session)
-    # Notify students enrolled in the course
-    notify_students_of_live_qa_start.delay(course.id)
-    # Prepare context for the template
-    context = {
-        "course": course,
-        "qa_session": qa_session,
-        "is_instructor": request.user.teacher_profile == course.teacher,
-    }
-    return render(request, "userportal/qa_session.html", context=context)
+    # Show a message and redirect to the QA session page if already started
+    if already_exists:
+        messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
+    else:
+        # Notify students enrolled in the course
+        notify_students_of_live_qa_start.delay(course.id)
+        # Delete all previous questions asynchronously
+        delete_qa_questions.delay(previous_room_name)
+    return redirect("qa-session", course_id=course.id)
 
 
 def qa_session(request, course_id):

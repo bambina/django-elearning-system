@@ -41,7 +41,10 @@ ERR_FAILED_TO_END_SESSION = _("Failed to end the QA session. Error: {exception}.
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")
-ACTIVE_QA_SESSION_EXISTS = _("An active QA session already exists for this course.")
+ACTIVE_QA_SESSION_EXISTS = _(
+    "Active QA session already exists for this course. "
+    "Only one Live QA Session can be created per course. Please end the current session to start a new one."
+)
 
 # Info messages
 USER_ALREADY_CHANGED_MSG = _("User {username} is already {action}.")

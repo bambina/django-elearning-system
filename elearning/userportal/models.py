@@ -334,8 +334,8 @@ class QASession(models.Model):
         ACTIVE = 1, _("Active")
         ENDED = 2, _("Ended")
 
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="qa_sessions"
+    course = models.OneToOneField(
+        Course, on_delete=models.CASCADE, related_name="qa_session"
     )
     room_name = models.CharField(max_length=200, unique=True, blank=True)
     status = models.PositiveSmallIntegerField(
