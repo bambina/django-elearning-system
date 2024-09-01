@@ -152,9 +152,8 @@ class AcademicTerm(models.Model):
             raise ValidationError(
                 {
                     "start_datetime": ValidationError(
-                        f"{INVALID_VALUE_MSG} {INVALID_START_DATETIME_MSG}",
+                        f"{INVALID_VALUE_MSG.format(value=self.start_datetime)} {INVALID_START_DATETIME_MSG}",
                         code=VALIDATION_ERR_INVALID,
-                        params={"value": self.start_datetime},
                     )
                 }
             )
@@ -235,17 +234,15 @@ class Enrollment(models.Model):
         errors = {}
         if now() > self.offering.term.start_datetime:
             errors["offering_started"] = ValidationError(
-                f"{INVALID_VALUE_MSG} {INVALID_COURSE_ALREADY_STARTED_MSG}",
+                f"{INVALID_VALUE_MSG.format(value=self.offering)} {INVALID_COURSE_ALREADY_STARTED_MSG}",
                 code=VALIDATION_ERR_INVALID,
-                params={"value": self.offering},
             )
         if Enrollment.objects.filter(
             student=self.student, offering=self.offering
         ).exists():
             errors["enrollment_duplicate"] = ValidationError(
-                f"{INVALID_VALUE_MSG} {ALREADY_ENROLLED_MSG}",
+                f"{INVALID_VALUE_MSG.format(value=self.offering)} {ALREADY_ENROLLED_MSG}",
                 code=VALIDATION_ERR_INVALID,
-                params={"value": self.offering},
             )
 
         if errors:
@@ -319,7 +316,7 @@ class Notification(models.Model):
             raise ValidationError(
                 {
                     "link_path": ValidationError(
-                        f"{INVALID_VALUE_MSG} {ERR_MISSING_NOTIFICATION_LINK}",
+                        f"{INVALID_VALUE_MSG.format(value="None")} {ERR_MISSING_NOTIFICATION_LINK}",
                         code=VALIDATION_ERR_INVALID,
                     )
                 }

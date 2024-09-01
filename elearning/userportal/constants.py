@@ -3,14 +3,16 @@ from django.utils.translation import gettext as _
 # Validation error codes
 VALIDATION_ERR_REQUIRED = "required"
 VALIDATION_ERR_INVALID = "invalid"
+VALIDATION_ERR_INVALID_SIZE = "invalid_size"
 VALIDATION_ERR_MISSING_FIELD = _("{entity} must be specified")
 
 # Invalid value error messages
-INVALID_VALUE_MSG = _("Invalid value: %(value)s.")
+INVALID_VALUE_MSG = _("Invalid value: {value}.")
 INVALID_START_DATETIME_MSG = _("Start datetime cannot be greater than end datetime.")
 INVALID_COURSE_ALREADY_STARTED_MSG = _(
     "Registration is not allowed for courses that have already started."
 )
+INVALID_FILE_SIZE_MSG = _("File size must be less than {size}.")
 
 # Error messages
 ERR_UNEXPECTED_LOG = _("Unexpected error occurred: {error}.")
@@ -90,4 +92,5 @@ UNAUTHORIZED_ACCESS_CODE = 4001
 
 # Constants for models
 ALLOWED_MATERIAL_EXTENSIONS = ["pdf", "jpg", "png", "jpeg"]
-MAX_MATERIAL_FILE_SIZE = 1 * 1024 * 1024  # 1 MB
+MAX_MATERIAL_FILE_SIZE = 1
+MAX_MATERIAL_FILE_SIZE_BYTES = MAX_MATERIAL_FILE_SIZE * 1024 * 1024

@@ -457,7 +457,7 @@ class MaterialModelTest(TestCase):
 
     def test_file_size_validator(self):
         large_file = SimpleUploadedFile(
-            "large.png", b"0" * (MAX_MATERIAL_FILE_SIZE + 1)
+            "large.png", b"0" * (MAX_MATERIAL_FILE_SIZE_BYTES + 1)
         )  # 1MB + 1 byte
         material = MaterialFactory.build(course=self.course, file=large_file)
         with self.assertRaises(ValidationError) as context:
