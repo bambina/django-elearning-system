@@ -43,9 +43,12 @@ def password_change(request):
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)
-            messages.success(request, PASSWORD_CHANGE_SUCCESS_MSG)
+            try:
+                user = form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, PASSWORD_CHANGE_SUCCESS_MSG)
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         form = PasswordChangeForm(request.user)
     return render(request, "registration/password_change.html", {"form": form})
