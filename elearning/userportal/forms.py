@@ -5,9 +5,9 @@ from .models import *
 
 
 class StudentForm(UserCreationForm):
-    email = forms.EmailField()
-    first_name = forms.CharField(help_text="Required.")
-    last_name = forms.CharField(help_text="Required.")
+    email = forms.EmailField(help_text=FORM_HELP_TEXT_REQUIERED)
+    first_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
+    last_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
     title = forms.ChoiceField(
         choices=PortalUser.Title.choices,
         initial=PortalUser.Title.PREFER_NOT_TO_SAY,
@@ -29,7 +29,7 @@ class StudentForm(UserCreationForm):
 
 class StudentProfileForm(forms.ModelForm):
     program = forms.ModelChoiceField(
-        queryset=Program.objects.all(), help_text="Required."
+        queryset=Program.objects.all(), help_text=FORM_HELP_TEXT_REQUIERED
     )
 
     class Meta:

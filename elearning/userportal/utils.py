@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 from django.utils import timezone
-import datetime
+from datetime import datetime
 
 
 def path_and_rename(instance, filename):
@@ -12,9 +12,11 @@ def path_and_rename(instance, filename):
     return os.path.join(upload_to, new_filename)
 
 
-def create_timezone_aware_datetime(year, month, day, hour=0, minute=0, second=0):
+def create_timezone_aware_datetime(
+    year: int, month: int, day: int, hour: int = 0, minute: int = 0, second: int = 0
+) -> datetime:
     """Create a timezone-aware datetime object from year, month, and day."""
     # Create a naive datetime
-    naive_datetime = datetime.datetime(year, month, day, hour, minute, second)
+    naive_datetime = datetime(year, month, day, hour, minute, second)
     # Make it timezone-aware using the default timezone
     return timezone.make_aware(naive_datetime)

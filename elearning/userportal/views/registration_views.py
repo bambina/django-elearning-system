@@ -13,22 +13,27 @@ def signup(request):
         student_form = StudentForm(request.POST)
         student_profile_form = StudentProfileForm(request.POST)
         if student_form.is_valid() and student_profile_form.is_valid():
-            student = student_form.save(commit=False)
-            student.user_type = PortalUser.UserType.STUDENT
-            student.save()
-            student_profile = student_profile_form.save(commit=False)
-            student_profile.user = student
-            student_profile.save()
-            messages.success(request, CREATE_STUDENT_ACCOUNT_SUCCESS_MSG)
-            login(request, student)
-            return redirect("home")
+            try:
+                student = student_form.save(commit=False)
+                student.user_type = PortalUser.UserType.STUDENT
+                student.save()
+                student_profile = student_profile_form.save(commit=False)
+                student_profile.user = student
+                student_profile.save()
+                messages.success(request, CREATE_STUDENT_ACCOUNT_SUCCESS_MSG)
+                login(request, student)
+                return redirect("home")
+            except Exception:
+                student_form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         student_form = StudentForm()
         student_profile_form = StudentProfileForm()
 
+    forms = [student_form, student_profile_form]
+    any_non_field_errors = any(form.non_field_errors() for form in forms)
     context = {
-        "student_form": student_form,
-        "student_profile_form": student_profile_form,
+        "forms": [student_form, student_profile_form],
+        "any_non_field_errors": any_non_field_errors,
     }
     return render(request, "registration/signup.html", context)
 

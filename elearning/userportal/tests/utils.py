@@ -1,8 +1,12 @@
 from django.utils import timezone
 from userportal.utils import create_timezone_aware_datetime
+from typing import Tuple
+from datetime import datetime, date
 
 
-def get_term_datetimes(target_date=None):
+def get_term_datetimes(
+    target_date: datetime = None,
+) -> Tuple[int, int, datetime, datetime]:
     """Generate an AcademicTerm instance representing the current academic term based on the current date."""
     fall, spring = 1, 2
     today = target_date if target_date else timezone.now()
@@ -28,7 +32,10 @@ def get_term_datetimes(target_date=None):
         return fall, fall_start2.year, fall_start2, fall_end2
 
 
-def get_registration_date():
+def get_registration_date() -> date:
     """Generate a registration date based on the current term."""
     end_date_index = 3
-    return get_term_datetimes()[end_date_index] + timezone.timedelta(days=1)
+    next_term_start_date = get_term_datetimes()[end_date_index] + timezone.timedelta(
+        days=1
+    )
+    return next_term_start_date.date()
