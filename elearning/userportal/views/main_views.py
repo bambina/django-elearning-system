@@ -37,8 +37,11 @@ def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
         form = StatusForm(request.POST)
         if form.is_valid():
             status = form.cleaned_data["status"]
-            UserRepository.update_status(student, status)
-            messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+            try:
+                UserRepository.update_status(student, status)
+                messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+            except Exception:
+                form.add_error(None, ERR_UNEXPECTED_MSG)
     else:
         initial = {"status": student.status}
         form = StatusForm(initial=initial)

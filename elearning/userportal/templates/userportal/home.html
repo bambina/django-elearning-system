@@ -6,14 +6,32 @@
         <h1>{{ user.get_full_name }}</h1>
 
         {% if user.is_student %}
-        <form method="post" class="row mb-4 row-cols-lg-auto g-3 align-items-center">
+        <form method="post">
             {% csrf_token %}
-            <div class="col-12">
-                <label class="visually-hidden">Status</label>
-                {{ status_form.status }}
+            {% if status_form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in status_form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">Update status</button>
+            {% endif %}
+            <div class="row mb-4 row-cols-lg-auto g-4">
+                {% for field in status_form %}
+                <div class="col-12">
+                    <label class="visually-hidden">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <small class="form-text text-muted text-danger-emphasis">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Update status</button>
+                </div>
             </div>
         </form>
         {% endif %}

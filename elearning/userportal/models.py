@@ -103,7 +103,7 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(
         PortalUser, on_delete=models.CASCADE, related_name="student_profile"
     )
-    status = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, blank=True)
     program = models.ForeignKey(
         Program, on_delete=models.CASCADE, related_name="students"
     )

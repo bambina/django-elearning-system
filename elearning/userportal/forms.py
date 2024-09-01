@@ -62,7 +62,7 @@ class CourseSearchForm(forms.Form):
 class StatusForm(forms.Form):
     status = forms.CharField(
         required=False,
-        max_length=100,
+        max_length=20,
         widget=forms.TextInput(
             attrs={"placeholder": "What's your status?", "class": "form-control"}
         ),

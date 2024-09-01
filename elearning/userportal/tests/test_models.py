@@ -159,7 +159,7 @@ class StudentProfileModelTest(TestCase):
         program_related_name = StudentProfile._meta.get_field("program")._related_name
         self.assertEqual(program_related_name, "students")
         status_max_length = StudentProfile._meta.get_field("status").max_length
-        self.assertEqual(status_max_length, 100)
+        self.assertEqual(status_max_length, 20)
         registration_date_editable = StudentProfile._meta.get_field(
             "registration_date"
         ).editable
