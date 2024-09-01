@@ -38,6 +38,9 @@ ERR_FAILED_TO_SEND_NOTIFICATION = _(
     "Failed to send notifications to users. Error: {exception}."
 )
 ERR_FAILED_TO_END_SESSION = _("Failed to end the QA session. Error: {exception}.")
+ERR_UPDATE_USER_ACTIVE_STATUS_FAIL = _(
+    "Failed to update the active status of user {username}."
+)
 
 # Warning messages
 ALREADY_ENROLLED_MSG = _("You are already enrolled in this course.")

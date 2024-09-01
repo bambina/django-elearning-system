@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.views.decorators.http import require_http_methods
 
 from userportal.repositories import *
 from userportal.models import *
@@ -54,7 +55,7 @@ class UserDetailView(DetailView):
         # Add student's enrollment data categorized into upcoming, current, and past enrollments.
         user = self.object
         if user.is_student():
-            enrollments = EnrollmentRepository.fetch_enrollments_for_student(user)
+            enrollments = EnrollmentRepository.fetch(user.student_profile)
             # Unpack the enrollments tuple into context
             (
                 context["upcoming_enrollments"],
@@ -70,27 +71,21 @@ class UserDetailView(DetailView):
 
 @login_required(login_url="login")
 # @permission_required('auth.change_user', raise_exception=True)
-def deactivate_user(request, username):
-    action = "deactivated"
-    if UserRepository.toggle_user_active_status(username, activate=False):
-        messages.success(
-            request,
-            UPDATE_USER_ACTIVE_STATUS_SUCCESS_MSG.format(
-                username=username, action=action
-            ),
+@require_http_methods(["POST"])
+def toggle_active_status(request, username, activate):
+    activate = activate.lower() == "true"
+    action = "activated" if activate else "deactivated"
+    try:
+        is_toggled = UserRepository.toggle_user_active_status(
+            username, activate=activate
         )
-    else:
-        messages.info(
-            request, USER_ALREADY_CHANGED_MSG.format(username=username, action=action)
+    except Exception:
+        messages.error(
+            request, ERR_UPDATE_USER_ACTIVE_STATUS_FAIL.format(username=username)
         )
-    return redirect("user-list")
+        return redirect("user-list")
 
-
-@login_required(login_url="login")
-# @permission_required('auth.change_user', raise_exception=True)
-def activate_user(request, username):
-    action = "activated"
-    if UserRepository.toggle_user_active_status(username, activate=True):
+    if is_toggled:
         messages.success(
             request,
             UPDATE_USER_ACTIVE_STATUS_SUCCESS_MSG.format(

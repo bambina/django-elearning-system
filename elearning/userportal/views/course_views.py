@@ -193,8 +193,8 @@ def start_qa_session(request, course_id):
         messages.error(request, ERR_UNEXPECTED_MSG)
         return redirect("course-detail", pk=course.id)
 
-    # Show a message and redirect to the QA session page if already started
     if already_exists:
+        # Show a message if already started
         messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
     else:
         # Notify students enrolled in the course
@@ -230,24 +230,22 @@ def end_qa_session(request, course_id):
 
     try:
         with transaction.atomic():
-            _, close_comment = _end_session_and_create_comment(course)
+            close_comment = _end_session_and_create_comment(course)
     except Exception as e:
         messages.error(request, ERR_FAILED_TO_END_SESSION.format(exception=e))
         return redirect("qa-session", course_id=course.id)
 
     _send_close_message(close_comment)
-
     messages.success(request, QA_SESSION_END_SUCCESS_MSG)
     return redirect("course-detail", pk=course.id)
 
 
-def _end_session_and_create_comment(course: Course) -> tuple[QASession, QAQuestion]:
+def _end_session_and_create_comment(course: Course) -> QAQuestion:
     """
     End the QA session and create a close comment in an atomic operation.
     """
     qa_session = QASessionRepository.end(course)
-    close_comment = QAQuestionRepository.create_and_save_close_comment(qa_session)
-    return qa_session, close_comment
+    return QAQuestionRepository.create_and_save_close_comment(qa_session)
 
 
 def _send_close_message(close_comment: QAQuestion) -> None:
