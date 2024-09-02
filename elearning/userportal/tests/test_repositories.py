@@ -2,6 +2,7 @@ from django.test import TestCase
 from userportal.tests.mixins import TermTestMixin
 from userportal.tests.model_factories import *
 from userportal.repositories import *
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class AcademicTermRepositoryTest(TestCase, TermTestMixin):
@@ -163,3 +164,119 @@ class EnrollmentRepositoryTest(TestCase, TermTestMixin):
         )
         results = FeedbackRepository.fetch_with_student_grade(self.course.id)
         self.assertEqual(results[0].grade, Enrollment.Grade.PASS)
+
+
+class FeedbackRepositoryTest(TestCase, TermTestMixin):
+    @classmethod
+    def setUpTestData(cls):
+        cls.course = CourseFactory.create()
+        cls.student = StudentProfileFactory.create()
+        cls.feedback = FeedbackFactory.create(student=cls.student, course=cls.course)
+        cls.current_term = AcademicTermFactory.create()
+        cls.previous_term = cls.create_previous_term(cls.current_term)
+        cls.antecedent_term = cls.create_previous_term(cls.previous_term)
+        cls.previous_offering = CourseOfferingFactory.create(
+            course=cls.course, term=cls.previous_term
+        )
+        cls.antecedent_offering = CourseOfferingFactory.create(
+            course=cls.course, term=cls.antecedent_term
+        )
+        cls.previous_enrollment = EnrollmentFactory.create(
+            student=cls.student,
+            offering=cls.previous_offering,
+            grade=Enrollment.Grade.PASS,
+        )
+        cls.antecedent_enrollment = EnrollmentFactory.create(
+            student=cls.student,
+            offering=cls.antecedent_offering,
+            grade=Enrollment.Grade.FAIL,
+        )
+
+    def test_fetch(self):
+        feedback = FeedbackRepository.fetch(self.student, self.course)
+        self.assertEqual(feedback, self.feedback)
+
+    def test_create_or_update(self):
+        # Test case 1: Create a new feedback
+        student = StudentProfileFactory.create()
+        form_data = {
+            "comments": "[Create] Great course!",
+        }
+        feedback = FeedbackRepository.create_or_update(form_data, self.course, student)
+        self.assertEqual(feedback.comments, form_data["comments"])
+
+        # Test case 2: Update the existing feedback
+        form_data = {
+            "comments": "[Update] Great course!",
+        }
+        feedback = FeedbackRepository.create_or_update(
+            form_data, self.course, student, feedback
+        )
+        self.assertEqual(feedback.comments, form_data["comments"])
+
+    def test_fetch_with_student_grade(self):
+        results = FeedbackRepository.fetch_with_student_grade(self.course.id)
+        self.assertEqual(results.count(), 1)
+        self.assertEqual(results[0].grade, Enrollment.Grade.PASS)
+        self.assertEqual(results[0].grade_display, "Pass")
+
+
+class MaterialRepositoryTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.files = {"file": SimpleUploadedFile("rubric_file.txt", b"file_content")}
+        cls.course = CourseFactory.create()
+        cls.form_data = {
+            "title": "Rubric",
+            "description": "Rubric for the final project",
+        }
+
+    def test_create(self):
+        material = MaterialRepository.create(self.form_data, self.course, self.files)
+        self.assertEqual(material.title, self.form_data["title"])
+        self.assertEqual(material.description, self.form_data["description"])
+        self.assertEqual(material.course, self.course)
+        self.assertEqual(material.file.read(), b"file_content")
+
+    def test_fetch(self):
+        material = MaterialRepository.create(self.form_data, self.course, self.files)
+        materials = MaterialRepository.fetch(self.course)
+        self.assertEqual(materials.count(), 1)
+        self.assertEqual(materials[0], material)
+        self.assertEqual(materials[0].file.read(), b"file_content")
+        self.assertEqual(materials[0].original_filename, "rubric_file.txt")
+
+
+class NotificationRepositoryTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserFactory.create()
+        cls.notification = NotificationFactory.create(user=cls.user)
+
+    def test_fetch(self):
+        notifications = NotificationRepository.fetch(self.user)
+        self.assertEqual(notifications.count(), 1)
+        self.assertEqual(notifications[0], self.notification)
+
+class QAQuestionRepositoryTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.qa_session = QASessionFactory.create()
+
+    def test_create_and_save_close_comment(self):
+        close_comment = QAQuestionRepository.create_and_save_close_comment(self.qa_session)
+        self.assertEqual(close_comment.room_name, self.qa_session.room_name)
+        self.assertEqual(close_comment.text, LIVE_QA_END_SESSION_MSG)
+        self.assertEqual(close_comment.sender, "System")
+        self.assertIsNotNone(close_comment.timestamp)
+
+class QASessionRepositoryTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.qa_session = QASessionFactory.create()
+
+    def test_fetch(self):
+        pass
+        # qa_sessions = QASessionRepository.fetch()
+        # self.assertEqual(qa_sessions.count(), 1)
+        # self.assertEqual(qa_sessions[0], self.qa_session)
