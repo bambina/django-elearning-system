@@ -11,10 +11,9 @@
     {% endif %}
 {% endif %}
 
-<h2>Login</h2>
+<h1>Login</h1>
 <form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
+  {% include "../userportal/common/standard_form.html" %}
   <button type="submit" class="btn btn-primary">Login</button>
 </form>
 
