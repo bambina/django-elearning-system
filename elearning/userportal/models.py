@@ -87,7 +87,9 @@ class PortalUser(AbstractUser):
 
 class TeacherProfile(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="teacher_profile"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="teacher_profile",
     )
     biography = models.TextField(
         max_length=500,
@@ -102,7 +104,9 @@ class TeacherProfile(models.Model):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="student_profile"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="student_profile",
     )
     status = models.CharField(max_length=20, blank=True)
     program = models.ForeignKey(
