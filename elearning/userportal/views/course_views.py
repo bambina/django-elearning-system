@@ -4,11 +4,12 @@ from django.contrib import messages
 
 from django.views.generic import ListView, DetailView
 from django.views.decorators.http import require_http_methods
-from django.db.models import Q
 from django.conf import settings
 from django.http import FileResponse
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.views.generic.edit import CreateView
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from userportal.consumers import *
 from userportal.models import *
@@ -95,25 +96,29 @@ class CourseDetailView(DetailView):
         }
 
 
-@login_required(login_url="login")
-def create_course(request):
-    if not request.user.is_teacher():
-        messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSES)
-        return redirect("course-list")
+class CourseCreateView(UserPassesTestMixin, CreateView):
+    model = Course
+    form_class = CourseForm
+    template_name = "userportal/course_create.html"
+    login_url = "login"
 
-    teacher = get_object_or_404(TeacherProfile, user=request.user)
-    if request.method == "POST":
-        form = CourseForm(request.POST, teacher=teacher)
-        if form.is_valid():
-            try:
-                course = CourseRepository.create(form.cleaned_data, teacher)
-                messages.success(request, CREATED_SUCCESS_MSG.format(entity="course"))
-                return redirect("course-detail", pk=course.pk)
-            except Exception:
-                form.add_error(None, ERR_UNEXPECTED_MSG)
-    else:
-        form = CourseForm()
-    return render(request, "userportal/course_create.html", {"form": form})
+    def test_func(self):
+        return self.request.user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["teacher"] = self.request.user.teacher_profile
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            teacher = self.request.user.teacher_profile
+            self.object = CourseRepository.create(form.cleaned_data, teacher)
+            messages.success(self.request, CREATED_SUCCESS_MSG.format(entity="course"))
+            return redirect("course-detail", pk=self.object.pk)
+        except Exception:
+            form.add_error(None, ERR_UNEXPECTED_MSG)
+            return self.form_invalid(form)
 
 
 @login_required(login_url="login")

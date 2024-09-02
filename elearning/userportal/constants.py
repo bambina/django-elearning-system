@@ -1,5 +1,9 @@
 from django.utils.translation import gettext as _
 
+# Permission groups
+PERMISSION_GROUP_TEACHER = "teacher"
+PERMISSION_GROUP_STUDENT = "student"
+
 # Validation error codes
 VALIDATION_ERR_REQUIRED = "required"
 VALIDATION_ERR_INVALID = "invalid"

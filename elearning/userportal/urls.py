@@ -36,7 +36,9 @@ urlpatterns = [
         course_views.CourseDetailView.as_view(),
         name="course-detail",
     ),
-    path("courses/create/", course_views.create_course, name="course-create"),
+    path(
+        "courses/create/", course_views.CourseCreateView.as_view(), name="course-create"
+    ),
     path(
         "courses/<int:course_id>/offerings/",
         course_offering_views.CourseOfferingListView.as_view(),

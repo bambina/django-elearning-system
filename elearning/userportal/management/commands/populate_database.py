@@ -69,8 +69,8 @@ class Command(BaseCommand):
     def create_groups(self):
         """Create groups"""
         groups = [
-            Group(name="teacher"),
-            Group(name="student"),
+            Group(name=PERMISSION_GROUP_TEACHER),
+            Group(name=PERMISSION_GROUP_STUDENT),
         ]
         self.teacher_group, self.student_group = Group.objects.bulk_create(groups)
         self.update_record_count(len(groups))
