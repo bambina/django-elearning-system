@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.core.validators import FileExtensionValidator
+from django.conf import settings
 
 from .constants import *
 from .validators import *
@@ -86,7 +87,7 @@ class PortalUser(AbstractUser):
 
 class TeacherProfile(models.Model):
     user = models.OneToOneField(
-        PortalUser, on_delete=models.CASCADE, related_name="teacher_profile"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="teacher_profile"
     )
     biography = models.TextField(
         max_length=500,
@@ -101,7 +102,7 @@ class TeacherProfile(models.Model):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(
-        PortalUser, on_delete=models.CASCADE, related_name="student_profile"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="student_profile"
     )
     status = models.CharField(max_length=20, blank=True)
     program = models.ForeignKey(
@@ -300,7 +301,7 @@ class Material(models.Model):
 
 class Notification(models.Model):
     user = models.ForeignKey(
-        PortalUser, on_delete=models.CASCADE, related_name="notifications"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
     )
     message = models.TextField(max_length=500)
     link_path = models.CharField(max_length=100, blank=True, null=True)
