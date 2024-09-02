@@ -79,15 +79,18 @@ class CourseForm(forms.ModelForm):
             "program": forms.Select(attrs={"class": "form-control"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.teacher = kwargs.pop("teacher", None)
+        super(CourseForm, self).__init__(*args, **kwargs)
+
     def clean(self):
         cleaned_data = super().clean()
         title = cleaned_data.get("title")
-        program = cleaned_data.get("program")
-        if title and program:
-            # Check if the course already exists for the selected program
-            if Course.objects.filter(title=title, program=program).exists():
+        # If teacher and title are present, check for course duplication
+        if self.teacher and title:
+            if Course.objects.filter(title=title, teacher=self.teacher).exists():
                 raise ValidationError(
-                    f"The course '{title}' already exists for the selected program."
+                    f"A course with the title '{title}' already exists for this teacher."
                 )
         return cleaned_data
 

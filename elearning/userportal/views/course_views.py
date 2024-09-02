@@ -103,7 +103,7 @@ def create_course(request):
 
     teacher = get_object_or_404(TeacherProfile, user=request.user)
     if request.method == "POST":
-        form = CourseForm(request.POST)
+        form = CourseForm(request.POST, teacher=teacher)
         if form.is_valid():
             try:
                 course = CourseRepository.create(form.cleaned_data, teacher)
