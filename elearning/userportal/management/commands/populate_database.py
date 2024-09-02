@@ -100,10 +100,7 @@ class Command(BaseCommand):
 
         # Student group permissions
         student_codenames = [
-            "view_portaluser",
-            "view_teacherprofile",
             "change_studentprofile",
-            "view_studentprofile",
             "view_academicterm",
             "view_course",
             "view_courseoffering",

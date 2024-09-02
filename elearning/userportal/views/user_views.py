@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
 
 from userportal.repositories import *
 from userportal.models import *
@@ -15,11 +17,15 @@ from userportal.views.mixins import QueryParamsMixin
 AuthUser = get_user_model()
 
 
-class UserListView(QueryParamsMixin, ListView):
+class UserListView(
+    LoginRequiredMixin, PermissionRequiredMixin, QueryParamsMixin, ListView
+):
     model = AuthUser
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/user_list.html"
     context_object_name = "users"
+    login_url = "login"
+    permission_required = "userportal.view_portaluser"
 
     def get_queryset(self):
         keywords = self.request.GET.get("keywords")
