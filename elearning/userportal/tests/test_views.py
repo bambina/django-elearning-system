@@ -1,5 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.contrib.auth.models import Group
 
 from userportal.models import *
 from userportal.constants import *
@@ -141,6 +142,7 @@ class SignUpViewTestCase(BaseTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.url = reverse("signup")
+        cls.student_group = Group.objects.create(name="student")
         cls.program = Program.objects.create(title="Program 1")
         cls.new_student_data = {
             "username": "new-student",

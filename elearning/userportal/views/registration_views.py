@@ -3,6 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash, login
 from django.contrib.auth.forms import PasswordChangeForm
+from django.db import transaction
+from django.contrib.auth.models import Group
 
 from userportal.models import *
 from userportal.forms import *
@@ -14,12 +16,16 @@ def signup(request):
         student_profile_form = StudentProfileForm(request.POST)
         if student_form.is_valid() and student_profile_form.is_valid():
             try:
-                student = student_form.save(commit=False)
-                student.user_type = PortalUser.UserType.STUDENT
-                student.save()
-                student_profile = student_profile_form.save(commit=False)
-                student_profile.user = student
-                student_profile.save()
+                with transaction.atomic():
+                    student = student_form.save(commit=False)
+                    student.user_type = PortalUser.UserType.STUDENT
+                    student.save()
+                    student_profile = student_profile_form.save(commit=False)
+                    student_profile.user = student
+                    student_profile.save()
+                    # Add student to student permission group
+                    student_group = Group.objects.get(name="student")
+                    student.groups.add(student_group)
                 messages.success(request, CREATE_STUDENT_ACCOUNT_SUCCESS_MSG)
                 login(request, student)
                 return redirect("home")
