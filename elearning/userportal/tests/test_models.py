@@ -11,31 +11,9 @@ from django.urls import reverse
 
 from userportal.models import *
 from userportal.tests.model_factories import *
-
+from userportal.tests.mixins import TermTestMixin
 
 User = get_user_model()
-
-
-class TermTestMixin:
-    def create_academic_term(self, semester_val, year, start_date, end_date):
-        return AcademicTermFactory.create(
-            semester=AcademicTerm.SemesterType(semester_val),
-            year=year,
-            start_datetime=start_date,
-            end_datetime=end_date,
-        )
-
-    def create_next_term(self, current_term: AcademicTerm) -> AcademicTerm:
-        next_term_properties = get_term_datetimes(
-            current_term.end_datetime + relativedelta(days=1)
-        )
-        return self.create_academic_term(*next_term_properties)
-
-    def create_previous_term(self, current_term: AcademicTerm) -> AcademicTerm:
-        prev_term_properties = get_term_datetimes(
-            current_term.start_datetime - relativedelta(days=1)
-        )
-        return self.create_academic_term(*prev_term_properties)
 
 
 class UserModelTest(TestCase):
@@ -183,6 +161,8 @@ class AcademicTermModelTest(TestCase, TermTestMixin):
             start_datetime=cls.start,
             end_datetime=cls.end,
         )
+        cls.next_term = cls.create_next_term(cls.term)
+        cls.previous_term = cls.create_previous_term(cls.term)
 
     def test_create_academic_term(self):
         self.assertEqual(
@@ -197,10 +177,8 @@ class AcademicTermModelTest(TestCase, TermTestMixin):
 
     def test_status_property(self):
         self.assertEqual(self.term.status, AcademicTerm.TermStatus.IN_PROGRESS)
-        prev_term = self.create_previous_term(self.term)
-        self.assertEqual(prev_term.status, AcademicTerm.TermStatus.ENDED)
-        next_term = self.create_next_term(self.term)
-        self.assertEqual(next_term.status, AcademicTerm.TermStatus.NOT_STARTED)
+        self.assertEqual(self.previous_term.status, AcademicTerm.TermStatus.ENDED)
+        self.assertEqual(self.next_term.status, AcademicTerm.TermStatus.NOT_STARTED)
 
     def test_clean_method_with_valid_dates(self):
         valid_term = AcademicTermFactory.create()
@@ -296,6 +274,8 @@ class EnrollmentModelTest(TestCase, TermTestMixin):
         cls.enrollment = EnrollmentFactory.create(
             student=cls.student, offering=cls.offering
         )
+        cls.next_term = cls.create_next_term(cls.offering.term)
+        cls.previous_term = cls.create_previous_term(cls.offering.term)
 
     def test_create_enrollment(self):
         self.assertEqual(self.enrollment.student, self.student)
@@ -320,18 +300,15 @@ class EnrollmentModelTest(TestCase, TermTestMixin):
 
     def test_status_property(self):
         self.assertEqual(self.enrollment.status, "In Progress")
-        next_term = self.create_next_term(self.offering.term)
-        next_offering = CourseOfferingFactory.create(term=next_term)
+        next_offering = CourseOfferingFactory.create(term=self.next_term)
         next_enrollment = EnrollmentFactory.create(offering=next_offering)
         self.assertEqual(next_enrollment.status, "Registered")
-        prev_term = self.create_previous_term(self.offering.term)
-        prev_offering = CourseOfferingFactory.create(term=prev_term)
+        prev_offering = CourseOfferingFactory.create(term=self.previous_term)
         prev_enrollment = EnrollmentFactory.create(offering=prev_offering)
         self.assertEqual(prev_enrollment.status, "Ended")
 
     def test_clean_method_with_valid_data(self):
-        next_term = self.create_next_term(self.offering.term)
-        next_offering = CourseOfferingFactory.create(term=next_term)
+        next_offering = CourseOfferingFactory.create(term=self.next_term)
         student = StudentProfileFactory.create()
         valid_enrollment = EnrollmentFactory.build(
             student=student, offering=next_offering

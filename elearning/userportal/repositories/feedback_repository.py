@@ -1,6 +1,6 @@
 from typing import Union
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, CharField
 from django.db.models import Subquery, Case, When, Value
 
 from userportal.models import *
@@ -45,6 +45,7 @@ class FeedbackRepository:
                     When(grade=Enrollment.Grade.PASS, then=Value("Pass")),
                     When(grade=Enrollment.Grade.FAIL, then=Value("Fail")),
                     default=Value("Not Graded"),
+                    output_field=CharField(),
                 ),
             )
             .select_related("student")

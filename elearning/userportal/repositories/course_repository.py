@@ -8,7 +8,7 @@ class CourseRepository:
     """Repository for Course model."""
 
     @staticmethod
-    def fetch_filtered_by(keywords: dict = None) -> QuerySet[Course]:
+    def fetch_filtered_by(keywords: str = None) -> QuerySet[Course]:
         """Fetch courses that match the given keywords."""
         queryset = Course.objects.select_related("teacher__user").only(
             "id",
