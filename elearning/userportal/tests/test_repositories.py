@@ -1,8 +1,11 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from userportal.tests.mixins import TermTestMixin
 from userportal.tests.model_factories import *
 from userportal.repositories import *
 from django.core.files.uploadedfile import SimpleUploadedFile
+import shutil
+
+TEST_MEDIA_ROOT = settings.BASE_DIR / "test_media"
 
 
 class AcademicTermRepositoryTest(TestCase, TermTestMixin):
@@ -221,30 +224,53 @@ class FeedbackRepositoryTest(TestCase, TermTestMixin):
         self.assertEqual(results[0].grade_display, "Pass")
 
 
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class MaterialRepositoryTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.files = {"file": SimpleUploadedFile("rubric_file.txt", b"file_content")}
+        cls.file_name = "rubric_file.png"
+        cls.content = b"0"
+        cls.files = {"file": SimpleUploadedFile(cls.file_name, cls.content)}
         cls.course = CourseFactory.create()
         cls.form_data = {
             "title": "Rubric",
             "description": "Rubric for the final project",
         }
+        TEST_MEDIA_ROOT.mkdir(exist_ok=True, parents=True)
 
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(TEST_MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
+
+    @override_settings(
+        STORAGES={
+            "default": {
+                "BACKEND": "django.core.files.storage.InMemoryStorage",
+            },
+        }
+    )
     def test_create(self):
         material = MaterialRepository.create(self.form_data, self.course, self.files)
         self.assertEqual(material.title, self.form_data["title"])
         self.assertEqual(material.description, self.form_data["description"])
         self.assertEqual(material.course, self.course)
-        self.assertEqual(material.file.read(), b"file_content")
+        self.assertEqual(material.file.read(), self.content)
 
+    @override_settings(
+        STORAGES={
+            "default": {
+                "BACKEND": "django.core.files.storage.InMemoryStorage",
+            },
+        }
+    )
     def test_fetch(self):
         material = MaterialRepository.create(self.form_data, self.course, self.files)
         materials = MaterialRepository.fetch(self.course)
         self.assertEqual(materials.count(), 1)
         self.assertEqual(materials[0], material)
-        self.assertEqual(materials[0].file.read(), b"file_content")
-        self.assertEqual(materials[0].original_filename, "rubric_file.txt")
+        self.assertEqual(materials[0].file.read(), self.content)
+        self.assertEqual(materials[0].original_filename, self.file_name)
 
 
 class NotificationRepositoryTest(TestCase):
