@@ -1,19 +1,42 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from .models import *
 from django.contrib.auth.admin import UserAdmin
-from django import forms
+from django.forms import ModelForm
+
+from userportal.models import *
 
 AuthUser = get_user_model()
 
 
-class AuthUserAdmin(UserAdmin):
-    additional_fieldsets = (("Portal User Info", {"fields": ("user_type", "title")}),)
+class PortalUserAdmin(UserAdmin):
+    model = AuthUser
 
-    fieldsets = UserAdmin.fieldsets + additional_fieldsets
+    list_display = ("username", "email", "user_type", "is_staff")
+    fieldsets = UserAdmin.fieldsets + (
+        ("Portal User Info", {"fields": ("user_type", "title")}),
+    )
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_superuser",
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "user_type",
+                ),
+            },
+        ),
+    )
 
 
-class BaseProfileAdminForm(forms.ModelForm):
+class BaseProfileAdminForm(ModelForm):
     INVALID_USER_TYPE_MSG = "Invalid user type for this profile."
 
     def clean(self):
@@ -58,7 +81,7 @@ class StudentProfileAdmin(admin.ModelAdmin):
     form = StudentProfileAdminForm
 
 
-admin.site.register(AuthUser, AuthUserAdmin)
+admin.site.register(AuthUser, PortalUserAdmin)
 admin.site.register(Program)
 admin.site.register(TeacherProfile, TeacherProfileAdmin)
 admin.site.register(StudentProfile, StudentProfileAdmin)

@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext as _
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
@@ -53,7 +53,13 @@ class PortalUser(AbstractUser):
                     code=VALIDATION_ERR_REQUIRED,
                 )
             else:
-                if get_user_model().objects.filter(email=self.email).exists():
+                pk = self.pk if self.pk else None
+                if (
+                    get_user_model()
+                    .objects.filter(email=self.email)
+                    .exclude(pk=pk)
+                    .exists()
+                ):
                     errors["email"] = ValidationError(
                         f"{INVALID_VALUE_MSG.format(value=self.email)} {INVALID_EMAIL_MSG}",
                         code=VALIDATION_ERR_INVALID,
