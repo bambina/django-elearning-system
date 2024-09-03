@@ -58,12 +58,7 @@ class PermissionChecker:
         )
 
     @staticmethod
-    def can_manage_qa_session(
-        request_user: Union[AuthUserType, AnonymousUser], course: Course
-    ) -> bool:
-        # Return False for the anonymous user
-        if not request_user.is_authenticated:
-            return False
+    def can_manage_qa_session(request_user: AuthUserType, course: Course) -> bool:
         # Return False if the user is not in the teacher permission group
         if not request_user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists():
             return False

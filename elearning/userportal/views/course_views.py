@@ -181,6 +181,7 @@ def download_material(request, course_id, material_id):
     return response
 
 
+@login_required(login_url="login")
 @require_http_methods(["POST"])
 def start_qa_session(request, course_id):
     # Only teachers can start a QA session
@@ -208,20 +209,44 @@ def start_qa_session(request, course_id):
     return redirect("qa-session", course_id=course.id)
 
 
-def qa_session(request, course_id):
-    user = request.user
-    course = get_object_or_404(Course, pk=course_id)
-    qa_session = get_object_or_404(QASession, course=course)
-    # Setup the context for the QA session page
-    context = {
-        "course": course,
-        "qa_session": qa_session,
-        "is_instructor": user.is_teacher() and user.teacher_profile == course.teacher,
-    }
-    if qa_session.is_ended():
-        # If the QA session has ended, fetch the questions as WebSocket is not available
-        context["questions"] = QAQuestion.objects.filter(room_name=qa_session.room_name)
-    return render(request, "userportal/qa_session.html", context=context)
+class QASessionView(UserPassesTestMixin, DetailView):
+    model = QASession
+    template_name = "userportal/qa_session.html"
+    context_object_name = "qa_session"
+    login_url = "login"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.course = get_object_or_404(Course, pk=self.kwargs["course_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        if not self.request.user.is_authenticated:
+            return False
+        is_admin = PermissionChecker.is_admin(self.request.user)
+        is_active_in_course = PermissionChecker.is_active_in_course(
+            self.request.user, self.course
+        )
+        return is_admin or is_active_in_course
+
+    def get_object(self):
+        return get_object_or_404(QASession, course=self.course)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        course = self.object.course
+
+        context["course"] = course
+        context["is_instructor"] = (
+            user.is_teacher() and user.teacher_profile == course.teacher
+        )
+
+        if self.object.is_ended():
+            context["questions"] = QAQuestion.objects.filter(
+                room_name=self.object.room_name
+            )
+
+        return context
 
 
 @require_http_methods(["POST"])

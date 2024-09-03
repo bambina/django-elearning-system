@@ -91,7 +91,7 @@ class Command(BaseCommand):
             "view_program",
         ]
         actions = ["add", "change", "delete", "view"]
-        teacher_model_names = ["course", "courseoffering", "material"]
+        teacher_model_names = ["course", "courseoffering", "material", "qasession"]
         for action, model in itertools.product(actions, teacher_model_names):
             teacher_codenames.append(f"{action}_{model}")
         teacher_permissions = Permission.objects.filter(codename__in=teacher_codenames)

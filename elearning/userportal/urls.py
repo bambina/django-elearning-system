@@ -96,7 +96,7 @@ urlpatterns = [
     ),
     path(
         "courses/<int:course_id>/qa-session/",
-        course_views.qa_session,
+        course_views.QASessionView.as_view(),
         name="qa-session",
     ),
 ]
