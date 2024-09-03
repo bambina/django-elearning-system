@@ -1,7 +1,8 @@
 from userportal.models import *
-from userportal.repositories.academic_term_repository import *
 from django.contrib.auth import get_user_model
-from typing import Type
+from typing import Type, Union
+from django.contrib.auth.models import AnonymousUser
+from userportal.repositories import *
 
 # Get the auth user model type
 AuthUserType = Type[get_user_model()]
@@ -15,7 +16,7 @@ class PermissionChecker:
     @staticmethod
     def is_teacher_or_admin(user: AuthUserType) -> bool:
         is_authenticated = user.is_authenticated
-        is_teacher = user.groups.filter(name="teacher").exists()
+        is_teacher = user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists()
         is_manager = PermissionChecker.is_admin(user)
         return is_authenticated and (is_teacher or is_manager)
 
@@ -40,3 +41,18 @@ class PermissionChecker:
         if user.is_student():
             return PermissionChecker.is_taking_course(user.student_profile, course)
         return False
+
+    @staticmethod
+    def has_finished_course(
+        request_user: Union[AuthUserType, AnonymousUser], course: Course
+    ) -> bool:
+        # Return False for the anonymous user
+        if not request_user.is_authenticated:
+            return False
+        # Return False if the user is not in the student permission group
+        if not request_user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists():
+            return False
+        # Return True if the user has finished the course before
+        return EnrollmentRepository.has_finished_course(
+            request_user.student_profile, course
+        )

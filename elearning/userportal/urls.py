@@ -60,8 +60,8 @@ urlpatterns = [
         name="enrolled-student-list",
     ),
     path(
-        "courses/<int:course_id>/feedback/create",
-        feedback_views.create_feedback,
+        "courses/<int:course_id>/feedback/create/",
+        feedback_views.FeedbackCreateView.as_view(),
         name="feedback-create",
     ),
     path(

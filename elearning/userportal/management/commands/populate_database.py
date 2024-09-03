@@ -361,7 +361,7 @@ class Command(BaseCommand):
         feedbacks = []
         ended_enrollments = Enrollment.objects.filter(
             offering__term__end_datetime__lt=timezone.now()
-        ).select_related("student", "offering__course")
+        ).select_related("student", "offering__course")[:2]
 
         for i, enrollment in enumerate(ended_enrollments):
             comment_no = i % len(self.COMMENTS)

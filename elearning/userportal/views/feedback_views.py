@@ -1,5 +1,4 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.contrib import messages
 from ..models import *
 from ..forms import *
@@ -7,33 +6,51 @@ from django.views.generic import ListView
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from userportal.repositories import *
+from django.views.generic import CreateView
+from django.contrib.auth.mixins import UserPassesTestMixin
+from userportal.permissions import PermissionChecker
 
 
-@login_required(login_url="login")
-def create_feedback(request, course_id):
-    if not request.user.is_student():
-        messages.error(request, ERR_ONLY_STUDENTS_CAN_CREATE_FEEDBACK)
-        return redirect("course-list")
+class FeedbackCreateView(UserPassesTestMixin, CreateView):
+    """Allows students to leave feedback for a completed course."""
 
-    course = get_object_or_404(Course, pk=course_id)
-    student = request.user.student_profile
-    feedback = FeedbackRepository.fetch(student, course)
+    model = Feedback
+    form_class = FeedbackForm
+    template_name = "userportal/feedback_create.html"
+    login_url = "login"
 
-    if request.method == "POST":
-        form = FeedbackForm(request.POST, instance=feedback)
-        if form.is_valid():
-            try:
-                FeedbackRepository.create_or_update(
-                    form.cleaned_data, course, student, feedback
-                )
-                messages.success(request, SAVE_FEEDBACK_SUCCESS_MSG)
-                return redirect("home")
-            except Exception:
-                form.add_error(None, ERR_UNEXPECTED_MSG)
-    else:
-        form = FeedbackForm(instance=feedback)
-    context = {"form": form, "course": course}
-    return render(request, "userportal/feedback_create.html", context)
+    def dispatch(self, request, *args, **kwargs):
+        self.course = get_object_or_404(Course, pk=self.kwargs["course_id"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        if has_permission := PermissionChecker.has_finished_course(
+            self.request.user, self.course
+        ):
+            self.student = self.request.user.student_profile
+        return has_permission
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = FeedbackRepository.fetch(self.student, self.course)
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            # Use the repository method to create or update the feedback
+            FeedbackRepository.create_or_update(
+                form.cleaned_data, self.course, self.student, form.instance
+            )
+            messages.success(self.request, SAVE_FEEDBACK_SUCCESS_MSG)
+            return redirect("home")
+        except Exception:
+            form.add_error(None, ERR_UNEXPECTED_MSG)
+            return self.form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["course"] = self.course
+        return context
 
 
 class FeedbackListView(ListView):

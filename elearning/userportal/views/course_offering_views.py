@@ -15,7 +15,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 class EnrollCourseView(UserPassesTestMixin, View):
-    """Student enrolls in a next course offering."""
+    """Allows students enrolls in a next course offering."""
+
     login_url = "login"
 
     def test_func(self):

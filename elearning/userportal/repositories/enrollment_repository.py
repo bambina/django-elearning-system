@@ -43,6 +43,16 @@ class EnrollmentRepository:
         ).exists()
 
     @staticmethod
+    def has_finished_course(student_profile: StudentProfile, course: Course) -> bool:
+        """Check if the student has finished the given course before."""
+        current_time = now()
+        return Enrollment.objects.filter(
+            student=student_profile,
+            offering__course=course,
+            offering__term__end_datetime__lt=current_time,
+        ).exists()
+
+    @staticmethod
     def fetch_with_student(offering_id: int) -> QuerySet[Enrollment]:
         """Get all enrollments for the given course offering, including related student data."""
         return (
