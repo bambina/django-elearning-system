@@ -8,15 +8,19 @@
         <h1>{{ object.title }}</h1>
         <p>{{ object.description }}</p>
 
-        by <a href="{% url 'user-detail' object.teacher.user.username %}">{{ object.teacher.user.get_full_name }}</a>
+        <p>by <a href="{% url 'user-detail' object.teacher.user.username %}">{{ object.teacher.user.get_full_name }}</a></p>
     </div>
 
-    {% if next_offering and not is_registered and user.is_student %}
+    {% if user.is_student and not is_registered %}
     <div class="py-3">
+        {% if next_offering %}
         <form method="post" action="{% url 'course-enroll' course_id=object.id offering_id=next_offering.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary"><span class="h4 font-weight-bold">Enroll Now</span><br>Starts {{ next_offering.term.start_datetime|date:"M j Y" }}</button>
         </form>
+        {% else %}
+        <p>The offering of this course is currently not scheduled. Please check back later for updates.</p>
+        {% endif %}
     </div>
     {% endif %}
 
