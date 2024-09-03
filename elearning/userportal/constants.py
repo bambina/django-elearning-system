@@ -17,6 +17,13 @@ INVALID_COURSE_ALREADY_STARTED_MSG = _(
     "Registration is not allowed for courses that have already started."
 )
 INVALID_FILE_SIZE_MSG = _("File size must be less than {size}.")
+INVALID_TEACHER_PROFILE_USER_TYPE_MSG = _(
+    "User must be of type teacher to create a TeacherProfile."
+)
+INVALID_STUDENT_PROFILE_USER_TYPE_MSG = _(
+    "User must be of type student to create a StudentProfile."
+)
+
 
 # Error messages
 ERR_UNEXPECTED_LOG = _("Unexpected error occurred: {error}.")
