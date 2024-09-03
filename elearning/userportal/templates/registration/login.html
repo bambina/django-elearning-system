@@ -7,7 +7,10 @@
     <p>Your account doesn't have access to this page. To proceed,
     please login with an account that has access.</p>
     {% else %}
-    <p>Please login to see this page.</p>
+    <p>
+      Please log in to continue.<br>
+      If you don't have an account, consider <a href="{% url 'signup' %}">signing up</a> to access all features.
+    </p>
     {% endif %}
 {% endif %}
 

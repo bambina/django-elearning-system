@@ -50,12 +50,12 @@ class CourseDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         course = self.object
+        # Add course offering data
+        context.update(self.get_course_offerings_context(course))
         # Return early for anonymous users
         if user.is_anonymous:
             return context
 
-        # Add course offering data
-        context.update(self.get_course_offerings_context(course))
         # Add QA session data
         context.update(self.get_qa_session_context(course))
         # Add request user's data

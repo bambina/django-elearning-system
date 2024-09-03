@@ -9,34 +9,39 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 from ..tasks import notify_teacher_of_new_enrollment
 from userportal.repositories import *
+from django.views.generic import View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
-@login_required(login_url="login")
-@require_POST
-def enroll_course(request, course_id, offering_id):
-    """
-    Student enrolls in a next course offering.
-    Displays a warning message if already enrolled.
-    """
-    if not request.user.is_student():
-        messages.error(request, ERR_ONLY_STUDENTS_CAN_ENROLL)
-        return redirect("course-list")
+class EnrollCourseView(UserPassesTestMixin, View):
+    """Student enrolls in a next course offering."""
+    login_url = "login"
 
-    course = get_object_or_404(Course, pk=course_id)
-    offering = get_object_or_404(CourseOffering, pk=offering_id)
+    def test_func(self):
+        return self.request.user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists()
 
-    _, created = Enrollment.objects.get_or_create(
-        student=request.user.student_profile, offering=offering
-    )
-    if created:
-        messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
-        # Send a notification to the course teacher
-        notify_teacher_of_new_enrollment.delay(
-            course.id, offering.id, request.user.username
+    @method_decorator(require_POST)
+    def post(self, request, course_id, offering_id):
+        """
+        Student enrolls in a next course offering.
+        """
+        course = get_object_or_404(Course, pk=course_id)
+        offering = get_object_or_404(CourseOffering, pk=offering_id)
+
+        _, created = Enrollment.objects.get_or_create(
+            student=request.user.student_profile, offering=offering
         )
-    else:
-        messages.warning(request, ALREADY_ENROLLED_MSG)
-    return redirect("course-detail", pk=course.id)
+        if created:
+            messages.success(request, ENROLL_COURSE_SUCCESS_MSG)
+            # Send a notification to the course teacher
+            notify_teacher_of_new_enrollment.delay(
+                course.id, offering.id, request.user.username
+            )
+        else:
+            messages.warning(request, ALREADY_ENROLLED_MSG)
+
+        return redirect("course-detail", pk=course.id)
 
 
 class CourseOfferingListView(ListView):

@@ -51,7 +51,7 @@ urlpatterns = [
     ),
     path(
         "courses/<int:course_id>/offerings/<int:offering_id>/enroll/",
-        course_offering_views.enroll_course,
+        course_offering_views.EnrollCourseView.as_view(),
         name="course-enroll",
     ),
     path(

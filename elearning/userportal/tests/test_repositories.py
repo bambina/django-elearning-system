@@ -258,17 +258,21 @@ class NotificationRepositoryTest(TestCase):
         self.assertEqual(notifications.count(), 1)
         self.assertEqual(notifications[0], self.notification)
 
+
 class QAQuestionRepositoryTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.qa_session = QASessionFactory.create()
 
     def test_create_and_save_close_comment(self):
-        close_comment = QAQuestionRepository.create_and_save_close_comment(self.qa_session)
+        close_comment = QAQuestionRepository.create_and_save_close_comment(
+            self.qa_session
+        )
         self.assertEqual(close_comment.room_name, self.qa_session.room_name)
         self.assertEqual(close_comment.text, LIVE_QA_END_SESSION_MSG)
         self.assertEqual(close_comment.sender, "System")
         self.assertIsNotNone(close_comment.timestamp)
+
 
 class QASessionRepositoryTest(TestCase):
     @classmethod
