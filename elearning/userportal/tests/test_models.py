@@ -50,15 +50,16 @@ class UserModelTest(TestCase):
         self.assertFalse(user.is_superuser)
 
     def test_create_user_with_missing_fields(self):
+        user = UserFactory.build(
+            username="user",
+            password=self.common_password,
+            email=None,
+            first_name=None,
+            last_name=None,
+            user_type=None,
+        )
         with self.assertRaises(ValidationError) as context:
-            UserFactory.create(
-                username="user",
-                password=self.common_password,
-                email=None,
-                first_name=None,
-                last_name=None,
-                user_type=None,
-            )
+            user.clean()
         errors = context.exception.error_dict
         self.assertIn("email", errors)
         self.assertIn("first_name", errors)

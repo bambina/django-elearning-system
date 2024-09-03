@@ -18,7 +18,6 @@ def signup(request):
             try:
                 with transaction.atomic():
                     student = student_form.save(commit=False)
-                    student.user_type = PortalUser.UserType.STUDENT
                     student.save()
                     student_profile = student_profile_form.save(commit=False)
                     student_profile.user = student

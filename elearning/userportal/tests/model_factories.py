@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from userportal.models import *
 from userportal.tests.utils import get_term_datetimes
 
-User = get_user_model()
+AuthUser = get_user_model()
 
 
 class ProgramFactory(DjangoModelFactory):
@@ -21,7 +21,7 @@ class ProgramFactory(DjangoModelFactory):
 
 class UserFactory(DjangoModelFactory):
     class Meta:
-        model = User
+        model = AuthUser
         skip_postgeneration_save = True
 
     username = factory.Faker("user_name")
@@ -29,13 +29,8 @@ class UserFactory(DjangoModelFactory):
     email = factory.Faker("email")
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
-    title = User.Title.PROF
-    user_type = User.UserType.TEACHER
-
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        manager = cls._get_manager(model_class)
-        return manager.create_user(*args, **kwargs)
+    title = AuthUser.Title.PROF
+    user_type = AuthUser.UserType.TEACHER
 
     @factory.post_generation
     def save_user(self, create, extracted, **kwargs):
@@ -47,7 +42,7 @@ class TeacherProfileFactory(DjangoModelFactory):
     class Meta:
         model = TeacherProfile
 
-    user = factory.SubFactory(UserFactory, user_type=User.UserType.TEACHER)
+    user = factory.SubFactory(UserFactory, user_type=AuthUser.UserType.TEACHER)
     biography = factory.Faker("text")
 
 
@@ -55,7 +50,7 @@ class StudentProfileFactory(DjangoModelFactory):
     class Meta:
         model = StudentProfile
 
-    user = factory.SubFactory(UserFactory, user_type=User.UserType.STUDENT)
+    user = factory.SubFactory(UserFactory, user_type=AuthUser.UserType.STUDENT)
     status = factory.Faker("text")
     program = factory.SubFactory(ProgramFactory)
 

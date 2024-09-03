@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
-
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 from .constants import *
 from .validators import *
 from .utils import path_and_rename
@@ -20,37 +21,6 @@ class Program(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class PortalUserManager(UserManager):
-    def create_user(self, username, email=None, password=None, **extra_fields):
-        # email, first_name, last_name and user_type are required fields
-        errors = {}
-
-        if not email:
-            errors["email"] = ValidationError(
-                VALIDATION_ERR_MISSING_FIELD.format(entity="Email"),
-                code=VALIDATION_ERR_REQUIRED,
-            )
-        else:
-            # Check if the email is already in use
-            if self.filter(email=email).exists():
-                errors["email"] = ValidationError(
-                    ERR_ALREADY_EXISTS.format(entity="email"),
-                    code=VALIDATION_ERR_INVALID,
-                )
-
-        for field_name in ["first_name", "last_name", "user_type"]:
-            if not extra_fields.get(field_name):
-                errors[field_name] = ValidationError(
-                    VALIDATION_ERR_MISSING_FIELD.format(entity=field_name.capitalize()),
-                    code=VALIDATION_ERR_REQUIRED,
-                )
-
-        if errors:
-            raise ValidationError(errors)
-
-        return super().create_user(username, email, password, **extra_fields)
 
 
 class PortalUser(AbstractUser):
@@ -72,8 +42,33 @@ class PortalUser(AbstractUser):
     )
     title = models.CharField(max_length=10, choices=Title, null=True, blank=True)
 
-    objects = PortalUserManager()
     EMAIL_FIELD = "email"
+
+    def clean(self):
+        errors = {}
+        if not self.is_staff and not self.is_superuser:
+            if not self.email:
+                errors["email"] = ValidationError(
+                    VALIDATION_ERR_MISSING_FIELD.format(entity="Email"),
+                    code=VALIDATION_ERR_REQUIRED,
+                )
+            else:
+                if get_user_model().objects.filter(email=self.email).exists():
+                    errors["email"] = ValidationError(
+                        f"{INVALID_VALUE_MSG.format(value=self.email)} {INVALID_EMAIL_MSG}",
+                        code=VALIDATION_ERR_INVALID,
+                    )
+
+            for field_name in ["first_name", "last_name", "user_type"]:
+                if not getattr(self, field_name):
+                    errors[field_name] = ValidationError(
+                        VALIDATION_ERR_MISSING_FIELD.format(
+                            entity=field_name.capitalize()
+                        ),
+                        code=VALIDATION_ERR_REQUIRED,
+                    )
+        if errors:
+            raise ValidationError(errors)
 
     def is_teacher(self):
         return self.user_type == self.UserType.TEACHER

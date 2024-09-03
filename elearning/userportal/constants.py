@@ -12,6 +12,7 @@ VALIDATION_ERR_MISSING_FIELD = _("{entity} must be specified")
 
 # Invalid value error messages
 INVALID_VALUE_MSG = _("Invalid value: {value}.")
+INVALID_EMAIL_MSG = _("This email address is already in use.")
 INVALID_START_DATETIME_MSG = _("Start datetime cannot be greater than end datetime.")
 INVALID_COURSE_ALREADY_STARTED_MSG = _(
     "Registration is not allowed for courses that have already started."
@@ -28,7 +29,6 @@ INVALID_STUDENT_PROFILE_USER_TYPE_MSG = _(
 # Error messages
 ERR_UNEXPECTED_LOG = _("Unexpected error occurred: {error}.")
 ERR_UNEXPECTED_MSG = _("Unexpected error occurred. Please try again later.")
-ERR_ALREADY_EXISTS = _("The {entity} already exists.")
 ERR_ONLY_STUDENTS_CAN_ENROLL = _("Only students can enroll in courses.")
 ERR_ONLY_STUDENTS_CAN_CREATE_FEEDBACK = _("Only students can create feedback.")
 ERR_ONLY_TEACHERS_CAN_CREATE_COURSES = _("Only teachers can create courses.")

@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-
+from django.contrib.auth import get_user_model
 from .models import *
+
+AuthUser = get_user_model()
 
 
 class StudentForm(UserCreationForm):
@@ -9,13 +11,16 @@ class StudentForm(UserCreationForm):
     first_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
     last_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
     title = forms.ChoiceField(
-        choices=PortalUser.Title.choices,
-        initial=PortalUser.Title.PREFER_NOT_TO_SAY,
+        choices=AuthUser.Title.choices,
+        initial=AuthUser.Title.PREFER_NOT_TO_SAY,
         required=False,
+    )
+    user_type = forms.IntegerField(
+        widget=forms.HiddenInput(), initial=PortalUser.UserType.STUDENT
     )
 
     class Meta:
-        model = PortalUser
+        model = AuthUser
         fields = (
             "username",
             "password1",
@@ -24,6 +29,7 @@ class StudentForm(UserCreationForm):
             "first_name",
             "last_name",
             "title",
+            "user_type",
         )
 
 

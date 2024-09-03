@@ -1,23 +1,25 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import Group
-
+from django.contrib.auth import get_user_model
 from userportal.models import *
 from userportal.constants import *
+
+AuthUser = get_user_model()
 
 
 class BaseTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.client = Client()
-        cls.user = PortalUser.objects.create_user(
+        cls.user = AuthUser.objects.create_user(
             username="testuser",
             email="test@example.com",
             password="testpassword",
             first_name="Firstname",
             last_name="Lastname",
-            title=PortalUser.Title.PROF,
-            user_type=PortalUser.UserType.TEACHER,
+            title=AuthUser.Title.PROF,
+            user_type=AuthUser.UserType.TEACHER,
         )
         cls.teacher_profile = TeacherProfile.objects.create(
             user=cls.user,
@@ -151,8 +153,8 @@ class SignUpViewTestCase(BaseTestCase):
             "password2": "crispy123student",
             "first_name": "New",
             "last_name": "Student",
+            "user_type": AuthUser.UserType.STUDENT,
             "program": cls.program.id,
-            "registration_date": "2024-01-01",
         }
 
     def test_signup_view_get(self):
@@ -175,4 +177,4 @@ class SignUpViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This field is required.", html=True)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
-        self.assertFalse(PortalUser.objects.filter(username="new-student").exists())
+        self.assertFalse(AuthUser.objects.filter(username="new-student").exists())
