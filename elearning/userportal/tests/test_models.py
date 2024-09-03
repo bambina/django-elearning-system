@@ -68,8 +68,6 @@ class UserModelTest(TestCase):
     def test_field_constraints(self):
         username_uniqueness = User._meta.get_field("username").unique
         self.assertTrue(username_uniqueness)
-        email_uniqueness = User._meta.get_field("email").unique
-        self.assertTrue(email_uniqueness)
         title_max_length = User._meta.get_field("title").max_length
         self.assertEqual(title_max_length, 10)
 

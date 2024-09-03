@@ -32,6 +32,13 @@ class PortalUserManager(UserManager):
                 VALIDATION_ERR_MISSING_FIELD.format(entity="Email"),
                 code=VALIDATION_ERR_REQUIRED,
             )
+        else:
+            # Check if the email is already in use
+            if self.filter(email=email).exists():
+                errors["email"] = ValidationError(
+                    ERR_ALREADY_EXISTS.format(entity="email"),
+                    code=VALIDATION_ERR_INVALID,
+                )
 
         for field_name in ["first_name", "last_name", "user_type"]:
             if not extra_fields.get(field_name):
@@ -59,7 +66,7 @@ class PortalUser(AbstractUser):
         DR = "DR", _("Dr.")
         PROF = "PROF", _("Prof.")
 
-    email = models.EmailField(unique=True, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
     user_type = models.PositiveSmallIntegerField(
         choices=UserType, null=True, blank=True
     )
