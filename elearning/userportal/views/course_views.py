@@ -184,17 +184,16 @@ def download_material(request, course_id, material_id):
 @require_http_methods(["POST"])
 def start_qa_session(request, course_id):
     # Only teachers can start a QA session
-    if not PermissionChecker.is_teacher_or_admin(request.user):
+    course = get_object_or_404(Course, pk=course_id)
+    if not PermissionChecker.can_manage_qa_session(request.user, course):
         messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
         return redirect("course-detail", pk=course_id)
 
-    course = get_object_or_404(Course, pk=course_id)
     try:
         already_exists, previous_room_name = QASessionRepository.get_or_create(
             course=course
         )
-    except Exception as e:
-        print(e)
+    except Exception:
         messages.error(request, ERR_UNEXPECTED_MSG)
         return redirect("course-detail", pk=course.id)
 

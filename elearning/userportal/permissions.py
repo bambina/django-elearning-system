@@ -17,8 +17,8 @@ class PermissionChecker:
     def is_teacher_or_admin(user: AuthUserType) -> bool:
         is_authenticated = user.is_authenticated
         is_teacher = user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists()
-        is_manager = PermissionChecker.is_admin(user)
-        return is_authenticated and (is_teacher or is_manager)
+        is_admin = PermissionChecker.is_admin(user)
+        return is_authenticated and (is_teacher or is_admin)
 
     @staticmethod
     def is_taking_course(profile: StudentProfile, course: Course) -> bool:
@@ -55,4 +55,18 @@ class PermissionChecker:
         # Return True if the user has finished the course before
         return EnrollmentRepository.has_finished_course(
             request_user.student_profile, course
+        )
+
+    @staticmethod
+    def can_manage_qa_session(
+        request_user: Union[AuthUserType, AnonymousUser], course: Course
+    ) -> bool:
+        # Return False for the anonymous user
+        if not request_user.is_authenticated:
+            return False
+        # Return False if the user is not in the teacher permission group
+        if not request_user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists():
+            return False
+        return PermissionChecker.is_admin or PermissionChecker.is_teaching_course(
+            request_user.teacher_profile, course
         )
