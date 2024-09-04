@@ -77,7 +77,7 @@ class UserDetailView(DetailView):
 
 @require_http_methods(["POST"])
 @login_required(login_url="login")
-@permission_required('userportal.change_portaluser', raise_exception=True)
+@permission_required("userportal.change_portaluser", raise_exception=True)
 def toggle_active_status(request, username, activate):
     activate = activate.lower() == "true"
     action = "activated" if activate else "deactivated"

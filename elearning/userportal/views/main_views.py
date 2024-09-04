@@ -33,18 +33,15 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
-    if request.method == "POST":
-        form = StatusForm(request.POST)
-        if form.is_valid():
+    form = StatusForm(request.POST or None, initial={"status": student.status})
+
+    if request.method == "POST" and form.is_valid():
+        try:
             status = form.cleaned_data["status"]
-            try:
-                UserRepository.update_status(student, status)
-                messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
-            except Exception:
-                form.add_error(None, ERR_UNEXPECTED_MSG)
-    else:
-        initial = {"status": student.status}
-        form = StatusForm(initial=initial)
+            UserRepository.update_status(student, status)
+            messages.success(request, UPDATE_STATUS_SUCCESS_MSG)
+        except Exception:
+            form.add_error(None, ERR_UNEXPECTED_MSG)
     context = {"status_form": form}
     enrollments = EnrollmentRepository.fetch(student)
     (
