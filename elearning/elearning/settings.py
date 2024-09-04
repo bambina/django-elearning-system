@@ -74,7 +74,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 MIDDLEWARE = [
-    'userportal.middleware.HttpResponseNotAllowedMiddleware',
+    "userportal.middleware.HttpResponseNotAllowedMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -177,15 +177,15 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
-CELERY_BROKER_URL = "redis://localhost:6379/"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
 
-CELERY_RESULT_BACKEND = "redis://localhost:6379/"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/1"
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("127.0.0.1", 6379, 2)],
         },
     },
 }
