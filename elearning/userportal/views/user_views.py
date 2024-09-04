@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
+from django.contrib.auth.decorators import permission_required
 
 from userportal.repositories import *
 from userportal.models import *
@@ -75,9 +75,9 @@ class UserDetailView(DetailView):
         return context
 
 
-@login_required(login_url="login")
-# @permission_required('auth.change_user', raise_exception=True)
 @require_http_methods(["POST"])
+@login_required(login_url="login")
+@permission_required('userportal.change_portaluser', raise_exception=True)
 def toggle_active_status(request, username, activate):
     activate = activate.lower() == "true"
     action = "activated" if activate else "deactivated"
