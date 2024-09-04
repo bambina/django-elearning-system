@@ -76,7 +76,7 @@ urlpatterns = [
     ),
     path(
         "courses/<int:course_id>/materials/create/",
-        course_views.create_material,
+        course_views.CreateMaterialView.as_view(),
         name="material-create",
     ),
     path(

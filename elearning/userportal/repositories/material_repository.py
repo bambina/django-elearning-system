@@ -1,4 +1,5 @@
 from django.db.models.query import QuerySet
+from django.utils.datastructures import MultiValueDict
 from userportal.models import *
 
 
@@ -6,7 +7,7 @@ class MaterialRepository:
     """Repository for Material model."""
 
     @staticmethod
-    def create(form_data: dict, course: Course, files: dict) -> Material:
+    def create(form_data: dict, course: Course, files: MultiValueDict) -> Material:
         """Create a material with given form data and course."""
         form_data["file"] = files.get("file")
         material = Material(**form_data)

@@ -65,3 +65,18 @@ class PermissionChecker:
         return PermissionChecker.is_admin or PermissionChecker.is_teaching_course(
             request_user.teacher_profile, course
         )
+
+    @staticmethod
+    def can_upload_material(
+        request_user: Union[AuthUserType, AnonymousUser], course: Course
+    ) -> bool:
+        # Return False for the anonymous user
+        if not request_user.is_authenticated:
+            return False
+        # Return False if the user is not in the teacher permission group
+        if not request_user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists():
+            return False
+        # Return True if the user is teaching the course
+        return PermissionChecker.is_teaching_course(
+            request_user.teacher_profile, course
+        )
