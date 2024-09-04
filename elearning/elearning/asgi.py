@@ -15,18 +15,22 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 
-import userportal.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "elearning.settings")
 
+django_asgi_app = get_asgi_application()
+
+# Load the routing configuration after the Django app is loaded
+from userportal.routing import websocket_urlpatterns
+
 application = ProtocolTypeRouter(
     {
-        "http": get_asgi_application(),
+        "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(  # Confirm that incoming WebSocket connections are from an allowed host
             # Add an authentication layer to WebSocket connections
             AuthMiddlewareStack(
                 # Define the routing configuration for WebSocket connections
-                URLRouter(userportal.routing.websocket_urlpatterns)
+                URLRouter(websocket_urlpatterns)
             )
         ),
     }
