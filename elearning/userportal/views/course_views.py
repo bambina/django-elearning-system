@@ -249,13 +249,13 @@ class QASessionView(UserPassesTestMixin, DetailView):
         return context
 
 
+@login_required(login_url="login")
 @require_http_methods(["POST"])
 def end_qa_session(request, course_id):
-    if not PermissionChecker.is_teacher_or_admin(request.user):
-        messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
-        return redirect("qa-session", course_id=course_id)
-
     course = get_object_or_404(Course, pk=course_id)
+    if not PermissionChecker.can_manage_qa_session(request.user, course):
+        messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
+        return redirect("course-detail", pk=course.id)
 
     try:
         with transaction.atomic():
