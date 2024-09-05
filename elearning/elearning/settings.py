@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_bootstrap5",
     "django_bootstrap_icons",
+    "django_extensions",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

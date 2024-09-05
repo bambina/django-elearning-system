@@ -4,6 +4,7 @@ from factory.django import DjangoModelFactory
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.contrib.auth.models import Group
 
 from userportal.models import *
 from userportal.tests.utils import get_term_datetimes
@@ -36,6 +37,19 @@ class UserFactory(DjangoModelFactory):
     def save_user(self, create, extracted, **kwargs):
         if create:
             self.save()
+
+    @factory.post_generation
+    def add_group(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if self.user_type == get_user_model().UserType.TEACHER:
+            group, _ = Group.objects.get_or_create(name=PERMISSION_GROUP_TEACHER)
+        elif self.user_type == get_user_model().UserType.STUDENT:
+            group, _ = Group.objects.get_or_create(name=PERMISSION_GROUP_STUDENT)
+
+        self.groups.add(group)
+        self.save()
 
 
 class TeacherProfileFactory(DjangoModelFactory):
