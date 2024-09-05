@@ -1,5 +1,11 @@
 from drf_spectacular.utils import OpenApiExample
 
+"""
+API Examples for Swagger UI Documentation.
+This file contains OpenApiExample definitions used to provide
+request body examples in the Swagger UI documentation.
+"""
+
 admin_example = OpenApiExample(
     name="Admin Example",
     description="Example showing editable fields for an admin profile",

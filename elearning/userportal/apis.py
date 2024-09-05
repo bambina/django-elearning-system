@@ -1,17 +1,19 @@
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import *
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import GenericAPIView
-from drf_spectacular.utils import extend_schema
-from .api_examples import *
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.generics import ListAPIView
-from userportal.api_permissions import IsTeacherGroupOrAdminUser
+from rest_framework.generics import GenericAPIView, ListAPIView
+
+from drf_spectacular.utils import extend_schema
+
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .filters import UserFilter
+
+from userportal.serializers import *
+from userportal.api_examples import *
+from userportal.filters import UserFilter
+from userportal.api_permissions import IsTeacherGroupOrAdminUser
 
 
 @extend_schema(
@@ -30,26 +32,40 @@ from .filters import UserFilter
     examples=[auth_example],
 )
 class CustomObtainAuthToken(ObtainAuthToken):
+    """
+    Custom authentication token endpoint.
+    This view extends the default ObtainAuthToken view to provide enhanced
+    API documentation.
+    """
+
     pass
 
 
 class UserProfileView(GenericAPIView):
+    """
+    API view for retrieving and updating user profiles.
+    Requires token authentication.
+    """
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = UserProfileSerializer
 
     def get_object(self):
+        """Get the user object for the current user."""
         return get_object_or_404(get_user_model(), pk=self.request.user.pk)
 
     def get(self, request):
+        """Retrieve the user and profile data for the user."""
         serializer = self.get_serializer(self.get_object())
         return Response(serializer.data)
 
     @extend_schema(
-        request=UserSerializer,
+        request=UserProfileSerializer,
         examples=[admin_example, teacher_example, student_example],
     )
     def put(self, request):
+        """Update the user and profile data."""
         serializer = self.get_serializer(
             self.get_object(), data=request.data, partial=True
         )
@@ -60,7 +76,13 @@ class UserProfileView(GenericAPIView):
 
 
 class UserListView(ListAPIView):
+    """
+    API endpoint that provides a list of non-staff and non-superuser users.
+    Requires token authentication. Only accessible to teachers and admins.
+    """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsTeacherGroupOrAdminUser]
     queryset = get_user_model().objects.filter(is_staff=False, is_superuser=False)
     serializer_class = UserSerializer
-    permission_classes = [IsTeacherGroupOrAdminUser]
     filterset_class = UserFilter

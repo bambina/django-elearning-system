@@ -7,7 +7,10 @@ from django.contrib.auth import get_user_model
 
 from userportal.models import *
 
+
 class ProgramSerializer(serializers.ModelSerializer):
+    """Serializer for Program model"""
+
     class Meta:
         model = Program
         fields = ["title", "description"]
@@ -15,12 +18,15 @@ class ProgramSerializer(serializers.ModelSerializer):
 
 
 class TeacherProfileSerializer(serializers.ModelSerializer):
+    """Serializer for TeacherProfile model"""
+
     class Meta:
         model = TeacherProfile
         fields = ["biography"]
         read_only_fields = []
 
     def update(self, instance, validated_data):
+        """Update fields that are not read-only"""
         for attr, value in validated_data.items():
             if attr not in self.Meta.read_only_fields:
                 setattr(instance, attr, value)
@@ -29,6 +35,8 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
+    """Serializer for StudentProfile model"""
+
     program = ProgramSerializer(required=False)
 
     class Meta:
@@ -41,6 +49,7 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         ]
 
     def update(self, instance, validated_data):
+        """Update fields that are not read-only"""
         for attr, value in validated_data.items():
             if attr not in self.Meta.read_only_fields:
                 setattr(instance, attr, value)
@@ -49,6 +58,11 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model with nested profile data.
+    Includes TeacherProfile or StudentProfile based on user type.
+    """
+
     user_type_display = serializers.SerializerMethodField()
 
     class Meta:
@@ -66,9 +80,15 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_user_type_display(self, obj):
+        """Return user type display value"""
         return obj.get_user_type_display() if obj.user_type else None
 
     def to_representation(self, instance):
+        """
+        Extend the default serialization by adding a 'profile' field
+        containing either TeacherProfile or StudentProfile data, depending on the
+        user type.
+        """
         ret = super().to_representation(instance)
         if instance.is_teacher():
             ret["profile"] = TeacherProfileSerializer(instance.teacher_profile).data
@@ -77,6 +97,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return ret
 
     def to_internal_value(self, data):
+        """
+        Process input data before validation.
+        This method extracts the 'profile' data from the input and includes it in the
+        internal value dictionary. This allows for handling nested profile data
+        during deserialization and update operations.
+        """
         internal_value = super().to_internal_value(data)
         profile_data = data.get("profile")
         if profile_data:
@@ -84,6 +110,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return internal_value
 
     def _get_update_profile_serializer(self, instance, data):
+        """Return the appropriate profile serializer for update operation."""
         if instance.is_teacher():
             return TeacherProfileSerializer(
                 instance.teacher_profile, data=data, partial=True
@@ -96,6 +123,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        """Update User and associated profile data."""
         profile_data = validated_data.pop("profile", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -111,6 +139,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for User model"""
+
     class Meta:
         model = get_user_model()
         fields = [
