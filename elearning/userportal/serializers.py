@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from .models import *
-from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 
+from django.db import transaction
+from django.contrib.auth import get_user_model
+
+from userportal.models import *
 
 class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,7 +62,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "title",
             "user_type_display",
         ]
-        read_only_fields = ["id", "username", "email", "user_type_display"]
+        read_only_fields = ["id", "username", "user_type_display"]
 
     @extend_schema_field(OpenApiTypes.STR)
     def get_user_type_display(self, obj):
@@ -92,9 +94,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             )
         return None
 
+    @transaction.atomic
     def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
         profile_data = validated_data.pop("profile", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.clean()
+        instance.save()
         if profile_data:
             if serializer := self._get_update_profile_serializer(
                 instance, profile_data
@@ -116,4 +122,4 @@ class UserSerializer(serializers.ModelSerializer):
             "title",
             "user_type",
         ]
-        read_only_fields = ["id", "username", "email", "user_type"]
+        read_only_fields = ["id", "username", "user_type"]
