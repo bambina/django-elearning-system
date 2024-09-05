@@ -38,6 +38,7 @@ class CustomObtainAuthToken(ObtainAuthToken):
     This view extends the default ObtainAuthToken view to provide enhanced
     API documentation.
     """
+
     pass
 
 
@@ -68,7 +69,7 @@ class UserProfileView(GenericAPIView, RetrieveModelMixin, UpdateModelMixin):
         try:
             return self.update(request, *args, **kwargs, partial=True)
         except ValidationError as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(ListAPIView):
