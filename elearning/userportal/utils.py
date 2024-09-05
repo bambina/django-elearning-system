@@ -20,3 +20,10 @@ def create_timezone_aware_datetime(
     naive_datetime = datetime(year, month, day, hour, minute, second)
     # Make it timezone-aware using the default timezone
     return timezone.make_aware(naive_datetime)
+
+
+def generate_unique_room_name(course_id: int) -> str:
+    """Generate a unique room name for a Q&A session."""
+    timestamp = timezone.now().strftime("%Y%m%d%H%M%S%f")
+    unique_id = uuid4().hex[:8]
+    return f"{course_id}_{timestamp}_{unique_id}"

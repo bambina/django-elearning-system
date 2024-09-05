@@ -156,7 +156,7 @@ class QASessionFactory(DjangoModelFactory):
 
     @factory.lazy_attribute
     def room_name(self):
-        return f"{self.course.id}_{self.created_at.strftime('%Y%m%d%H%M%S%f')}"
+        return generate_unique_room_name(self.course.id)
 
 
 class QAQuestionFactory(DjangoModelFactory):

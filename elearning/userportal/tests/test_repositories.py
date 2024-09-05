@@ -303,10 +303,43 @@ class QAQuestionRepositoryTest(TestCase):
 class QASessionRepositoryTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.qa_session = QASessionFactory.create()
+        cls.course = CourseFactory.create()
+        cls.room_name = "test_room"
+        cls.qa_session = QASessionFactory.create(
+            course=cls.course, room_name=cls.room_name
+        )
 
     def test_fetch(self):
-        pass
-        # qa_sessions = QASessionRepository.fetch()
-        # self.assertEqual(qa_sessions.count(), 1)
-        # self.assertEqual(qa_sessions[0], self.qa_session)
+        qa_session = QASessionRepository.fetch(self.course)
+        self.assertEqual(qa_session, self.qa_session)
+        self.assertEqual(qa_session.course, self.course)
+        self.assertEqual(qa_session.room_name, self.room_name)
+
+    def test_get_or_create(self):
+        course = CourseFactory.create()
+        # Test case 1: Create a new Q&A session
+        created, already_available, room_name_to_be_deleted = (
+            QASessionRepository.get_create_or_reactivate(course)
+        )
+        self.assertTrue(created)
+        self.assertFalse(already_available)
+        self.assertIsNone(room_name_to_be_deleted)
+
+        # Test case 2: Get the existing and active Q&A session
+        created, already_available, room_name_to_be_deleted = (
+            QASessionRepository.get_create_or_reactivate(course)
+        )
+        self.assertFalse(created)
+        self.assertTrue(already_available)
+        self.assertIsNone(room_name_to_be_deleted)
+
+        # Test case 3: Update the room name if the existing session is ended
+        qa_session = QASession.objects.get(course=course)
+        qa_session.status = QASession.Status.ENDED
+        qa_session.save()
+        created, already_available, room_name_to_be_deleted = (
+            QASessionRepository.get_create_or_reactivate(course)
+        )
+        self.assertFalse(created)
+        self.assertFalse(already_available)
+        self.assertIsNotNone(room_name_to_be_deleted)

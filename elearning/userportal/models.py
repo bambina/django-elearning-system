@@ -9,9 +9,10 @@ from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from .constants import *
-from .validators import *
-from .utils import path_and_rename
+
+from userportal.constants import *
+from userportal.validators import *
+from userportal.utils import *
 from userportal.tests.utils import *
 
 
@@ -350,7 +351,7 @@ class QASession(models.Model):
     course = models.OneToOneField(
         Course, on_delete=models.CASCADE, related_name="qa_session"
     )
-    room_name = models.CharField(max_length=200, unique=True, blank=True)
+    room_name = models.CharField(max_length=200, unique=True)
     status = models.PositiveSmallIntegerField(
         choices=Status.choices, default=Status.ACTIVE
     )
@@ -361,6 +362,11 @@ class QASession(models.Model):
 
     def is_ended(self):
         return self.status == self.Status.ENDED
+
+    def save(self, *args, **kwargs):
+        if not self.room_name:
+            self.room_name = generate_unique_room_name(self.course.id)
+        super().save(*args, **kwargs)
 
 
 class QAQuestion(models.Model):

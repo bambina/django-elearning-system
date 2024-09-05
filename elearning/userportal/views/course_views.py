@@ -196,21 +196,24 @@ def start_qa_session(request, course_id):
         return redirect("course-detail", pk=course_id)
 
     try:
-        already_exists, previous_room_name = QASessionRepository.get_or_create(
-            course=course
+        created, already_available, room_name_to_be_deleted = (
+            QASessionRepository.get_create_or_reactivate(course=course)
         )
     except Exception:
         messages.error(request, ERR_UNEXPECTED_MSG)
         return redirect("course-detail", pk=course.id)
 
-    if already_exists:
-        # Show a message if already started
-        messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
-    else:
+    if created:
         # Notify students enrolled in the course
         notify_students_of_live_qa_start.delay(course.id)
+
+    if already_available:
+        # Show a message if already started
+        messages.warning(request, ACTIVE_QA_SESSION_EXISTS)
+
+    if room_name_to_be_deleted:
         # Delete all previous questions asynchronously
-        delete_qa_questions.delay(previous_room_name)
+        delete_qa_questions.delay(room_name_to_be_deleted)
     return redirect("qa-session", course_id=course.id)
 
 
