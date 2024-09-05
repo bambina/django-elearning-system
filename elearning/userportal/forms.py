@@ -7,16 +7,16 @@ AuthUser = get_user_model()
 
 
 class StudentForm(UserCreationForm):
-    email = forms.EmailField(help_text=FORM_HELP_TEXT_REQUIERED)
-    first_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
-    last_name = forms.CharField(help_text=FORM_HELP_TEXT_REQUIERED)
+    email = forms.EmailField(required=False, help_text=FORM_HELP_TEXT_REQUIERED)
+    first_name = forms.CharField(required=False, help_text=FORM_HELP_TEXT_REQUIERED)
+    last_name = forms.CharField(required=False, help_text=FORM_HELP_TEXT_REQUIERED)
     title = forms.ChoiceField(
         choices=AuthUser.Title.choices,
         initial=AuthUser.Title.PREFER_NOT_TO_SAY,
         required=False,
     )
     user_type = forms.IntegerField(
-        widget=forms.HiddenInput(), initial=PortalUser.UserType.STUDENT
+        widget=forms.HiddenInput(), initial=PortalUser.UserType.STUDENT, required=False
     )
 
     class Meta:

@@ -37,36 +37,32 @@ class PortalUser(AbstractUser):
         DR = "DR", _("Dr.")
         PROF = "PROF", _("Prof.")
 
-    email = models.EmailField(null=True, blank=True)
     user_type = models.PositiveSmallIntegerField(
         choices=UserType, null=True, blank=True
     )
     title = models.CharField(max_length=10, choices=Title, null=True, blank=True)
 
-    EMAIL_FIELD = "email"
-
     def clean(self):
         errors = {}
-        if not self.is_staff and not self.is_superuser:
-            if not self.email:
+        if self.email:
+            # Check if email is already in use
+            pk = self.pk if self.pk else None
+            already_exists = (
+                get_user_model()
+                .objects.filter(email=self.email)
+                .exclude(pk=pk)
+                .exists()
+            )
+            if already_exists:
                 errors["email"] = ValidationError(
-                    VALIDATION_ERR_MISSING_FIELD.format(entity="Email"),
-                    code=VALIDATION_ERR_REQUIRED,
+                    f"{INVALID_VALUE_MSG.format(value=self.email)} {INVALID_EMAIL_MSG}",
+                    code=VALIDATION_ERR_INVALID,
                 )
-            else:
-                pk = self.pk if self.pk else None
-                if (
-                    get_user_model()
-                    .objects.filter(email=self.email)
-                    .exclude(pk=pk)
-                    .exists()
-                ):
-                    errors["email"] = ValidationError(
-                        f"{INVALID_VALUE_MSG.format(value=self.email)} {INVALID_EMAIL_MSG}",
-                        code=VALIDATION_ERR_INVALID,
-                    )
 
-            for field_name in ["first_name", "last_name", "user_type"]:
+        is_admin = self.is_staff or self.is_superuser
+        if not is_admin:
+            # Check the required fields for non-admin users
+            for field_name in ["email", "first_name", "last_name", "user_type"]:
                 if not getattr(self, field_name):
                     errors[field_name] = ValidationError(
                         VALIDATION_ERR_MISSING_FIELD.format(
@@ -104,7 +100,7 @@ class TeacherProfile(models.Model):
         max_length=500,
         blank=True,
         null=True,
-        help_text="A professional biography of the teacher",
+        help_text=_("A professional biography of the teacher."),
     )
 
     def __str__(self):
@@ -373,6 +369,7 @@ class QAQuestion(models.Model):
     room_name = models.CharField(max_length=200)
     text = models.TextField()
     # sender is a concatenated string of the User's title, first name, and last name.
+    # Thus, max length is 310 characters.
     sender = models.CharField(max_length=310, blank=True, null=True)
     timestamp = models.DateTimeField()
 
