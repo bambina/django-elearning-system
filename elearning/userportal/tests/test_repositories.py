@@ -4,7 +4,9 @@ from userportal.tests.model_factories import *
 from userportal.repositories import *
 from django.core.files.uploadedfile import SimpleUploadedFile
 import shutil
+from django.http import Http404
 
+# For testing file uploads in MaterialRepository
 TEST_MEDIA_ROOT = settings.BASE_DIR / "test_media"
 
 
@@ -315,6 +317,11 @@ class QASessionRepositoryTest(TestCase):
         self.assertEqual(qa_session.course, self.course)
         self.assertEqual(qa_session.room_name, self.room_name)
 
+    def test_fetch_with_invalid_course(self):
+        course = CourseFactory.create()
+        qa_session = QASessionRepository.fetch(course)
+        self.assertIsNone(qa_session)
+
     def test_get_or_create(self):
         course = CourseFactory.create()
         # Test case 1: Create a new Q&A session
@@ -343,3 +350,70 @@ class QASessionRepositoryTest(TestCase):
         self.assertFalse(created)
         self.assertFalse(already_available)
         self.assertIsNotNone(room_name_to_be_deleted)
+
+    def test_end(self):
+        qa_session = QASessionRepository.end(self.course)
+        self.assertEqual(qa_session.status, QASession.Status.ENDED)
+
+    def test_end_with_invalid_course(self):
+        course = CourseFactory.create()
+        with self.assertRaises(Http404):
+            QASessionRepository.end(course)  # Course does not have a Q&A session to end
+
+
+class UserRepositoryTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = UserFactory.create(
+            username="student1",
+            first_name="Emily",
+            last_name="Smith",
+            title="Ms.",
+            user_type=AuthUser.UserType.STUDENT,
+        )
+        cls.user2 = UserFactory.create(
+            username="teacher1",
+            first_name="John",
+            last_name="Doe",
+            title="Dr.",
+            user_type=AuthUser.UserType.TEACHER,
+        )
+
+    def test_fetch_filtered_by_keywords(self):
+        users = UserRepository.fetch_filtered_by("John")
+        self.assertEqual(users.count(), 1)
+        self.assertEqual(users[0], self.user2)
+
+    def test_fetch_filtered_by_user_types(self):
+        users = UserRepository.fetch_filtered_by(user_types=[AuthUser.UserType.STUDENT])
+        self.assertEqual(users.count(), 1)
+        self.assertEqual(users[0], self.user1)
+
+    def test_toggle_user_active_status(self):
+        activate = True
+        # Test case 1: Activate an active user
+        self.assertFalse(
+            UserRepository.toggle_user_active_status(self.user1.username, activate)
+        )
+        # Test case 2: Activate an inactive user
+        self.user1.is_active = False
+        self.user1.save()
+        self.assertTrue(
+            UserRepository.toggle_user_active_status(self.user1.username, activate)
+        )
+
+        activate = False
+        # Test case 3: Deactivate an active user
+        self.assertTrue(
+            UserRepository.toggle_user_active_status(self.user1.username, activate)
+        )
+        # Test case 4: Deactivate an inactive user
+        self.assertFalse(
+            UserRepository.toggle_user_active_status(self.user1.username, activate)
+        )
+
+    def test_update_status(self):
+        student = StudentProfileFactory.create()
+        status = "Happy!"
+        updated_student = UserRepository.update_status(student, status)
+        self.assertEqual(updated_student.status, status)
