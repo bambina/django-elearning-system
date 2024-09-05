@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 
 from drf_spectacular.utils import extend_schema
 
@@ -37,11 +38,10 @@ class CustomObtainAuthToken(ObtainAuthToken):
     This view extends the default ObtainAuthToken view to provide enhanced
     API documentation.
     """
-
     pass
 
 
-class UserProfileView(GenericAPIView):
+class UserProfileView(GenericAPIView, RetrieveModelMixin, UpdateModelMixin):
     """
     API view for retrieving and updating user profiles.
     Requires token authentication.
@@ -55,24 +55,20 @@ class UserProfileView(GenericAPIView):
         """Get the user object for the current user."""
         return get_object_or_404(get_user_model(), pk=self.request.user.pk)
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         """Retrieve the user and profile data for the user."""
-        serializer = self.get_serializer(self.get_object())
-        return Response(serializer.data)
+        return self.retrieve(request, *args, **kwargs)
 
     @extend_schema(
         request=UserProfileSerializer,
         examples=[admin_example, teacher_example, student_example],
     )
-    def put(self, request):
+    def put(self, request, *args, **kwargs):
         """Update the user and profile data."""
-        serializer = self.get_serializer(
-            self.get_object(), data=request.data, partial=True
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            return self.update(request, *args, **kwargs, partial=True)
+        except ValidationError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(ListAPIView):
