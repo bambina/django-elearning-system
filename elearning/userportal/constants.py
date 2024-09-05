@@ -24,6 +24,9 @@ INVALID_TEACHER_PROFILE_USER_TYPE_MSG = _(
 INVALID_STUDENT_PROFILE_USER_TYPE_MSG = _(
     "User must be of type student to create a StudentProfile."
 )
+INVALID_DUPLICATE_COURSE_TITLE_MSG = _(
+    "A course with the title '{title}' already exists for this teacher."
+)
 
 
 # Error messages

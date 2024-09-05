@@ -96,7 +96,7 @@ class CourseForm(forms.ModelForm):
         if self.teacher and title:
             if Course.objects.filter(title=title, teacher=self.teacher).exists():
                 raise ValidationError(
-                    f"A course with the title '{title}' already exists for this teacher."
+                    INVALID_DUPLICATE_COURSE_TITLE_MSG.format(title=title)
                 )
         return cleaned_data
 
