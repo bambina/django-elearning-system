@@ -11,14 +11,6 @@ from userportal.tasks import mark_notifications_as_read
 from userportal.repositories import *
 
 
-def index(request):
-    # TODO: Swith to the Swagger ui
-    context = {
-        "somedata": "Hello, world!",
-    }
-    return render(request, "userportal/index.html", context)
-
-
 @login_required(login_url="login")
 def home(request: HttpRequest) -> HttpResponse:
     context = {}

@@ -1,16 +1,39 @@
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+
 from django.urls import path
-from .views import *
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 
+from userportal.views import *
+
 urlpatterns = [
-    path("", main_views.index, name="index"),
+    # Swagger UI: Provides an interface for API documentation
+    path(
+        "",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    # Schema view: Serves the OpenAPI schema
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    # ReDoc view: Displays API documentation using ReDoc
+    path(
+        "schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+
+    # User Portal App Main Views
     path("home/", main_views.home, name="home"),
     path(
         "notifications/",
         main_views.NotificationListView.as_view(),
         name="notification-list",
     ),
+    # Registration Views
     path("signup/", registration_views.signup, name="signup"),
     path("login/", auth_views.LoginView.as_view(), name="login"),
     path(
@@ -21,6 +44,7 @@ urlpatterns = [
     path(
         "password-change/", registration_views.password_change, name="password-change"
     ),
+    # User Views
     path("users/", user_views.UserListView.as_view(), name="user-list"),
     path(
         "users/<str:username>/", user_views.UserDetailView.as_view(), name="user-detail"
@@ -30,6 +54,7 @@ urlpatterns = [
         user_views.toggle_active_status,
         name="user-toggle-active-status",
     ),
+    # Course Views
     path("courses/", course_views.CourseListView.as_view(), name="course-list"),
     path(
         "courses/<int:pk>/",
@@ -39,6 +64,7 @@ urlpatterns = [
     path(
         "courses/create/", course_views.CourseCreateView.as_view(), name="course-create"
     ),
+    # Course Offering Views
     path(
         "courses/<int:course_id>/offerings/",
         course_offering_views.CourseOfferingListView.as_view(),
@@ -59,6 +85,7 @@ urlpatterns = [
         course_offering_views.EnrolledStudentListView.as_view(),
         name="enrolled-student-list",
     ),
+    # Feedback Views
     path(
         "courses/<int:course_id>/feedback/create/",
         feedback_views.FeedbackCreateView.as_view(),
