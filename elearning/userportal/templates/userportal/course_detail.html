@@ -1,62 +1,121 @@
 {% extends "./common/base.html" %}
+{% load bootstrap_icons %}
 {% block content %}
     <h1>Course Detail</h1>
     <div class="py-3">
-
         <strong class="d-inline-block mb-2 text-success-emphasis">{{ object.program.title }}</strong>
-
         <h1>{{ object.title }}</h1>
         <p>{{ object.description }}</p>
-
         <p>by <a href="{% url 'user-detail' object.teacher.user.username %}">{{ object.teacher.user.get_full_name }}</a></p>
     </div>
 
     {% if user.is_student and not is_registered %}
-    <div class="py-3">
-        {% if next_offering %}
-        <form method="post" action="{% url 'course-enroll' course_id=object.id offering_id=next_offering.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary"><span class="h4 font-weight-bold">Enroll Now</span><br>Starts {{ next_offering.term.start_datetime|date:"M j Y" }}</button>
-        </form>
-        {% else %}
-        <p>The offering of this course is currently not scheduled. Please check back later for updates.</p>
-        {% endif %}
+    <div class="container py-3">
+        <h3 class="pb-3 border-bottom">Join This Course</h3>
+        <div class="row py-4">
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">Unlock Your Potential with Expert-Led Learning</h4>
+                <p>Enroll now to start your learning journey. Our comprehensive lectures and interactive sessions are designed to enhance your skills and knowledge.</p>
+                {% if next_offering %}
+                <form method="post" action="{% url 'course-enroll' course_id=object.id offering_id=next_offering.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <span class="h4 font-weight-bold">Enroll Now</span><br>
+                        Starts {{ next_offering.term.start_datetime|date:"M j Y" }}
+                    </button>
+                </form>
+                {% else %}
+                <p>This course is not currently scheduled. Please check back later for upcoming offerings.</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    {% endif %}
-
-    {% if is_instructor %}
-    <a href="{% url 'offering-list' object.id %}">View All Course Offerings</a>
-    or
-    <a href="{% url 'offering-create' object.id %}">Add New Offering for This Course</a>
     {% endif %}
 
     {% if is_taking or is_instructor %}
-    {% if qa_session %}
-    <div class="py-3">
-        <a href="{% url 'qa-session' object.id %}" class="btn btn-success">View Live QA Session</a>
-    </div>
-    {% endif %}
-    <div class="py-3">
-        <a href="{% url 'material-list' object.id %}">View Materials</a>
+    <div class="container py-3">
+        <h3 class="pb-3 border-bottom">Enhance Your Learning Experience</h3>
+        <div class="row py-4 g-4 row-cols-1 row-cols-lg-2">
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">View Course Materials</h4>
+                <p>Access all your course readings, lecture notes, and supplementary materials here. Stay organized and on track with everything you need in one place.</p>
+                <a href="{% url 'material-list' object.id %}" class="icon-link">
+                Explore Materials
+                {% bs_icon 'chevron-right' %}
+                </a>
+            </div>
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">Live Q&A Session</h4>
+                <p>Got questions? Join our live Q&A sessions to clarify your doubts, interact with instructors, and engage with your peers in real-time.</p>
+                <div class="row align-items-center">
+                    {% if qa_session %}
+                    <div class="col">
+                        <a href="{% url 'qa-session' object.id %}" class="icon-link">
+                            Join Live Session
+                            {% bs_icon 'chevron-right' %}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if is_instructor and show_start_session_button %}
+                    <div class="col">
+                        <form method="post" action="{% url 'start-qa-session' object.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link icon-link p-0">
+                                Start Live QA Session
+                                {% bs_icon 'chevron-right' %}
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
     {% endif %}
 
     {% if is_instructor %}
-    {% if show_start_session_button %}
-    <div class="py-3">
-        <form method="post" action="{% url 'start-qa-session' object.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success">Start Live QA Session</button>
-        </form>
-    </div>
-    {% endif %}
-    {% if current_offering %}
-    <div class="py-3">
-        <a href="{% url 'enrolled-student-list' object.id current_offering.id %}">View Currently Enrolled Students</a>
-    </div>
-    {% endif %}
-    <div class="py-3">
-        <a href="{% url 'feedback-list' object.id %}">View Feedback</a>
+    <div class="container py-3">
+        <h3 class="pb-3 border-bottom">Instructor Dashboard</h3>
+        <div class="row py-4 g-4 row-cols-1 row-cols-lg-3">
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">Student Roster</h4>
+                <p>Browse the list of students currently enrolled in your course. Get an overview of class demographics to tailor your teaching strategies effectively.</p>
+                {% if current_offering %}
+                <a href="{% url 'enrolled-student-list' object.id current_offering.id %}" class="icon-link">
+                View Students
+                {% bs_icon 'chevron-right' %}
+                </a>
+                {% else %}
+                <p>No offerings available for this course.</p>
+                {% endif %}
+            </div>
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">Course Offerings Overview</h4>
+                <p>View all upcoming and past offerings of this course. Manage your schedule and prepare for different terms to ensure seamless course delivery.</p>
+                <div class="row align-items-center">
+                    <div class="col">
+                        <a href="{% url 'offering-list' object.id %}" class="icon-link">
+                        View Offerings
+                        {% bs_icon 'chevron-right' %}
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{% url 'offering-create' object.id %}" class="icon-link">
+                        Create New Offerings
+                        {% bs_icon 'chevron-right' %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <h4 class="fs-5 text-body-emphasis">Course Feedback</h4>
+                <p>Review feedback provided by students to understand their learning experience and identify areas for improvement in your course delivery.</p>
+                <a href="{% url 'feedback-list' object.id %}" class="icon-link">
+                Check Feedback
+                {% bs_icon 'chevron-right' %}
+                </a>
+            </div>
+        </div>
     </div>
     {% endif %}
 
