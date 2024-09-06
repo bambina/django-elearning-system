@@ -13,7 +13,7 @@ from userportal.models import *
 from userportal.tests.model_factories import *
 from userportal.tests.mixins import TermTestMixin
 
-User = get_user_model()
+AuthUser = get_user_model()
 
 
 class UserModelTest(TestCase):
@@ -22,7 +22,7 @@ class UserModelTest(TestCase):
         cls.common_password = "abc"
 
     def test_create_superuser(self):
-        admin = User.objects.create_superuser(
+        admin = AuthUser.objects.create_superuser(
             username="admin",
             password=self.common_password,
         )
@@ -38,14 +38,14 @@ class UserModelTest(TestCase):
             email="a@example.com",
             first_name="John",
             last_name="Doe",
-            user_type=User.UserType.TEACHER,
+            user_type=AuthUser.UserType.TEACHER,
         )
         self.assertEqual(user.username, "user")
         self.assertTrue(user.check_password(self.common_password))
         self.assertEqual(user.email, "a@example.com")
         self.assertEqual(user.first_name, "John")
         self.assertEqual(user.last_name, "Doe")
-        self.assertEqual(user.user_type, User.UserType.TEACHER)
+        self.assertEqual(user.user_type, AuthUser.UserType.TEACHER)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
 
@@ -67,25 +67,27 @@ class UserModelTest(TestCase):
         self.assertIn("user_type", errors)
 
     def test_field_constraints(self):
-        username_uniqueness = User._meta.get_field("username").unique
+        username_uniqueness = AuthUser._meta.get_field("username").unique
         self.assertTrue(username_uniqueness)
-        title_max_length = User._meta.get_field("title").max_length
+        title_max_length = AuthUser._meta.get_field("title").max_length
         self.assertEqual(title_max_length, 10)
 
     def test_ordering(self):
-        self.assertEqual(User._meta.ordering, ["username"])
+        self.assertEqual(AuthUser._meta.ordering, ["username"])
 
     def test_user_type_methods(self):
-        teacher = UserFactory(user_type=User.UserType.TEACHER)
+        teacher = UserFactory(user_type=AuthUser.UserType.TEACHER)
         self.assertTrue(teacher.is_teacher())
-        student = UserFactory(user_type=User.UserType.STUDENT)
+        student = UserFactory(user_type=AuthUser.UserType.STUDENT)
         self.assertTrue(student.is_student())
 
     def test_get_full_name(self):
-        user = UserFactory(first_name="John", last_name="Doe", title=User.Title.PROF)
+        user = UserFactory(
+            first_name="John", last_name="Doe", title=AuthUser.Title.PROF
+        )
         self.assertEqual(user.get_full_name(), "Prof. John Doe")
         user_no_title = UserFactory(
-            first_name="John", last_name="Doe", title=User.Title.PREFER_NOT_TO_SAY
+            first_name="John", last_name="Doe", title=AuthUser.Title.PREFER_NOT_TO_SAY
         )
         self.assertEqual(user_no_title.get_full_name(), "John Doe")
 
