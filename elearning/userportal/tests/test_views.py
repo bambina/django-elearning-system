@@ -66,7 +66,7 @@ class LogoutViewTestCase(BaseTestCase):
         self.client.force_login(self.user)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("index"))
+        self.assertRedirects(response, reverse("swagger-ui"))
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
     def test_logout_view_not_logged_in(self):

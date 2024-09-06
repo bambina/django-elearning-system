@@ -25,7 +25,6 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-
     # User Portal App Main Views
     path("home/", main_views.home, name="home"),
     path(
