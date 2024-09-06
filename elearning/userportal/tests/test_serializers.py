@@ -146,3 +146,7 @@ class UserSerializerTest(TestCase):
             "title": self.student_user.title,
             "user_type": self.student_user.user_type,
         }
+
+    def test_read_only_fields(self):
+        serializer = UserSerializer()
+        assert serializer.Meta.read_only_fields == ["id", "username", "user_type"]

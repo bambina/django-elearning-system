@@ -75,7 +75,7 @@ class AcademicTermFactory(DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        # Get the current term
+        # Get the current term data
         semester_val, year, start, end = get_term_datetimes()
         defaults = {
             "semester": AcademicTerm.SemesterType(semester_val),
