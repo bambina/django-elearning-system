@@ -26,6 +26,7 @@ urlpatterns = [
         name="redoc",
     ),
     # User Portal App Main Views
+    path("top/", main_views.top, name="top"),
     path("home/", main_views.home, name="home"),
     path(
         "notifications/",

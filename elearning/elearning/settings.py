@@ -165,7 +165,7 @@ AUTH_USER_MODEL = "userportal.PortalUser"
 
 LOGIN_REDIRECT_URL = "home"
 
-LOGOUT_REDIRECT_URL = "swagger-ui"
+LOGOUT_REDIRECT_URL = "top"
 
 MESSAGE_TAGS = {
     messages.INFO: "alert-info",

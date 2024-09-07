@@ -11,6 +11,10 @@ from userportal.tasks import mark_notifications_as_read
 from userportal.repositories import *
 
 
+def top(request: HttpRequest) -> HttpResponse:
+    return render(request, "userportal/top.html")
+
+
 @login_required(login_url="login")
 def home(request: HttpRequest) -> HttpResponse:
     context = {}
