@@ -5,9 +5,7 @@ from userportal.repositories import *
 from django.core.files.uploadedfile import SimpleUploadedFile
 import shutil
 from django.http import Http404
-
-# For testing file uploads in MaterialRepository
-TEST_MEDIA_ROOT = settings.BASE_DIR / "test_media"
+from userportal.constants import *
 
 
 class AcademicTermRepositoryTest(TestCase, TermTestMixin):

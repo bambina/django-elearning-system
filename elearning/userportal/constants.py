@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 # Permission groups
@@ -117,3 +118,6 @@ MAX_MATERIAL_FILE_SIZE_BYTES = MAX_MATERIAL_FILE_SIZE * 1024 * 1024
 
 # Constants for forms
 FORM_HELP_TEXT_REQUIERED = _("Required.")
+
+# For testing file uploads
+TEST_MEDIA_ROOT = settings.BASE_DIR / "test_media"

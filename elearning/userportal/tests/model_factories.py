@@ -135,8 +135,7 @@ class MaterialFactory(DjangoModelFactory):
 
     title = factory.Faker("text", max_nb_chars=100)
     description = factory.Faker("paragraph")
-    original_filename = factory.Faker("file_name", extension="pdf")
-    file = factory.django.FileField(filename="test.pdf")
+    original_filename = factory.Faker("file_name", extension="png")
     course = factory.SubFactory(CourseFactory)
 
     @factory.post_generation
