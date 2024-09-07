@@ -217,9 +217,26 @@ class UserPortalAppUrlsTestCase(URLTestBase):
             kwargs={"course_id": course_id},
         )
 
+    # /courses/<int:course_id>/feedback/	userportal.views.feedback_views.FeedbackListView	feedback-list
+    def test_feedback_list_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "feedback-list",
+            f"/courses/{course_id}/feedback/",
+            expected_class=FeedbackListView,
+            kwargs={"course_id": course_id},
+        )
 
-# /courses/<int:course_id>/feedback/	userportal.views.feedback_views.FeedbackListView	feedback-list
-# /courses/<int:course_id>/feedback/create/	userportal.views.feedback_views.FeedbackCreateViewfeedback-create
+    # /courses/<int:course_id>/feedback/create/	userportal.views.feedback_views.FeedbackCreateViewfeedback-create
+    def test_feedback_create_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "feedback-create",
+            f"/courses/{course_id}/feedback/create/",
+            expected_class=FeedbackCreateView,
+            kwargs={"course_id": course_id},
+        )
+
 
 # /courses/<int:course_id>/materials/	userportal.views.course_views.MaterialListView	material-list
 # /courses/<int:course_id>/materials/<int:material_id>/download/	userportal.views.course_views.download_material	material-download
