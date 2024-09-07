@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 from userportal.models import *
 from userportal.constants import *
+from userportal.tests.model_factories import *
 
 AuthUser = get_user_model()
 
@@ -11,18 +12,13 @@ AuthUser = get_user_model()
 class BaseTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.client = Client()
-        cls.user = AuthUser.objects.create_user(
+        cls.teacher_user = UserFactory.create(
             username="testuser",
-            email="test@example.com",
             password="testpassword",
-            first_name="Firstname",
-            last_name="Lastname",
-            title=AuthUser.Title.PROF,
             user_type=AuthUser.UserType.TEACHER,
         )
-        cls.teacher_profile = TeacherProfile.objects.create(
-            user=cls.user,
+        cls.teacher_profile = TeacherProfileFactory.create(
+            user=cls.teacher_user,
             biography="Prof. Firstname Lastname is a Professor of Computer Science at the University of California.",
         )
 
@@ -63,7 +59,7 @@ class LogoutViewTestCase(BaseTestCase):
         cls.url = reverse("logout")
 
     def test_logout_view(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.teacher_user)
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("swagger-ui"))
@@ -83,13 +79,13 @@ class PasswordChangeViewTestCase(BaseTestCase):
         cls.new_password = "apple52cat"
 
     def test_password_change_view_get(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.teacher_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Password change", html=True)
 
     def test_password_change_view_post(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.teacher_user)
         response = self.client.post(
             self.url,
             {
@@ -103,7 +99,7 @@ class PasswordChangeViewTestCase(BaseTestCase):
         self.assertTrue(response.wsgi_request.user.check_password(self.new_password))
 
     def test_password_change_view_post_invalid_old_password(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.teacher_user)
         response = self.client.post(
             self.url,
             {
@@ -121,7 +117,7 @@ class PasswordChangeViewTestCase(BaseTestCase):
         self.assertTrue(response.wsgi_request.user.check_password("testpassword"))
 
     def test_password_change_view_post_invalid_new_password(self):
-        self.client.force_login(self.user)
+        self.client.force_login(self.teacher_user)
         response = self.client.post(
             self.url,
             {
@@ -145,7 +141,7 @@ class SignUpViewTestCase(BaseTestCase):
         super().setUpTestData()
         cls.url = reverse("signup")
         cls.student_group = Group.objects.create(name="student")
-        cls.program = Program.objects.create(title="Program 1")
+        cls.program = ProgramFactory.create(title="Program 1")
         cls.new_student_data = {
             "username": "new-student",
             "email": "stu@example.com",
