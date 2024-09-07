@@ -21,7 +21,7 @@ class CreateMaterialView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def test_func(self):
         self.course = get_object_or_404(Course, pk=self.kwargs["course_id"])
-        return PermissionChecker.can_upload_material(self.request.user, self.course)
+        return PermissionChecker.is_course_admin(self.request.user, self.course)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

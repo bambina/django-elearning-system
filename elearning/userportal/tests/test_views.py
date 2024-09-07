@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
+
 from userportal.models import *
 from userportal.constants import *
 from userportal.tests.model_factories import *
@@ -20,6 +21,17 @@ class BaseTestCase(TestCase):
         cls.teacher_profile = TeacherProfileFactory.create(
             user=cls.teacher_user,
             biography="Prof. Firstname Lastname is a Professor of Computer Science at the University of California.",
+        )
+        cls.student_user = UserFactory.create(
+            user_type=AuthUser.UserType.STUDENT,
+        )
+        cls.student_profile = StudentProfileFactory.create(user=cls.student_user)
+        cls.teacher_group = Group.objects.get(name=PERMISSION_GROUP_TEACHER)
+        cls.teacher_user.groups.add(cls.teacher_group)
+        cls.student_group = Group.objects.get(name=PERMISSION_GROUP_STUDENT)
+        cls.student_user.groups.add(cls.student_group)
+        cls.course = CourseFactory.create(
+            title="Data Science", teacher=cls.teacher_profile
         )
 
 
@@ -140,7 +152,6 @@ class SignUpViewTestCase(BaseTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.url = reverse("signup")
-        cls.student_group = Group.objects.create(name="student")
         cls.program = ProgramFactory.create(title="Program 1")
         cls.new_student_data = {
             "username": "new-student",
@@ -174,3 +185,33 @@ class SignUpViewTestCase(BaseTestCase):
         self.assertContains(response, "This field is required.", html=True)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
         self.assertFalse(AuthUser.objects.filter(username="new-student").exists())
+
+
+class CourseOfferingListViewTestCase(BaseTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.offering = CourseOfferingFactory.create(course=cls.course)
+        cls.url = reverse("offering-list", args=[cls.course.id])
+
+    def test_course_offering_list_view_get(self):
+        self.client.force_login(self.teacher_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Course Offerings", html=True)
+        self.assertContains(response, self.offering.term.status.label, html=True)
+
+    def test_course_offering_list_view_get_not_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response, reverse("login") + f"?next=/courses/{self.course.id}/offerings/"
+        )
+
+    def test_course_offering_list_view_get_student(self):
+        self.client.force_login(self.student_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(
+            response, "Permission Denied (403)", status_code=403, html=True
+        )

@@ -1,8 +1,11 @@
-from userportal.models import *
-from django.contrib.auth import get_user_model
 from typing import Type, Union
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+
+from userportal.models import *
 from userportal.repositories import *
+from userportal.constants import *
 
 # Get the auth user model type
 AuthUserType = Type[get_user_model()]
@@ -76,7 +79,7 @@ class PermissionChecker:
         )
 
     @staticmethod
-    def can_upload_material(
+    def is_course_admin(
         request_user: Union[AuthUserType, AnonymousUser], course: Course
     ) -> bool:
         # Return False for the anonymous user
@@ -85,7 +88,8 @@ class PermissionChecker:
         # Return False if the user is not in the teacher permission group
         if not request_user.groups.filter(name=PERMISSION_GROUP_TEACHER).exists():
             return False
+        is_admin = PermissionChecker.is_admin(request_user)
         # Return True if the user is teaching the course
-        return PermissionChecker.is_teaching_course(
+        return is_admin or PermissionChecker.is_teaching_course(
             request_user.teacher_profile, course
         )
