@@ -28,7 +28,7 @@ class URLTestBase(TestCase):
     ):
         """Get the URL from the URL name and verify its configuration."""
         url = reverse(url_name, kwargs=kwargs)
-        self.assertTrue(url.startswith(expected_url))
+        self.assertEqual(url, expected_url)
         resolver = resolve(url)
         self.assertEqual(resolver.namespace, self.namespace)
         self.assertEqual(resolver.app_name, self.app_name)
