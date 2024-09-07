@@ -268,7 +268,32 @@ class UserPortalAppUrlsTestCase(URLTestBase):
             kwargs={"course_id": course_id},
         )
 
+    # /courses/<int:course_id>/qa-session/	userportal.views.qa_session_views.QASessionView	qa-session
+    def test_qa_session_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "qa-session",
+            f"/courses/{course_id}/qa-session/",
+            expected_class=QASessionView,
+            kwargs={"course_id": course_id},
+        )
 
-# /courses/<int:course_id>/qa-session/	userportal.views.course_views.QASessionView	qa-session
-# /courses/<int:course_id>/start-qa-session/	userportal.views.course_views.start_qa_session	start-qa-session
-# /courses/<int:course_id>/end-qa-session/	userportal.views.course_views.end_qa_session	end-qa-session
+    # /courses/<int:course_id>/start-qa-session/	userportal.views.qa_session_views.start_qa_session	start-qa-session
+    def test_start_qa_session_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "start-qa-session",
+            f"/courses/{course_id}/start-qa-session/",
+            expected_func_name="start_qa_session",
+            kwargs={"course_id": course_id},
+        )
+
+    # /courses/<int:course_id>/end-qa-session/	userportal.views.qa_session_views.end_qa_session	end-qa-session
+    def test_end_qa_session_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "end-qa-session",
+            f"/courses/{course_id}/end-qa-session/",
+            expected_func_name="end_qa_session",
+            kwargs={"course_id": course_id},
+        )

@@ -112,17 +112,17 @@ urlpatterns = [
     ),
     path(
         "courses/<int:course_id>/start-qa-session/",
-        course_views.start_qa_session,
+        qa_session_views.start_qa_session,
         name="start-qa-session",
     ),
     path(
         "courses/<int:course_id>/end-qa-session/",
-        course_views.end_qa_session,
+        qa_session_views.end_qa_session,
         name="end-qa-session",
     ),
     path(
         "courses/<int:course_id>/qa-session/",
-        course_views.QASessionView.as_view(),
+        qa_session_views.QASessionView.as_view(),
         name="qa-session",
     ),
 ]
