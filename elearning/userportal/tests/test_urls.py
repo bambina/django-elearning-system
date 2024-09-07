@@ -237,10 +237,37 @@ class UserPortalAppUrlsTestCase(URLTestBase):
             kwargs={"course_id": course_id},
         )
 
+    # /courses/<int:course_id>/materials/	userportal.views.material_views.MaterialListView	material-list
+    def test_material_list_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "material-list",
+            f"/courses/{course_id}/materials/",
+            expected_class=MaterialListView,
+            kwargs={"course_id": course_id},
+        )
 
-# /courses/<int:course_id>/materials/	userportal.views.course_views.MaterialListView	material-list
-# /courses/<int:course_id>/materials/<int:material_id>/download/	userportal.views.course_views.download_material	material-download
-# /courses/<int:course_id>/materials/create/	userportal.views.course_views.CreateMaterialView	material-create
+    # /courses/<int:course_id>/materials/<int:material_id>/download/	userportal.views.material_views.download_material	material-download
+    def test_material_download_url(self):
+        course_id = 1
+        material_id = 1
+        self.verifyURLConfiguration(
+            "material-download",
+            f"/courses/{course_id}/materials/{material_id}/download/",
+            expected_func_name="download_material",
+            kwargs={"course_id": course_id, "material_id": material_id},
+        )
+
+    # /courses/<int:course_id>/materials/create/	userportal.views.material_views.CreateMaterialView	material-create
+    def test_material_create_url(self):
+        course_id = 1
+        self.verifyURLConfiguration(
+            "material-create",
+            f"/courses/{course_id}/materials/create/",
+            expected_class=CreateMaterialView,
+            kwargs={"course_id": course_id},
+        )
+
 
 # /courses/<int:course_id>/qa-session/	userportal.views.course_views.QASessionView	qa-session
 # /courses/<int:course_id>/start-qa-session/	userportal.views.course_views.start_qa_session	start-qa-session

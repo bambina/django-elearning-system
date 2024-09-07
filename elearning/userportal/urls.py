@@ -97,17 +97,17 @@ urlpatterns = [
     ),
     path(
         "courses/<int:course_id>/materials/",
-        course_views.MaterialListView.as_view(),
+        material_views.MaterialListView.as_view(),
         name="material-list",
     ),
     path(
         "courses/<int:course_id>/materials/create/",
-        course_views.CreateMaterialView.as_view(),
+        material_views.CreateMaterialView.as_view(),
         name="material-create",
     ),
     path(
         "courses/<int:course_id>/materials/<int:material_id>/download/",
-        course_views.download_material,
+        material_views.download_material,
         name="material-download",
     ),
     path(
