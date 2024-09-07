@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, CreateView
 from django.views.decorators.http import require_POST
-from django.utils.decorators import method_decorator, login_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from userportal.forms import *
@@ -34,29 +35,36 @@ class CourseOfferingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return context
 
 
-@login_required(login_url="login")
-def create_course_offering(request, course_id):
-    if not request.user.is_teacher():
-        messages.error(request, ERR_ONLY_TEACHERS_CAN_CREATE_COURSE_OFFERINGS)
-        return redirect("course-list")
+class CreateCourseOfferingView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = CourseOffering
+    form_class = CourseOfferingForm
+    template_name = "userportal/offering_create.html"
+    login_url = "login"
 
-    course = get_object_or_404(Course, pk=course_id)
+    def test_func(self):
+        self.course = get_object_or_404(Course, pk=self.kwargs.get("course_id"))
+        return PermissionChecker.is_course_admin(self.request.user, self.course)
 
-    if request.method == "POST":
-        form = CourseOfferingForm(request.POST, course=course)
-        if form.is_valid():
-            try:
-                CourseOfferingRepository.create(form.cleaned_data, course)
-                messages.success(
-                    request, CREATED_SUCCESS_MSG.format(entity="course offering")
-                )
-                return redirect("offering-list", course_id=course_id)
-            except Exception:
-                form.add_error(None, ERR_UNEXPECTED_MSG)
-    else:
-        form = CourseOfferingForm(course=course)
-    context = {"form": form, "course": course}
-    return render(request, "userportal/offering_create.html", context=context)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["course"] = self.course
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["course"] = self.course
+        return context
+
+    def form_valid(self, form):
+        try:
+            CourseOfferingRepository.create(form.cleaned_data, self.course)
+            messages.success(
+                self.request, CREATED_SUCCESS_MSG.format(entity="course offering")
+            )
+            return redirect("offering-list", course_id=self.course.id)
+        except Exception:
+            form.add_error(None, ERR_UNEXPECTED_MSG)
+            return self.form_invalid(form)
 
 
 class EnrollCourseView(UserPassesTestMixin, View):

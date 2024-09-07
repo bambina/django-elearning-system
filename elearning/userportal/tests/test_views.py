@@ -215,3 +215,54 @@ class CourseOfferingListViewTestCase(BaseTestCase):
         self.assertContains(
             response, "Permission Denied (403)", status_code=403, html=True
         )
+
+
+class CreateCourseOfferingViewTestCase(BaseTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.url = reverse("offering-create", args=[cls.course.id])
+        cls.term = AcademicTermFactory.create()
+        cls.new_offering_data = {
+            "term": cls.term.id,
+        }
+
+    def test_create_course_offering_view_get(self):
+        self.client.force_login(self.teacher_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create Course Offering", html=True)
+
+    def test_create_course_offering_view_post(self):
+        self.client.force_login(self.teacher_user)
+        response = self.client.post(self.url, self.new_offering_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("offering-list", args=[self.course.id]))
+        self.assertTrue(
+            CourseOffering.objects.filter(course=self.course, term=self.term).exists()
+        )
+
+    def test_create_course_offering_view_post_invalid(self):
+        self.client.force_login(self.teacher_user)
+        response = self.client.post(self.url, {})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required.", html=True)
+        self.assertFalse(
+            CourseOffering.objects.filter(course=self.course, term=self.term).exists()
+        )
+
+    def test_create_course_offering_view_post_not_logged_in(self):
+        response = self.client.post(self.url, self.new_offering_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            reverse("login") + f"?next=/courses/{self.course.id}/offerings/create/",
+        )
+
+    def test_create_course_offering_view_post_student(self):
+        self.client.force_login(self.student_user)
+        response = self.client.post(self.url, self.new_offering_data)
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(
+            response, "Permission Denied (403)", status_code=403, html=True
+        )

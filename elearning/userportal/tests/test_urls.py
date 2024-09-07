@@ -207,13 +207,13 @@ class UserPortalAppUrlsTestCase(URLTestBase):
             kwargs={"course_id": course_id, "offering_id": offering_id},
         )
 
-    # /courses/<int:course_id>/offerings/create/	userportal.views.course_offering_views.create_course_offering	offering-create
+    # /courses/<int:course_id>/offerings/create/	userportal.views.course_offering_views.CreateCourseOfferingView	offering-create
     def test_offering_create_url(self):
         course_id = 1
         self.verifyURLConfiguration(
             "offering-create",
             f"/courses/{course_id}/offerings/create/",
-            expected_func_name="create_course_offering",
+            expected_class=CreateCourseOfferingView,
             kwargs={"course_id": course_id},
         )
 

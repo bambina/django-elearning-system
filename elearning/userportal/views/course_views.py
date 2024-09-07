@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from userportal.forms import *
 from userportal.models import *
@@ -86,7 +86,7 @@ class CourseDetailView(DetailView):
         }
 
 
-class CourseCreateView(UserPassesTestMixin, CreateView):
+class CourseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = "userportal/course_create.html"
