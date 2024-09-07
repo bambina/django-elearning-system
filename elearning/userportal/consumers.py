@@ -155,4 +155,6 @@ class QASessionConsumer(AsyncWebsocketConsumer):
         if not course:
             return False
         user = self.scope["user"]
-        return PermissionChecker.is_active_in_course(user, course)
+        is_admin = PermissionChecker.is_admin(user)
+        is_active = PermissionChecker.is_active_in_course(user, course)
+        return is_admin or is_active

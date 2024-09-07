@@ -35,11 +35,20 @@ class PermissionChecker:
         return profile == course.teacher
 
     @staticmethod
-    def is_active_in_course(user: AuthUserType, course: Course) -> bool:
-        if user.is_teacher():
-            return PermissionChecker.is_teaching_course(user.teacher_profile, course)
-        if user.is_student():
-            return PermissionChecker.is_taking_course(user.student_profile, course)
+    def is_active_in_course(
+        request_user: Union[AuthUserType, AnonymousUser], course: Course
+    ) -> bool:
+        # Return False for the anonymous user
+        if not request_user.is_authenticated:
+            return False
+        if request_user.is_teacher():
+            return PermissionChecker.is_teaching_course(
+                request_user.teacher_profile, course
+            )
+        if request_user.is_student():
+            return PermissionChecker.is_taking_course(
+                request_user.student_profile, course
+            )
         return False
 
     @staticmethod

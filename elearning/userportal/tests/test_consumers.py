@@ -1,15 +1,16 @@
 import pytest
 from typing import Type
-
-from django.urls import path
 from channels.routing import URLRouter
 from channels.testing import WebsocketCommunicator
+
+from django.urls import path
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 
 from userportal.consumers import *
 from userportal.tests.model_factories import *
 
 # Get the auth user model
-User = get_user_model()
 AuthUserType = Type[get_user_model()]
 
 
@@ -110,6 +111,22 @@ async def test_deny_connect_for_unenrolled_student(
     """Test that the consumer denies connection for an unenrolled student."""
     communicator = await setup_communicator(
         *active_qa_session_with_unenrolled_student_fixture
+    )
+    await communicator.connect()
+    response = await communicator.receive_output()
+    expected_response = {"type": "websocket.close", "code": UNAUTHORIZED_ACCESS_CODE}
+    assert response == expected_response
+    await communicator.disconnect()
+
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.asyncio
+async def test_deny_connect_for_unauthenticated_user(
+    active_qa_session_fixture,
+):
+    """Test that the consumer denies connection for an unauthenticated user."""
+    communicator = await setup_communicator(
+        active_qa_session_fixture, user=AnonymousUser()
     )
     await communicator.connect()
     response = await communicator.receive_output()
