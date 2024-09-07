@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from userportal.models import StudentProfile
 
 AuthUser = get_user_model()
-AuthUserType = Type[get_user_model()]
+AuthUserType = Type[AuthUser]
 
 
 class UserRepository:

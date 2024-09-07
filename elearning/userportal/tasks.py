@@ -1,10 +1,17 @@
+from typing import Type
 from celery import shared_task
-from .models import *
-from django.urls import reverse
 from celery.utils.log import get_task_logger
-from userportal.repositories.academic_term_repository import AcademicTermRepository
+
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+
+from userportal.models import *
+from userportal.repositories import AcademicTermRepository
 
 logger = get_task_logger(__name__)
+
+AuthUser = get_user_model()
+AuthUserType = Type[AuthUser]
 
 
 @shared_task
@@ -88,16 +95,19 @@ def send_notifications_to_currently_enrolled_students(
     ).first()
 
     if course_offering:
-        users = PortalUser.objects.filter(
+        users = AuthUser.objects.filter(
             student_profile__enrollments__offering=course_offering
         )
     else:
-        users = PortalUser.objects.none()
+        users = AuthUser.objects.none()
     send_notifications(users, message, link_path, link_text)
 
 
 def send_notifications(
-    users: list[PortalUser], message: str, link_path: str = None, link_text: str = None
+    users: list[AuthUserType],
+    message: str,
+    link_path: str = None,
+    link_text: str = None,
 ):
     """
     Sends notifications to users

@@ -6,7 +6,7 @@ from django.db.models import QuerySet, OuterRef
 
 from userportal.models import *
 
-User = get_user_model()
+
 AuthUserType = Type[get_user_model()]
 
 

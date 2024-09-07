@@ -1,10 +1,13 @@
-from django.urls import reverse
-
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from django.urls import reverse
+from django.contrib.auth import get_user_model
+
 from userportal.tests.model_factories import *
 from userportal.serializers import *
+
+AuthUser = get_user_model()
 
 
 # CustomObtainAuthToken
