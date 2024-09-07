@@ -8,13 +8,30 @@
     </a>
 
     <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+        <li>
+            <a href="{% url 'top' %}" class="nav-link px-2 {% if request.path == '/top/' %}text-secondary{% else %}text-white{% endif %}">
+                Top
+            </a>
+        </li>
         {% if user.is_authenticated %}
-        <li><a href="{% url 'home' %}" class="nav-link px-2 text-secondary">Home</a></li>
+        <li>
+            <a href="{% url 'home' %}" class="nav-link px-2 {% if request.path == '/home/' %}text-secondary{% else %}text-white{% endif %}">
+                Home
+            </a>
+        </li>
         {% if not user.is_student %}
-        <li><a href="{% url 'user-list' %}" class="nav-link px-2 text-white">Users</a></li>
+        <li>
+            <a href="{% url 'user-list' %}" class="nav-link px-2 {% if request.path == '/users/' %}text-secondary{% else %}text-white{% endif %}">
+                Users
+            </a>
+        </li>
         {% endif %}
         {% endif %}
-        <li><a href="{% url 'course-list' %}" class="nav-link px-2 text-white">Courses</a></li>
+        <li>
+            <a href="{% url 'course-list' %}" class="nav-link px-2 {% if request.path == '/courses/' %}text-secondary{% else %}text-white{% endif %}">
+                Courses
+            </a>
+        </li>
         <li><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
         <li><a href="#" class="nav-link px-2 text-white">About</a></li>
     </ul>

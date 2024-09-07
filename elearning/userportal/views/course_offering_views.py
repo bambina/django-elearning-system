@@ -72,7 +72,10 @@ class EnrollCourseView(UserPassesTestMixin, View):
 
     def test_func(self):
         is_anonymous = self.request.user.is_anonymous
-        return is_anonymous or self.request.user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists()
+        return (
+            is_anonymous
+            or self.request.user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists()
+        )
 
     @method_decorator(require_POST)
     def post(self, request, course_id, offering_id):
