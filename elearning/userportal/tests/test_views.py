@@ -33,6 +33,7 @@ class BaseTestCase(TestCase):
         cls.course = CourseFactory.create(
             title="Data Science", teacher=cls.teacher_profile
         )
+        cls.offering = CourseOfferingFactory.create(course=cls.course)
 
 
 class LoginViewTestCase(BaseTestCase):
@@ -265,4 +266,40 @@ class CreateCourseOfferingViewTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 403)
         self.assertContains(
             response, "Permission Denied (403)", status_code=403, html=True
+        )
+
+
+class QASessionViewTestCase(BaseTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.qa_session = QASessionFactory.create(course=cls.course)
+        cls.url = reverse("qa-session", args=[cls.course.id])
+
+    def test_qa_session_view_get(self):
+        self.client.force_login(self.teacher_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Live Q&amp;A Session", html=True)
+
+    def test_qa_session_view_get_enrolled_student(self):
+        EnrollmentFactory.create(student=self.student_profile, offering=self.offering)
+        self.client.force_login(self.student_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Live Q&amp;A Session", html=True)
+
+    def test_qa_session_view_get_not_enrolled_student(self):
+        self.client.force_login(self.student_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(
+            response, "Permission Denied (403)", status_code=403, html=True
+        )
+
+    def test_qa_session_view_get_not_logged_in(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response, reverse("login") + f"?next=/courses/{self.course.id}/qa-session/"
         )
