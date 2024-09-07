@@ -70,16 +70,18 @@ class CreateCourseOfferingView(LoginRequiredMixin, UserPassesTestMixin, CreateVi
 class EnrollCourseView(UserPassesTestMixin, View):
     """Allows students enrolls in a next course offering."""
 
-    login_url = "login"
-
     def test_func(self):
-        return self.request.user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists()
+        is_anonymous = self.request.user.is_anonymous
+        return is_anonymous or self.request.user.groups.filter(name=PERMISSION_GROUP_STUDENT).exists()
 
     @method_decorator(require_POST)
     def post(self, request, course_id, offering_id):
         """
         Student enrolls in a next course offering.
         """
+        if request.user.is_anonymous:
+            messages.info(request, SIGNUP_REQUIRED_FOR_ENROLLMENT_MESSAGE)
+            return redirect("signup")
         course = get_object_or_404(Course, pk=course_id)
         offering = get_object_or_404(CourseOffering, pk=offering_id)
 

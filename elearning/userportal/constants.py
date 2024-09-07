@@ -68,6 +68,7 @@ ACTIVE_QA_SESSION_EXISTS = _(
 USER_ALREADY_CHANGED_MSG = _("User {username} is already {action}.")
 QA_SESSION_EMPTY_MSG = _("Empty message received and ignored")
 QA_SESSION_ENDED_MSG = _("Message received after session end and ignored")
+SIGNUP_REQUIRED_FOR_ENROLLMENT_MESSAGE = _("Please sign up to enroll in this course.")
 
 # Success messages
 CREATE_STUDENT_ACCOUNT_SUCCESS_MSG = _(

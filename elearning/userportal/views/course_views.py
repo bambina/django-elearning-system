@@ -71,7 +71,7 @@ class CourseDetailView(DetailView):
             "is_taking": EnrollmentRepository.is_enrolled(
                 profile, context["current_offering"]
             ),
-            "is_registered": EnrollmentRepository.is_enrolled(
+            "show_enroll_button": not EnrollmentRepository.is_enrolled(
                 profile, context["next_offering"]
             ),
         }
