@@ -81,7 +81,17 @@ class StudentProfileAdmin(admin.ModelAdmin):
     form = StudentProfileAdminForm
 
 
-admin.site.register(AuthUser, PortalUserAdmin)
 admin.site.register(Program)
+admin.site.register(AuthUser, PortalUserAdmin)
 admin.site.register(TeacherProfile, TeacherProfileAdmin)
 admin.site.register(StudentProfile, StudentProfileAdmin)
+
+admin.site.register(AcademicTerm)
+admin.site.register(Course)
+admin.site.register(CourseOffering)
+admin.site.register(Enrollment)
+admin.site.register(Feedback)
+admin.site.register(Material)
+admin.site.register(Notification)
+admin.site.register(QASession)
+admin.site.register(QAQuestion)

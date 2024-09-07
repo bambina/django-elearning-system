@@ -140,7 +140,7 @@ class AcademicTerm(models.Model):
         ENDED = 3, _("Ended")
 
     semester = models.PositiveSmallIntegerField(choices=SemesterType)
-    year = models.PositiveSmallIntegerField()
+    year = models.PositiveIntegerField()
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
 
@@ -158,7 +158,11 @@ class AcademicTerm(models.Model):
             return self.TermStatus.IN_PROGRESS
 
     def clean(self):
-        if self.start_datetime > self.end_datetime:
+        if (
+            self.start_datetime
+            and self.end_datetime
+            and (self.start_datetime >= self.end_datetime)
+        ):
             raise ValidationError(
                 {
                     "start_datetime": ValidationError(
@@ -274,7 +278,7 @@ class Feedback(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("student", "course")
+        unique_together = ["student", "course"]
 
     def __str__(self):
         return f"{self.student} ({self.course})"
