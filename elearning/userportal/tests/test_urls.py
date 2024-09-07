@@ -36,6 +36,8 @@ class URLTestBase(TestCase):
             self.assertEqual(resolver.func.view_class, expected_class)
         if expected_func_name:
             self.assertEqual(resolver.func.__name__, expected_func_name)
+        if kwargs:
+            self.assertDictEqual(resolver.kwargs, kwargs)
 
 
 class AdminUrlsTestCase(URLTestBase):
