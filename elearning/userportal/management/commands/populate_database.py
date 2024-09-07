@@ -1,12 +1,13 @@
-from django.core.management.base import BaseCommand
-from django.utils import timezone
-from datetime import datetime
 import itertools
 import random
-from userportal.models import *
+
+from django.utils import timezone
+from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.hashers import make_password
-from userportal.repositories.academic_term_repository import AcademicTermRepository
+
+from userportal.models import *
+from userportal.repositories import AcademicTermRepository
 
 
 class Command(BaseCommand):
@@ -239,32 +240,20 @@ class Command(BaseCommand):
         self.update_record_count(len(student_profiles))
 
     def create_academic_terms(self):
-        academic_terms = [
-            AcademicTerm(
-                semester=AcademicTerm.SemesterType.FALL,
-                year=2023,
-                start_datetime=timezone.make_aware(datetime(2023, 10, 1, 0, 0)),
-                end_datetime=timezone.make_aware(datetime(2024, 3, 31, 23, 59)),
-            ),
-            AcademicTerm(
-                semester=AcademicTerm.SemesterType.SPRING,
-                year=2024,
-                start_datetime=timezone.make_aware(datetime(2024, 4, 1, 0, 0)),
-                end_datetime=timezone.make_aware(datetime(2024, 9, 30, 23, 59)),
-            ),
-            AcademicTerm(
-                semester=AcademicTerm.SemesterType.FALL,
-                year=2024,
-                start_datetime=timezone.make_aware(datetime(2024, 10, 1, 0, 0)),
-                end_datetime=timezone.make_aware(datetime(2025, 3, 31, 23, 59)),
-            ),
-            AcademicTerm(
-                semester=AcademicTerm.SemesterType.SPRING,
-                year=2025,
-                start_datetime=timezone.make_aware(datetime(2025, 4, 1, 0, 0)),
-                end_datetime=timezone.make_aware(datetime(2025, 9, 30, 23, 59)),
-            ),
-        ]
+        academic_terms = []
+        target_datetime = timezone.now() - timezone.timedelta(days=365)
+        for _ in range(5):
+            semester_val, year, start, end = get_term_datetimes(target_datetime)
+            academic_terms.append(
+                AcademicTerm(
+                    semester=AcademicTerm.SemesterType(semester_val),
+                    year=year,
+                    start_datetime=start,
+                    end_datetime=end,
+                )
+            )
+            target_datetime = end + timezone.timedelta(days=1)
+
         AcademicTerm.objects.bulk_create(academic_terms)
         self.update_record_count(len(academic_terms))
 
