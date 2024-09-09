@@ -16,19 +16,19 @@ AuthUserType = Type[get_user_model()]
 
 @pytest.fixture
 def active_qa_session_fixture(db):
-    # Create an active QA session along with related entities.
+    """Create an active QA session along with related entities."""
     return QASessionFactory.create()
 
 
 @pytest.fixture
 def ended_qa_session_fixture(db):
-    # Create an ended QA session along with related entities.
+    """Create an ended QA session along with related entities."""
     return QASessionFactory.create(status=QASession.Status.ENDED)
 
 
 @pytest.fixture
 def active_qa_session_with_unenrolled_student_fixture(db):
-    # Create an active QA session, and a student not enrolled in the course.
+    """Create an active QA session, and a student not enrolled in the course."""
     qa_session = QASessionFactory.create()
     student = StudentProfileFactory.create()
     return qa_session, student.user

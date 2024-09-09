@@ -1,3 +1,4 @@
+// This script is used to update the date and time of the ended QA session
 document.addEventListener("DOMContentLoaded", function () {
   function updateAllDateTimes() {
     const elements = document.getElementsByClassName("utc-timestamp");

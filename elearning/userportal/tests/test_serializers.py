@@ -10,6 +10,7 @@ AuthUser = get_user_model()
 
 
 class ProgramSerializerTest(TestCase):
+    """Test cases for the ProgramSerializer class."""
     def setUp(self):
         self.program = ProgramFactory(
             title="Program Title", description="Program Description"
@@ -28,6 +29,7 @@ class ProgramSerializerTest(TestCase):
 
 
 class TeacherProfileSerializerTest(TestCase):
+    """Test cases for the TeacherProfileSerializer class."""
     def setUp(self):
         self.teacher = TeacherProfileFactory(biography="Teacher Biography")
 
@@ -48,6 +50,7 @@ class TeacherProfileSerializerTest(TestCase):
 
 
 class StudentProfileSerializerTest(TestCase):
+    """Test cases for the StudentProfileSerializer class."""
     def setUp(self):
         self.program = ProgramFactory()
         self.student = StudentProfileFactory(
@@ -81,6 +84,7 @@ class StudentProfileSerializerTest(TestCase):
 
 
 class UserProfileSerializerTest(TestCase):
+    """Test cases for the UserProfileSerializer class."""
     def setUp(self):
         self.teacher_user = UserFactory(
             user_type=AuthUser.UserType.TEACHER,
@@ -130,6 +134,7 @@ class UserProfileSerializerTest(TestCase):
 
 
 class UserSerializerTest(TestCase):
+    """Test cases for the UserSerializer class."""
     def setUp(self):
         self.student_user = UserFactory(
             user_type=AuthUser.UserType.STUDENT,

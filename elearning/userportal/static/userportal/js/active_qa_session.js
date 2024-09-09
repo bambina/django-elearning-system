@@ -1,3 +1,6 @@
+// This script is used to handle the WebSocket connection for the live Q&A session.
+
+// The following variables are passed from the Django template:
 const roomName = JSON.parse(document.getElementById("room-name").textContent);
 const courseId = JSON.parse(document.getElementById("course-id").textContent);
 const userName = JSON.parse(document.getElementById("user-name").textContent);
@@ -15,6 +18,7 @@ const MAX_RETRIES = 3;
 const RECONNECT_INTERVAL = 1000 * 5;
 const TOAST_DELAY = 5000;
 
+// WebSocket client class
 class WebSocketClient {
   constructor(url) {
     this.url = url;
@@ -119,8 +123,10 @@ class WebSocketClient {
   }
 }
 
+// Initialize the WebSocket client
 const client = new WebSocketClient(url);
 
+// Add event handlers
 client.addHandler("open", () => {
   setupFormEventListeners();
   toggleFormElements(false);

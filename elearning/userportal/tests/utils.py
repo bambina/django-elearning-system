@@ -1,8 +1,9 @@
-from django.utils import timezone
-from userportal.utils import create_timezone_aware_datetime
 from typing import Tuple
 from datetime import datetime, date
 
+from django.utils import timezone
+
+from userportal.utils import create_timezone_aware_datetime
 
 def get_term_datetimes(
     target_date: datetime = None,
