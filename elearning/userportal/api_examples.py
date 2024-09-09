@@ -50,6 +50,6 @@ student_example = OpenApiExample(
 auth_example = OpenApiExample(
     name="Authentication Example",
     description="Example showing a valid API token authentication request",
-    value={"username": "admin", "password": "abc"},
+    value={"username": "teacher1", "password": "abc"},
     request_only=True,
 )

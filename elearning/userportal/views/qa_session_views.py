@@ -32,7 +32,7 @@ def start_qa_session(request, course_id):
         messages.error(request, ERR_UNEXPECTED_MSG)
         return redirect("course-detail", pk=course.id)
 
-    if created:
+    if created or room_name_to_be_deleted:
         # Notify students enrolled in the course
         notify_students_of_live_qa_start.delay(course.id)
 

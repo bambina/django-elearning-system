@@ -62,7 +62,7 @@ class UserProfileView(GenericAPIView, RetrieveModelMixin, UpdateModelMixin):
 
     @extend_schema(
         request=UserProfileSerializer,
-        examples=[admin_example, teacher_example, student_example],
+        examples=[teacher_example, student_example, admin_example],
     )
     def put(self, request, *args, **kwargs):
         """Update the user and profile data."""
