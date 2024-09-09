@@ -1,13 +1,12 @@
 from django.conf import settings
 from django.http import Http404
+from django.contrib import messages
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.decorators import permission_required
 
 from userportal.repositories import *
 from userportal.models import *
@@ -20,6 +19,8 @@ AuthUser = get_user_model()
 class UserListView(
     LoginRequiredMixin, PermissionRequiredMixin, QueryParamsMixin, ListView
 ):
+    """List of users."""
+
     model = AuthUser
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/user_list.html"
@@ -39,6 +40,8 @@ class UserListView(
 
 
 class UserDetailView(DetailView):
+    """Detail view for a user."""
+
     models = AuthUser
     template_name = "userportal/user_detail.html"
     slug_field = "username"
@@ -79,6 +82,7 @@ class UserDetailView(DetailView):
 @login_required(login_url="login")
 @permission_required("userportal.change_portaluser", raise_exception=True)
 def toggle_active_status(request, username, activate):
+    """Toggle the active status of a user."""
     activate = activate.lower() == "true"
     action = "activated" if activate else "deactivated"
     try:

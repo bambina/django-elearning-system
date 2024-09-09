@@ -18,6 +18,8 @@ from userportal.permissions import PermissionChecker
 @login_required(login_url="login")
 @require_http_methods(["POST"])
 def start_qa_session(request, course_id):
+    """Start a QA session for a course."""
+
     # Only teachers can start a QA session
     course = get_object_or_404(Course, pk=course_id)
     if not PermissionChecker.can_manage_qa_session(request.user, course):
@@ -47,6 +49,8 @@ def start_qa_session(request, course_id):
 
 
 class QASessionView(UserPassesTestMixin, DetailView):
+    """View for a QA session."""
+
     model = QASession
     template_name = "userportal/qa_session.html"
     context_object_name = "qa_session"
@@ -89,6 +93,7 @@ class QASessionView(UserPassesTestMixin, DetailView):
 @login_required(login_url="login")
 @require_http_methods(["POST"])
 def end_qa_session(request, course_id):
+    """End a QA session for a course."""
     course = get_object_or_404(Course, pk=course_id)
     if not PermissionChecker.can_manage_qa_session(request.user, course):
         messages.error(request, ERR_ONLY_AUTHORIZED_CAN_MANAGE_QA_SESSIONS)
