@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from sys import version_info as python_version
+import black, drf_spectacular, rest_framework, factory
+import celery, channels, channels_redis, pytest_django, daphne
+from django import get_version
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -62,7 +66,33 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "e-learning system API",
-    "DESCRIPTION": "This API provides comprehensive access and management tools for student and teacher data in the e-learning system.",
+    "DESCRIPTION": f"""
+    This API provides comprehensive access and management tools for student and teacher data in the eLearning system.
+
+    The Python version, Django version, and main packages used in this application are as follows:
+    - Python               {python_version.major}.{python_version.minor}.{python_version.micro}
+    - Django               {get_version()}
+    - celery               {celery.__version__}
+    - channels             {channels.__version__}
+    - channels-redis       {channels_redis.__version__}
+    - daphne               {daphne.__version__}
+    - djangorestframework  {rest_framework.__version__}
+    - drf-spectacular      {drf_spectacular.__version__}
+    - black                {black.__version__}
+    - factory_boy          {factory.__version__}
+    - pytest-django        {pytest_django.__version__}
+
+    Admin site credentials are as follows:
+    - Username: admin
+    - Password: abc
+
+    Other credentials are as follows:
+    - Username: teacher1
+    - Password: abc
+
+    - Username: student1
+    - Password: abc
+    """,
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": "/api/v1/",
