@@ -86,7 +86,7 @@ SPECTACULAR_SETTINGS = {
     - Username: admin
     - Password: abc
 
-    Other credentials are as follows:
+    Login credentials for teacher and student are as follows:
     - Username: teacher1
     - Password: abc
 
