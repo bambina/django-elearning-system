@@ -10,6 +10,7 @@ from userportal.constants import *
 
 class AcademicTermRepositoryTest(TestCase, TermTestMixin):
     """Test cases for the AcademicTermRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.current_term = AcademicTermFactory.create()
@@ -24,6 +25,7 @@ class AcademicTermRepositoryTest(TestCase, TermTestMixin):
 
 class CourseOfferingRepositoryTest(TestCase, TermTestMixin):
     """Test cases for the CourseOfferingRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.current_term = AcademicTermFactory.create()
@@ -67,6 +69,7 @@ class CourseOfferingRepositoryTest(TestCase, TermTestMixin):
 
 class CourseRepositoryTest(TestCase):
     """Test cases for the CourseRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course1 = CourseFactory.create(
@@ -103,6 +106,7 @@ class CourseRepositoryTest(TestCase):
 
 class EnrollmentRepositoryTest(TestCase, TermTestMixin):
     """Test cases for the EnrollmentRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.current_term = AcademicTermFactory.create()
@@ -175,6 +179,7 @@ class EnrollmentRepositoryTest(TestCase, TermTestMixin):
 
 class FeedbackRepositoryTest(TestCase, TermTestMixin):
     """Test cases for the FeedbackRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
@@ -232,6 +237,7 @@ class FeedbackRepositoryTest(TestCase, TermTestMixin):
 @override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class MaterialRepositoryTest(TestCase):
     """Test cases for the MaterialRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.file_name = "rubric_file.png"
@@ -281,6 +287,7 @@ class MaterialRepositoryTest(TestCase):
 
 class NotificationRepositoryTest(TestCase):
     """Test cases for the NotificationRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -294,6 +301,7 @@ class NotificationRepositoryTest(TestCase):
 
 class QAQuestionRepositoryTest(TestCase):
     """Test cases for the QAQuestionRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.qa_session = QASessionFactory.create()
@@ -310,6 +318,7 @@ class QAQuestionRepositoryTest(TestCase):
 
 class QASessionRepositoryTest(TestCase):
     """Test cases for the QASessionRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
@@ -370,6 +379,7 @@ class QASessionRepositoryTest(TestCase):
 
 class UserRepositoryTest(TestCase):
     """Test cases for the UserRepository class."""
+
     @classmethod
     def setUpTestData(cls):
         cls.user1 = UserFactory.create(

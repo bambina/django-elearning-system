@@ -12,6 +12,7 @@ AuthUser = get_user_model()
 
 class BaseTestCase(TestCase):
     """Base test case for creating test data."""
+
     @classmethod
     def setUpTestData(cls):
         cls.teacher_user = UserFactory.create(
@@ -39,6 +40,7 @@ class BaseTestCase(TestCase):
 
 class LoginViewTestCase(BaseTestCase):
     """Test cases for the login view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -69,6 +71,7 @@ class LoginViewTestCase(BaseTestCase):
 
 class LogoutViewTestCase(BaseTestCase):
     """Test cases for the logout view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -89,6 +92,7 @@ class LogoutViewTestCase(BaseTestCase):
 
 class PasswordChangeViewTestCase(BaseTestCase):
     """Test cases for the password change view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -154,6 +158,7 @@ class PasswordChangeViewTestCase(BaseTestCase):
 
 class SignUpViewTestCase(BaseTestCase):
     """Test cases for the signup view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -195,6 +200,7 @@ class SignUpViewTestCase(BaseTestCase):
 
 class CourseOfferingListViewTestCase(BaseTestCase):
     """Test cases for the course offering list view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -226,6 +232,7 @@ class CourseOfferingListViewTestCase(BaseTestCase):
 
 class CreateCourseOfferingViewTestCase(BaseTestCase):
     """Test cases for the create course offering view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -278,6 +285,7 @@ class CreateCourseOfferingViewTestCase(BaseTestCase):
 
 class QASessionViewTestCase(BaseTestCase):
     """Test cases for the Q&A session view."""
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()

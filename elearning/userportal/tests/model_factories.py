@@ -14,6 +14,7 @@ AuthUser = get_user_model()
 
 class ProgramFactory(DjangoModelFactory):
     """Factory for creating Program objects."""
+
     class Meta:
         model = Program
 
@@ -23,6 +24,7 @@ class ProgramFactory(DjangoModelFactory):
 
 class UserFactory(DjangoModelFactory):
     """Factory for creating User objects."""
+
     class Meta:
         model = AuthUser
         skip_postgeneration_save = True
@@ -56,6 +58,7 @@ class UserFactory(DjangoModelFactory):
 
 class TeacherProfileFactory(DjangoModelFactory):
     """Factory for creating TeacherProfile objects."""
+
     class Meta:
         model = TeacherProfile
 
@@ -65,6 +68,7 @@ class TeacherProfileFactory(DjangoModelFactory):
 
 class StudentProfileFactory(DjangoModelFactory):
     """Factory for creating StudentProfile objects."""
+
     class Meta:
         model = StudentProfile
 
@@ -75,6 +79,7 @@ class StudentProfileFactory(DjangoModelFactory):
 
 class AcademicTermFactory(DjangoModelFactory):
     """Factory for creating AcademicTerm objects."""
+
     class Meta:
         model = AcademicTerm
 
@@ -95,6 +100,7 @@ class AcademicTermFactory(DjangoModelFactory):
 
 class CourseFactory(DjangoModelFactory):
     """Factory for creating Course objects."""
+
     class Meta:
         model = Course
 
@@ -106,6 +112,7 @@ class CourseFactory(DjangoModelFactory):
 
 class CourseOfferingFactory(DjangoModelFactory):
     """Factory for creating CourseOffering objects."""
+
     class Meta:
         model = CourseOffering
 
@@ -115,6 +122,7 @@ class CourseOfferingFactory(DjangoModelFactory):
 
 class EnrollmentFactory(DjangoModelFactory):
     """Factory for creating Enrollment objects."""
+
     class Meta:
         model = Enrollment
 
@@ -129,6 +137,7 @@ class EnrollmentFactory(DjangoModelFactory):
 
 class FeedbackFactory(DjangoModelFactory):
     """Factory for creating Feedback objects."""
+
     class Meta:
         model = Feedback
 
@@ -139,6 +148,7 @@ class FeedbackFactory(DjangoModelFactory):
 
 class MaterialFactory(DjangoModelFactory):
     """Factory for creating Material objects."""
+
     class Meta:
         model = Material
         skip_postgeneration_save = True
@@ -162,6 +172,7 @@ class MaterialFactory(DjangoModelFactory):
 
 class NotificationFactory(DjangoModelFactory):
     """Factory for creating Notification objects."""
+
     class Meta:
         model = Notification
 
@@ -173,6 +184,7 @@ class NotificationFactory(DjangoModelFactory):
 
 class QASessionFactory(DjangoModelFactory):
     """Factory for creating QASession objects."""
+
     class Meta:
         model = QASession
 
@@ -186,6 +198,7 @@ class QASessionFactory(DjangoModelFactory):
 
 class QAQuestionFactory(DjangoModelFactory):
     """Factory for creating QAQuestion objects."""
+
     class Meta:
         model = QAQuestion
 

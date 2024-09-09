@@ -1,10 +1,9 @@
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import ListView, View, CreateView
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
 from userportal.forms import *
@@ -16,6 +15,8 @@ from userportal.tasks import notify_teacher_of_new_enrollment
 
 
 class CourseOfferingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List of course offerings for a course."""
+
     model = CourseOffering
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/offering_list.html"
@@ -36,6 +37,8 @@ class CourseOfferingListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 
 class CreateCourseOfferingView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Create a new course offering."""
+
     model = CourseOffering
     form_class = CourseOfferingForm
     template_name = "userportal/offering_create.html"
@@ -104,6 +107,8 @@ class EnrollCourseView(UserPassesTestMixin, View):
 
 
 class EnrolledStudentListView(ListView):
+    """List of students enrolled in a course offering."""
+
     model = Enrollment
     template_name = "userportal/student_list.html"
     context_object_name = "enrollments"

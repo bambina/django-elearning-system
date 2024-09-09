@@ -5,6 +5,7 @@ from django.views.generic import ListView
 from django.views.generic.edit import CreateView
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
 
 from userportal.forms import *
 from userportal.tasks import *
@@ -14,6 +15,8 @@ from userportal.permissions import PermissionChecker
 
 
 class CreateMaterialView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Create a new material for a course."""
+
     model = Material
     form_class = MaterialForm
     template_name = "userportal/material_create.html"
@@ -44,7 +47,9 @@ class CreateMaterialView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return self.form_invalid(form)
 
 
-class MaterialListView(ListView):
+class MaterialListView(LoginRequiredMixin, ListView):
+    """List of materials for a course."""
+
     model = Material
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/material_list.html"
@@ -62,7 +67,9 @@ class MaterialListView(ListView):
         return context
 
 
+@login_required(login_url="login")
 def download_material(request, course_id, material_id):
+    """Download a material file."""
     course = get_object_or_404(Course, pk=course_id)
     material = get_object_or_404(Material, pk=material_id)
 

@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from userportal.utils import create_timezone_aware_datetime
 
+
 def get_term_datetimes(
     target_date: datetime = None,
 ) -> Tuple[int, int, datetime, datetime]:

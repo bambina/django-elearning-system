@@ -17,6 +17,8 @@ AuthUserType = Type[get_user_model()]
 
 
 class CourseListView(QueryParamsMixin, ListView):
+    """List of courses."""
+
     model = Course
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/course_list.html"
@@ -33,6 +35,8 @@ class CourseListView(QueryParamsMixin, ListView):
 
 
 class CourseDetailView(DetailView):
+    """Detail view for a course."""
+
     model = Course
     template_name = "userportal/course_detail.html"
 
@@ -87,6 +91,8 @@ class CourseDetailView(DetailView):
 
 
 class CourseCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Create a new course."""
+
     model = Course
     form_class = CourseForm
     template_name = "userportal/course_create.html"

@@ -13,6 +13,7 @@ from userportal.repositories import AcademicTermRepository
 
 class Command(BaseCommand):
     """Populate the database with initial data"""
+
     help = "Populate database with initial data"
     COMMON_PASSWORD = "abc"
     COMMENTS = [

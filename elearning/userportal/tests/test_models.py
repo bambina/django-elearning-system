@@ -18,6 +18,7 @@ AuthUser = get_user_model()
 
 class UserModelTest(TestCase):
     """Test cases for the AuthUser model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.common_password = "abc"
@@ -95,6 +96,7 @@ class UserModelTest(TestCase):
 
 class TeacherProfileModelTest(TestCase):
     """Test cases for the TeacherProfile model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create(username="testusername")
@@ -118,6 +120,7 @@ class TeacherProfileModelTest(TestCase):
 
 class StudentProfileModelTest(TestCase):
     """Test cases for the StudentProfile model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -157,6 +160,7 @@ class StudentProfileModelTest(TestCase):
 
 class AcademicTermModelTest(TestCase, TermTestMixin):
     """Test cases for the AcademicTerm model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.semester_val, cls.year, cls.start, cls.end = get_term_datetimes()
@@ -211,6 +215,7 @@ class AcademicTermModelTest(TestCase, TermTestMixin):
 
 class CourseModelTest(TestCase):
     """Test cases for the Course model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course_title = "Math"
@@ -252,6 +257,7 @@ class CourseModelTest(TestCase):
 
 class CourseOfferingModelTest(TestCase):
     """Test cases for the CourseOffering model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
@@ -278,6 +284,7 @@ class CourseOfferingModelTest(TestCase):
 
 class EnrollmentModelTest(TestCase, TermTestMixin):
     """Test cases for the Enrollment model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.student = StudentProfileFactory.create()
@@ -345,6 +352,7 @@ class EnrollmentModelTest(TestCase, TermTestMixin):
 
 class FeedbackModelTest(TestCase):
     """Test cases for the Feedback model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.student = StudentProfileFactory.create()
@@ -381,6 +389,7 @@ class FeedbackModelTest(TestCase):
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class MaterialModelTest(TestCase):
     """Test cases for the Material model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
@@ -461,6 +470,7 @@ class MaterialModelTest(TestCase):
 
 class NotificationModelTest(TestCase):
     """Test cases for the Notification model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.user = UserFactory.create()
@@ -523,6 +533,7 @@ class NotificationModelTest(TestCase):
 
 class QASessionModelTest(TestCase):
     """Test cases for the QASession model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.course = CourseFactory.create()
@@ -557,6 +568,7 @@ class QASessionModelTest(TestCase):
 
 class QAQuestionModelTest(TestCase):
     """Test cases for the QAQuestion model."""
+
     @classmethod
     def setUpTestData(cls):
         cls.qa_question = QAQuestionFactory.create(

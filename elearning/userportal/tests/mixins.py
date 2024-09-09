@@ -7,6 +7,7 @@ from datetime import datetime
 
 class TermTestMixin:
     """Mixin for creating academic terms."""
+
     @classmethod
     def create_academic_term(
         self, semester_val: int, year: int, start_date: datetime, end_date: datetime

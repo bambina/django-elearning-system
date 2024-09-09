@@ -1,22 +1,24 @@
 from django.conf import settings
 from django.shortcuts import render
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView
 from django.http import HttpRequest, HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from userportal.models import *
 from userportal.forms import *
-from userportal.tasks import mark_notifications_as_read
 from userportal.repositories import *
+from userportal.tasks import mark_notifications_as_read
 
 
 def top(request: HttpRequest) -> HttpResponse:
+    """Top page view."""
     return render(request, "userportal/top.html")
 
 
 @login_required(login_url="login")
 def home(request: HttpRequest) -> HttpResponse:
+    """Home page view."""
     context = {}
     user = request.user
 
@@ -29,6 +31,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
+    """Prepare the context for the student."""
     form = StatusForm(request.POST or None, initial={"status": student.status})
 
     if request.method == "POST" and form.is_valid():
@@ -49,12 +52,15 @@ def _handle_student_view(request: HttpRequest, student: StudentProfile) -> dict:
 
 
 def _handle_teacher_view(teacher: TeacherProfile) -> dict:
+    """Prepare the context for the teacher."""
     return {
         "offered_courses": teacher.courses.all(),
     }
 
 
 class NotificationListView(ListView):
+    """List of notifications for the current user."""
+
     model = Notification
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/notification_list.html"

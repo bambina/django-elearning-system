@@ -1,13 +1,12 @@
-from django.shortcuts import redirect
-from django.contrib import messages
-from ..models import *
-from ..forms import *
-from django.views.generic import ListView
-from django.shortcuts import get_object_or_404
 from django.conf import settings
-from userportal.repositories import *
-from django.views.generic import CreateView
+from django.contrib import messages
+from django.views.generic import ListView, CreateView
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib.auth.mixins import UserPassesTestMixin
+
+from userportal.forms import *
+from userportal.models import *
+from userportal.repositories import *
 from userportal.permissions import PermissionChecker
 
 
@@ -54,6 +53,8 @@ class FeedbackCreateView(UserPassesTestMixin, CreateView):
 
 
 class FeedbackListView(ListView):
+    """List of feedbacks for a course."""
+
     model = Feedback
     paginate_by = settings.PAGINATION_PAGE_SIZE
     template_name = "userportal/feedback_list.html"
