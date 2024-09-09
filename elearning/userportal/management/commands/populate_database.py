@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.hashers import make_password
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from userportal.models import *
 from userportal.repositories import AcademicTermRepository
@@ -25,6 +26,7 @@ class Command(BaseCommand):
         self.teacher_group = None
         self.student_group = None
         self.program = None
+        self.created_users = []
         self.teacher_1 = None
         self.teacher_2 = None
         self.student_1 = None
@@ -46,6 +48,8 @@ class Command(BaseCommand):
         self.create_course_offerings()
         self.create_enrollments()
         self.create_feedback()
+        self.create_materials()
+        self.create_notifications()
         print(f"Total records created: {self._total_records}")
 
     def update_record_count(self, count):
@@ -176,17 +180,17 @@ class Command(BaseCommand):
                 password=make_password(self.COMMON_PASSWORD),
             ),
         ]
-        created_users = PortalUser.objects.bulk_create(users)
+        self.created_users = PortalUser.objects.bulk_create(users)
 
         # Assign users to permission groups
         teachers = [
             user
-            for user in created_users
+            for user in self.created_users
             if user.user_type == PortalUser.UserType.TEACHER
         ]
         students = [
             user
-            for user in created_users
+            for user in self.created_users
             if user.user_type == PortalUser.UserType.STUDENT
         ]
         self.teacher_group.user_set.add(*teachers)
@@ -364,3 +368,36 @@ class Command(BaseCommand):
 
         Feedback.objects.bulk_create(feedbacks)
         self.update_record_count(len(feedbacks))
+
+    def create_materials(self):
+        materials = []
+        file_content = "This is a text file content."
+        file = SimpleUploadedFile(
+            "file.txt", file_content.encode("utf-8"), content_type="text/plain"
+        )
+
+        for course in self.created_courses:
+            materials.append(
+                Material(
+                    title="Material",
+                    description="This is a material",
+                    file=file,
+                    course=course,
+                )
+            )
+
+        Material.objects.bulk_create(materials)
+        self.update_record_count(len(materials))
+
+    def create_notifications(self):
+        notifications = []
+        for user in self.created_users:
+            notifications.append(
+                Notification(
+                    user=user,
+                    message="This is a new notification",
+                )
+            )
+
+        Notification.objects.bulk_create(notifications)
+        self.update_record_count(len(notifications))
